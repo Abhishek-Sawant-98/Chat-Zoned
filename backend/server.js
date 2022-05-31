@@ -1,0 +1,70 @@
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const connectToMongoDB = require("./config/db");
+const UserRoutes = require("./routes/UserRoutes");
+const ChatRoutes = require("./routes/ChatRoutes");
+const MessageRoutes = require("./routes/MessageRoutes");
+const socketio = require("socket.io");
+
+dotenv.config();
+connectToMongoDB();
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use("/api/user/", UserRoutes);
+app.use("/api/chat/", ChatRoutes);
+app.use("/api/message/", MessageRoutes);
+
+const PORT = process.env.PORT || 5000;
+
+const server = app.listen(PORT, () =>
+  console.log(`📍 Server started at port ${PORT}`)
+);
+
+const io = socketio(server, {
+  pingTimeout: 90000,
+  cors: {
+    origin: "http://localhost:3000",
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("Connected to socket.io");
+
+  // Socket event listeners
+  socket.on("init user", (user) => {
+    socket.join(user._id);
+    socket.emit(`user connected`);
+  });
+
+  socket.on("join chat", (chat) => {
+    socket.join(chat._id);
+    console.log(`User joined chat : ${chat._id}`);
+  });
+
+  socket.on("new message sent", (newMessage) => {
+    const chat = newMessage.chat;
+
+    if (!chat)
+      return console.log(`Chat not found for new message : ${newMessage._id}`);
+
+    chat.users.forEach((user) => {
+      // Emit 'newMessage' in the sockets of all other users except the sender of newMessage
+      if (user._id === newMessage.sender._id) return;
+
+      socket
+        .to(user._id)
+        .emit("new message received", { userId: user._id, ...newMessage });
+    });
+  });
+
+  socket.off("init user", (user) => {
+    console.log("User socket disconnected");
+    socket.leave(user._id);
+  });
+});
