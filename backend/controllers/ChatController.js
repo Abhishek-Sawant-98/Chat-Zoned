@@ -11,28 +11,28 @@ const createOrRetrieveChat = asyncHandler(async (req, res) => {
     return res.status(400).send({ message: "UserId not sent in request body" });
   }
 
-  // First check if a chat exists with the above users
-  const existingChats = await ChatModel.find({
-    isGroupChat: false,
-    $and: [
-      { users: { $elemMatch: receiverUserId } },
-      { users: { $elemMatch: loggedInUserId } },
-    ],
-  })
-    .populate("users", "-password")
-    .populate({
-      path: "lastMessage",
-      populate: {
-        path: "sender",
-        select: "name email profilePic",
-      },
-    });
+  try {
+    // First check if a chat exists with the above users
+    const existingChats = await ChatModel.find({
+      isGroupChat: false,
+      $and: [
+        { users: { $elemMatch: receiverUserId } },
+        { users: { $elemMatch: loggedInUserId } },
+      ],
+    })
+      .populate("users", "-password")
+      .populate({
+        path: "lastMessage",
+        populate: {
+          path: "sender",
+          select: "name email profilePic",
+        },
+      });
 
-  if (existingChats.length > 0) {
-    res.status(200).send(existingChats[0]);
-  } else {
-    // If it doesn't exist, then create a new chat
-    try {
+    if (existingChats.length > 0) {
+      res.status(200).send(existingChats[0]);
+    } else {
+      // If it doesn't exist, then create a new chat
       const createdChat = await ChatModel.create({
         chatName: "reciever",
         isGroupChat: false,
@@ -44,10 +44,11 @@ const createOrRetrieveChat = asyncHandler(async (req, res) => {
         "-password"
       );
       res.status(201).send(populatedChat);
-    } catch (error) {
-      res.status(400);
-      throw new Error(error.message);
     }
+  } catch (error) {
+    console.log("Error in create or retrieve chat route...");
+    res.status(500);
+    throw new Error(error.message);
   }
 });
 
@@ -73,7 +74,8 @@ const fetchChats = asyncHandler(async (req, res) => {
 
     res.status(200).send(chats);
   } catch (error) {
-    res.status(400);
+    console.log("Error in fetch chats route...");
+    res.status(500);
     throw new Error(error.message);
   }
 });
@@ -112,28 +114,29 @@ const createGroupChat = asyncHandler(async (req, res) => {
 
     res.status(201).send(populatedGroup);
   } catch (error) {
-    res.status(400);
+    console.log("Error in create group chat route...");
+    res.status(500);
     throw new Error(error.message);
   }
 });
 
 const deleteGroupDP = asyncHandler(async (req, res) => {
+  const { currentDP, cloudinary_id, chatId } = req.body;
+
+  if (!currentDP || !chatId) {
+    return res.status(400).send({
+      message: "Invalid request params for deleting group dp",
+    });
+  }
+
+  // Delete the existing dp only if it's not the default dp
+  if (currentDP.endsWith("group_am193i.png")) {
+    return res
+      .status(400)
+      .send({ message: "Cannot delete the default group dp" });
+  }
+
   try {
-    const { currentDP, cloudinary_id, chatId } = req.body;
-
-    if (!currentDP || !chatId) {
-      return res.status(400).send({
-        message: "Invalid request params for deleting group dp",
-      });
-    }
-
-    // Delete the existing dp only if it's not the default dp
-    if (currentDP.endsWith("group_am193i.png")) {
-      return res
-        .status(400)
-        .send({ message: "Cannot delete the default group dp" });
-    }
-
     await cloudinary.uploader.destroy(cloudinary_id);
 
     const updatedGroup = await ChatModel.findByIdAndUpdate(
@@ -156,21 +159,22 @@ const deleteGroupDP = asyncHandler(async (req, res) => {
     res.status(200).send(updatedGroup);
   } catch (error) {
     console.log("Error in delete group dp route...");
-    res.status(500).send(error.message);
+    res.status(500);
+    throw new Error(error.message);
   }
 });
 
 const updateGroupDP = asyncHandler(async (req, res) => {
+  const displayPic = req.file;
+  const { currentDP, cloudinary_id, chatId } = req.body;
+
+  if (!displayPic || !currentDP || !chatId) {
+    return res.status(400).send({
+      message: "Invalid request params for update group dp",
+    });
+  }
+
   try {
-    const displayPic = req.file;
-    const { currentDP, cloudinary_id, chatId } = req.body;
-
-    if (!displayPic || !currentDP || !chatId) {
-      return res.status(400).send({
-        message: "Invalid request params for update group dp",
-      });
-    }
-
     // Delete the existing dp only if it's not the default dp
     if (!currentDP.endsWith("group_am193i.png")) {
       await cloudinary.uploader.destroy(cloudinary_id);
@@ -197,20 +201,21 @@ const updateGroupDP = asyncHandler(async (req, res) => {
     res.status(200).send(updatedGroup);
   } catch (error) {
     console.log("Error in update group dp route...");
-    res.status(500).send(error.message);
+    res.status(500);
+    throw new Error(error.message);
   }
 });
 
 const updateGroupName = asyncHandler(async (req, res) => {
+  const { groupName, chatId } = req.body;
+
+  if (!groupName || !chatId) {
+    return res.status(400).send({
+      message: "Invalid request params for update group name",
+    });
+  }
+
   try {
-    const { groupName, chatId } = req.body;
-
-    if (!groupName || !chatId) {
-      return res.status(400).send({
-        message: "Invalid request params for update group name",
-      });
-    }
-
     const updatedGroup = await ChatModel.findByIdAndUpdate(
       chatId,
       {
@@ -229,27 +234,28 @@ const updateGroupName = asyncHandler(async (req, res) => {
     res.status(200).send(updatedGroup);
   } catch (error) {
     console.log("Error in update group name route...");
-    res.status(500).send(error.message);
+    res.status(500);
+    throw new Error(error.message);
   }
 });
 
 const removeUserFromGroup = asyncHandler(async (req, res) => {
+  const { userToBeRemoved, chatId } = req.body;
+  // const loggedInUser = req.user?._id;
+
+  if (!userToBeRemoved || !chatId) {
+    return res.status(400).send({
+      message: "Invalid request params for remove user from group",
+    });
+  }
+
+  // Group admin check should be done in the frontend itself, to save time
+
+  // What happens when userToBeRemoved === groupAdmin
+  // What happens when a non-admin leaves a group when group length is only 3
+  // What happens when an admin leaves a group
+
   try {
-    const { userToBeRemoved, chatId } = req.body;
-    // const loggedInUser = req.user?._id;
-
-    if (!userToBeRemoved || !chatId) {
-      return res.status(400).send({
-        message: "Invalid request params for remove user from group",
-      });
-    }
-
-    // Group admin check should be done in the frontend itself, to save time
-
-    // What happens when userToBeRemoved === groupAdmin
-    // What happens when a non-admin leaves a group when group length is only 3
-    // What happens when an admin leaves a group
-
     const updatedGroup = await ChatModel.findByIdAndUpdate(
       chatId,
       {
@@ -268,23 +274,24 @@ const removeUserFromGroup = asyncHandler(async (req, res) => {
     res.status(200).send(updatedGroup);
   } catch (error) {
     console.log("Error in remove user from group route...");
-    res.status(500).send(error.message);
+    res.status(500);
+    throw new Error(error.message);
   }
 });
 
 const addUserToGroup = asyncHandler(async (req, res) => {
+  const { userToBeAdded, chatId } = req.body;
+  // const loggedInUser = req.user?._id;
+
+  if (!userToBeAdded || !chatId) {
+    return res.status(400).send({
+      message: "Invalid request params for adding user to group",
+    });
+  }
+
+  // Group admin check should be done in the frontend itself, to save time
+
   try {
-    const { userToBeAdded, chatId } = req.body;
-    // const loggedInUser = req.user?._id;
-
-    if (!userToBeAdded || !chatId) {
-      return res.status(400).send({
-        message: "Invalid request params for adding user to group",
-      });
-    }
-
-    // Group admin check should be done in the frontend itself, to save time
-
     const updatedGroup = await ChatModel.findByIdAndUpdate(
       chatId,
       {
@@ -303,23 +310,24 @@ const addUserToGroup = asyncHandler(async (req, res) => {
     res.status(200).send(updatedGroup);
   } catch (error) {
     console.log("Error in add user to group route...");
-    res.status(500).send(error.message);
+    res.status(500);
+    throw new Error(error.message);
   }
 });
 
 const deleteGroupChat = asyncHandler(async (req, res) => {
+  const { chatId } = req.body;
+  // const loggedInUser = req.user?._id;
+
+  if (!chatId) {
+    return res.status(400).send({
+      message: "Invalid chatId for deleting group",
+    });
+  }
+
+  // Group admin check should be done in the frontend itself, to save time
+
   try {
-    const { chatId } = req.body;
-    // const loggedInUser = req.user?._id;
-
-    if (!chatId) {
-      return res.status(400).send({
-        message: "Invalid chatId for deleting group",
-      });
-    }
-
-    // Group admin check should be done in the frontend itself, to save time
-
     const deletedGroup = await ChatModel.findByIdAndDelete(chatId)
       .populate("users", "-password")
       .populate("groupAdmin", "-password");
@@ -332,7 +340,8 @@ const deleteGroupChat = asyncHandler(async (req, res) => {
     res.status(200).send(deletedGroup);
   } catch (error) {
     console.log("Error in delete group route...");
-    res.status(500).send(error.message);
+    res.status(500);
+    throw new Error(error.message);
   }
 });
 
