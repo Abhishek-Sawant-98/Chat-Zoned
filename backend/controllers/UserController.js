@@ -1,102 +1,117 @@
 const asyncHandler = require("express-async-handler");
 const UserModel = require("../models/UserModel");
 const cloudinary = require("../config/cloudinary");
-const deleteFile = require("../config/deleteFile");
-const generateToken = require("../config/generateToken");
+const { deleteFile } = require("../utils/deleteFile");
+const generateToken = require("../utils/generateToken");
+const path = require("path");
+
+// const fetchFile = asyncHandler(async (req, res) => {
+//   const filepath = path.join(__dirname, "../messageFiles", fileUrl);
+//   console.log("In get file request...", filepath);
+//   res.status(200).sendFile(filepath);
+// });
 
 const registerUser = asyncHandler(async (req, res) => {
+  // return res.sendFile(
+  //   path.join(__dirname, "../messageFiles", req.file?.filename)
+  // );
   const profilePic = req.file;
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
-    return res.status(400).send({
-      message: "Please enter all the user fields",
-    });
+    res.status(400);
+    throw new Error("Please enter all the user fields");
   }
-  // What if profilePic is undefined (user didn't select profile pic)
 
-  try {
-    const existingUser = await UserModel.findOne({ email });
-    if (existingUser) {
-      res.status(400);
-      throw new Error("User already exists");
-    }
-
-    let uploadResponse, profilePicDetails;
-    // Save only the selected profile pic to cloudinary (don't save if not selected by user)
-    if (profilePic) {
-      uploadResponse = await cloudinary.uploader.upload(profilePic.path);
-      await deleteFile(profilePic.path); // Delete file from server after upload to cloudinary
-
-      profilePicDetails = {
-        cloudinary_id: uploadResponse.public_id,
-        profilePic: uploadResponse.secure_url,
-      };
-    }
-
-    const newUserDetails = profilePicDetails
-      ? {
-          name,
-          email,
-          password,
-          ...profilePicDetails,
-        }
-      : { name, email, password };
-
-    const createdUser = await UserModel.create(newUserDetails);
-
-    if (!createdUser) {
-      res.status(404);
-      throw new Error("User not found");
-    }
-
-    res.status(201).send({
-      _id: createdUser._id,
-      name: createdUser.name,
-      email: createdUser.email,
-      cloudinary_id: createdUser.cloudinary_id,
-      profilePic: createdUser.profilePic,
-      token: generateToken(createdUser._id),
-    });
-  } catch (error) {
-    console.log("Error in register user route...");
-    res.status(500);
-    throw new Error(error.message);
+  const existingUser = await UserModel.findOne({ email });
+  if (existingUser) {
+    res.status(400);
+    throw new Error("User already exists");
   }
+
+  let uploadResponse, profilePicDetails;
+  // Save only the selected profile pic to cloudinary (don't save if not selected by user)
+  if (profilePic) {
+    uploadResponse = await cloudinary.uploader.upload(profilePic.path);
+    await deleteFile(profilePic.path); // Delete file from server after upload to cloudinary
+
+    profilePicDetails = {
+      cloudinary_id: uploadResponse.public_id,
+      profilePic: uploadResponse.secure_url,
+    };
+  }
+
+  // Using this condition as cloudinary_id and profilePic have default values, if not specified
+  const newUserDetails = profilePicDetails
+    ? {
+        name,
+        email,
+        password,
+        notifications: [],
+        ...profilePicDetails,
+      }
+    : { name, email, password, notifications: [] };
+
+  const createdUser = await UserModel.create(newUserDetails);
+
+  if (!createdUser) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  res.status(201).json({
+    _id: createdUser._id,
+    name: createdUser.name,
+    email: createdUser.email,
+    notifications: createdUser.notifications,
+    cloudinary_id: createdUser.cloudinary_id,
+    profilePic: createdUser.profilePic,
+    token: generateToken(createdUser._id),
+  });
 });
 
 const authenticateUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res
-      .status(400)
-      .send({ message: "Invalid request params for user login" });
+    res.status(400);
+    throw new Error("Invalid request params for user login");
   }
 
-  try {
-    // Check if a user with entered email exists
-    const user = await UserModel.findOne({ email });
-
-    // Also check if entered password matches the password
-    // stored in returned user
-    if (user?.matchPassword(password)) {
-      res.status(200).send({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        cloudinary_id: user.cloudinary_id,
-        profilePic: user.profilePic,
-        token: generateToken(user._id),
-      });
-    } else {
-      res.status(401);
-      throw new Error("Invalid email or password");
-    }
-  } catch (error) {
-    console.log("Error in user login route...");
-    res.status(500);
-    throw new Error(error.message);
+  // Check if a user with entered email exists
+  const user = await UserModel.findOne({ email })
+    .select("-password")
+    .populate({
+      path: "notifications",
+      model: "Message",
+      populate: [
+        {
+          path: "sender",
+          model: "User",
+          select: "name email profilePic",
+        },
+        {
+          path: "chat",
+          model: "Chat",
+          select: "-groupAdmin -cloudinary_id",
+        },
+      ],
+    });
+  // Also check if entered password matches the password
+  // stored in returned user
+  if (user?.matchPassword(password)) {
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      notifications: user.notifications,
+      cloudinary_id: user.cloudinary_id,
+      profilePic: user.profilePic,
+      token: generateToken(user._id),
+    });
+  } else {
+    res.status(401);
+    throw new Error("Invalid email or password");
   }
 });
 
@@ -111,18 +126,14 @@ const fetchUsers = asyncHandler(async (req, res) => {
     ],
   };
 
-  try {
-    // Find all users excluding loggedInUser, based on the searchFilter
-    const users = await UserModel.find(searchFilter).find({
+  // Find all users excluding loggedInUser, based on the searchFilter
+  const users = await UserModel.find(searchFilter)
+    .find({
       _id: { $ne: loggedInUser },
-    });
+    })
+    .select("-password");
 
-    res.status(200).send(users);
-  } catch (error) {
-    console.log("Error in fetch users route...");
-    res.status(500);
-    throw new Error(error.message);
-  }
+  res.status(200).json(users);
 });
 
 const updateUserName = asyncHandler(async (req, res) => {
@@ -130,31 +141,41 @@ const updateUserName = asyncHandler(async (req, res) => {
   const loggedInUser = req.user?._id;
 
   if (!newUserName) {
-    return res.status(400).send({
-      message: "Invalid request params for update user name",
+    res.status(400);
+    throw new Error("Invalid request params for update user name");
+  }
+
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    loggedInUser,
+    {
+      name: newUserName,
+    },
+    { new: true }
+  )
+    .select("-password")
+    .populate({
+      path: "notifications",
+      model: "Message",
+      populate: [
+        {
+          path: "sender",
+          model: "User",
+          select: "name email profilePic",
+        },
+        {
+          path: "chat",
+          model: "Chat",
+          select: "-groupAdmin -cloudinary_id",
+        },
+      ],
     });
+
+  if (!updatedUser) {
+    res.status(404);
+    throw new Error("User not found");
   }
 
-  try {
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      loggedInUser,
-      {
-        name: newUserName,
-      },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      res.status(404);
-      throw new Error("User not found");
-    }
-
-    res.status(200).send(updatedUser);
-  } catch (error) {
-    console.log("Error in update user name route...");
-    res.status(500);
-    throw new Error(error.message);
-  }
+  res.status(200).json(updatedUser);
 });
 
 const updateUserProfilePic = asyncHandler(async (req, res) => {
@@ -163,39 +184,49 @@ const updateUserProfilePic = asyncHandler(async (req, res) => {
   const loggedInUser = req.user?._id;
 
   if (!newProfilePic || !currentProfilePic) {
-    return res.status(400).send({
-      message: "Invalid request params for update user profile pic",
+    res.status(400);
+    throw new Error("Invalid request params for update user profile pic");
+  }
+
+  // Delete the existing profile pic only if it's not the default one
+  if (!currentProfilePic.endsWith("user_dqzjdz.png")) {
+    await cloudinary.uploader.destroy(cloudinary_id);
+  }
+  const uploadResponse = await cloudinary.uploader.upload(newProfilePic.path);
+  await deleteFile(newProfilePic.path); // Delete file from server after upload to cloudinary
+
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    loggedInUser,
+    {
+      cloudinary_id: uploadResponse.public_id,
+      profilePic: uploadResponse.secure_url,
+    },
+    { new: true }
+  )
+    .select("-password")
+    .populate({
+      path: "notifications",
+      model: "Message",
+      populate: [
+        {
+          path: "sender",
+          model: "User",
+          select: "name email profilePic",
+        },
+        {
+          path: "chat",
+          model: "Chat",
+          select: "-groupAdmin -cloudinary_id",
+        },
+      ],
     });
+
+  if (!updatedUser) {
+    res.status(404);
+    throw new Error("User not found");
   }
 
-  try {
-    // Delete the existing profile pic only if it's not the default one
-    if (!currentProfilePic.endsWith("user_dqzjdz.png")) {
-      await cloudinary.uploader.destroy(cloudinary_id);
-    }
-    const uploadResponse = await cloudinary.uploader.upload(newProfilePic.path);
-    await deleteFile(newProfilePic.path); // Delete file from server after upload to cloudinary
-
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      loggedInUser,
-      {
-        cloudinary_id: uploadResponse.public_id,
-        profilePic: uploadResponse.secure_url,
-      },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      res.status(404);
-      throw new Error("User not found");
-    }
-
-    res.status(200).send(updatedUser);
-  } catch (error) {
-    console.log("Error in update user profile pic route...");
-    res.status(500);
-    throw new Error(error.message);
-  }
+  res.status(200).json(updatedUser);
 });
 
 const deleteUserProfilePic = asyncHandler(async (req, res) => {
@@ -203,42 +234,161 @@ const deleteUserProfilePic = asyncHandler(async (req, res) => {
   const loggedInUser = req.user?._id;
 
   if (!currentProfilePic) {
-    return res.status(400).send({
-      message: "Invalid request params for deleting user profile pic",
-    });
+    res.status(400);
+    throw new Error("Invalid request params for deleting user profile pic");
   }
 
   // Delete the existing profile pic only if it's not the default one
   if (currentProfilePic.endsWith("user_dqzjdz.png")) {
-    return res
-      .status(400)
-      .send({ message: "Cannot delete the default user profile pic" });
+    res.status(400);
+    throw new Error("Cannot delete the default user profile pic");
   }
 
-  try {
-    await cloudinary.uploader.destroy(cloudinary_id);
+  await cloudinary.uploader.destroy(cloudinary_id);
 
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      loggedInUser,
-      {
-        cloudinary_id: "",
-        profilePic:
-          "https://res.cloudinary.com/abhi-sawant/image/upload/v1653670527/user_dqzjdz.png",
-      },
-      { new: true }
-    );
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    loggedInUser,
+    {
+      cloudinary_id: "",
+      profilePic:
+        "https://res.cloudinary.com/abhi-sawant/image/upload/v1653670527/user_dqzjdz.png",
+    },
+    { new: true }
+  )
+    .select("-password")
+    .populate({
+      path: "notifications",
+      model: "Message",
+      populate: [
+        {
+          path: "sender",
+          model: "User",
+          select: "name email profilePic",
+        },
+        {
+          path: "chat",
+          model: "Chat",
+          select: "-groupAdmin -cloudinary_id",
+        },
+      ],
+    });
 
-    if (!updatedUser) {
-      res.status(404);
-      throw new Error("User not found");
-    }
-
-    res.status(200).send(updatedUser);
-  } catch (error) {
-    console.log("Error in delete user profile pic route...");
-    res.status(500);
-    throw new Error(error.message);
+  if (!updatedUser) {
+    res.status(404);
+    throw new Error("User not found");
   }
+
+  res.status(200).json(updatedUser);
+});
+
+const addNotification = asyncHandler(async (req, res) => {
+  // Frontend logic
+  // if(!selectedChat || selectedChat !== newMessage.chat) => add notification to array (if not present)
+  const { notificationId } = req.body;
+  const loggedInUser = req.user?._id;
+
+  if (!notificationId) {
+    res.status(400);
+    throw new Error("Invalid notification id for adding a notification");
+  }
+
+  // First check if the notification already exists
+  const existingNotification = await UserModel.findOne({
+    $and: [
+      { _id: loggedInUser },
+      { notifications: { $elemMatch: notificationId } },
+    ],
+  });
+
+  if (existingNotification) {
+    res.status(400);
+    throw new Error("Notification already exists");
+  }
+
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    loggedInUser,
+    { $push: { notifications: notificationId } },
+    { new: true }
+  )
+    .select("-password")
+    .populate({
+      path: "notifications",
+      model: "Message",
+      populate: [
+        {
+          path: "sender",
+          model: "User",
+          select: "name email profilePic",
+        },
+        {
+          path: "chat",
+          model: "Chat",
+          select: "-groupAdmin -cloudinary_id",
+        },
+      ],
+    });
+
+  if (!updatedUser) {
+    res.status(404);
+    throw new Error("User not found while adding notification");
+  }
+
+  res.status(200).json(updatedUser);
+});
+
+const deleteNotification = asyncHandler(async (req, res) => {
+  // Frontend logic
+  // if(selectedChat && selectedChat === newMessage.chat) => delete notification from array (if present)
+  const { notificationId } = req.body;
+  const loggedInUser = req.user?._id;
+
+  if (!notificationId) {
+    res.status(400);
+    throw new Error("Invalid notification id for deleting a notification");
+  }
+
+  // First check if the notification exists or not
+  const existingNotification = await UserModel.findOne({
+    $and: [
+      { _id: loggedInUser },
+      { notifications: { $elemMatch: notificationId } },
+    ],
+  });
+
+  if (!existingNotification) {
+    res.status(400);
+    throw new Error("Can't delete notification as it doesn't exist");
+  }
+
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    loggedInUser,
+    { $pull: { notifications: notificationId } },
+    { new: true }
+  )
+    .select("-password")
+    .populate({
+      path: "notifications",
+      model: "Message",
+      populate: [
+        {
+          path: "sender",
+          model: "User",
+          select: "name email profilePic",
+        },
+        {
+          path: "chat",
+          model: "Chat",
+          select: "-groupAdmin -cloudinary_id",
+        },
+      ],
+    });
+
+  if (!updatedUser) {
+    res.status(404);
+    throw new Error("User not found while deleting notification");
+  }
+
+  res.status(200).json(updatedUser);
 });
 
 module.exports = {
@@ -248,4 +398,7 @@ module.exports = {
   updateUserName,
   updateUserProfilePic,
   deleteUserProfilePic,
+  addNotification,
+  deleteNotification,
+  // fetchFile,
 };

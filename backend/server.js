@@ -6,19 +6,29 @@ const UserRoutes = require("./routes/UserRoutes");
 const ChatRoutes = require("./routes/ChatRoutes");
 const MessageRoutes = require("./routes/MessageRoutes");
 const socketio = require("socket.io");
+const {
+  notFoundHandler,
+  appErrorHandler,
+} = require("./middleware/ErrorMiddleware");
 
 dotenv.config();
 connectToMongoDB();
 
 const app = express();
 
+// Config middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// App routes
 app.use("/api/user/", UserRoutes);
 app.use("/api/chat/", ChatRoutes);
 app.use("/api/message/", MessageRoutes);
+
+// Error middlewares
+app.all("*", notFoundHandler);
+app.use(appErrorHandler);
 
 const PORT = process.env.PORT || 5000;
 

@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const authorizeUser = require("../middleware/AuthMiddleware");
-const upload = require("../config/multer");
+const upload = require("../utils/multer");
 const {
   createOrRetrieveChat,
   fetchChats,
@@ -10,6 +10,7 @@ const {
   removeUserFromGroup,
   addUserToGroup,
   deleteGroupChat,
+  deleteGroupDP,
 } = require("../controllers/ChatController");
 
 router
@@ -18,7 +19,7 @@ router
   .get(authorizeUser, fetchChats);
 
 router.post("/group", authorizeUser, createGroupChat);
-router.put("/group/delete-dp", authorizeUser, updateGroupDP);
+router.put("/group/delete-dp", authorizeUser, deleteGroupDP);
 router.put(
   "/group/update-dp",
   authorizeUser,

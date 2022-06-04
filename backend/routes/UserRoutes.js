@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const authorizeUser = require("../middleware/AuthMiddleware");
-const upload = require("../config/multer");
+const upload = require("../utils/multer");
 const {
   registerUser,
   authenticateUser,
@@ -8,6 +8,9 @@ const {
   updateUserName,
   updateUserProfilePic,
   deleteUserProfilePic,
+  addNotification,
+  deleteNotification,
+  // fetchFile,
 } = require("../controllers/UserController");
 
 router.post("/register", upload.single("profilePic"), registerUser);
@@ -16,5 +19,9 @@ router.get("/", authorizeUser, fetchUsers);
 router.put("/update/name", authorizeUser, updateUserName);
 router.put("/update/profile-pic", authorizeUser, updateUserProfilePic);
 router.put("/delete/profile-pic", authorizeUser, deleteUserProfilePic);
+router.put("/add/notification", authorizeUser, addNotification);
+router.put("/delete/notification", authorizeUser, deleteNotification);
+
+// router.get("/:file", fetchFile);
 
 module.exports = router;

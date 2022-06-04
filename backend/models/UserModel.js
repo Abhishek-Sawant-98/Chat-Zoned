@@ -2,12 +2,14 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
 const { Schema } = mongoose;
+const { ObjectId } = Schema.Types;
 
 const userSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, trim: true },
+    email: { type: String, required: true, trim: true, unique: true },
     password: { type: String, required: true, trim: true },
+    notifications: [{ type: ObjectId, ref: "Message" }],
     cloudinary_id: { type: String, trim: true, default: "" },
     profilePic: {
       type: String,
