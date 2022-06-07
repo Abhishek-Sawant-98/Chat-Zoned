@@ -1,0 +1,48 @@
+.homepage {
+  & > section {
+    width: clamp(310px, 75vw, 700px);
+    border-radius: 20px;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .homepage__header {
+    font-size: 30px;
+    color: rgb(235, 217, 55);
+    font-weight: 700;
+
+    img {
+      width: 35px;
+    }
+  }
+
+  .homepage__body {
+    .homepage__btnToggle {
+      font-size: 20px;
+      transition: all 0.2s;
+    }
+
+    .homepage__form {
+      img {
+        display: inline-block;
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+      }
+
+      .homepage__formfield {
+        input {
+          font-weight: 200;
+          font-size: 20px;
+        }
+      }
+
+      .homepage_formlabel {
+        font-size: 20px;
+      }
+
+      .homepage__btnReset {
+        width: 30%;
+      }
+    }
+  }
+}

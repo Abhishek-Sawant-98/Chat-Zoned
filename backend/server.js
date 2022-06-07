@@ -22,9 +22,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // App routes
-app.use("/api/user/", UserRoutes);
-app.use("/api/chat/", ChatRoutes);
-app.use("/api/message/", MessageRoutes);
+app.use("/api/user", UserRoutes);
+app.use("/api/chat", ChatRoutes);
+app.use("/api/message", MessageRoutes);
 
 // Error middlewares
 app.all("*", notFoundHandler);

@@ -3,7 +3,6 @@
 # dependencies
 /node_modules
 /frontend/node_modules
-/frontend/build
 /.pnp
 .pnp.js
 
@@ -11,7 +10,7 @@
 /coverage
 
 # production
-/build
+/frontend/build
 
 # misc
 .DS_Store

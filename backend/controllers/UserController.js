@@ -20,13 +20,13 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (!name || !email || !password) {
     res.status(400);
-    throw new Error("Please enter all the user fields");
+    throw new Error("Please Enter All the User Fields");
   }
 
   const existingUser = await UserModel.findOne({ email });
   if (existingUser) {
     res.status(400);
-    throw new Error("User already exists");
+    throw new Error("User Already Exists");
   }
 
   let uploadResponse, profilePicDetails;
@@ -56,7 +56,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   if (!createdUser) {
     res.status(404);
-    throw new Error("User not found");
+    throw new Error("User Not Found");
   }
 
   res.status(201).json({
@@ -79,27 +79,25 @@ const authenticateUser = asyncHandler(async (req, res) => {
   }
 
   // Check if a user with entered email exists
-  const user = await UserModel.findOne({ email })
-    .select("-password")
-    .populate({
-      path: "notifications",
-      model: "Message",
-      populate: [
-        {
-          path: "sender",
-          model: "User",
-          select: "name email profilePic",
-        },
-        {
-          path: "chat",
-          model: "Chat",
-          select: "-groupAdmin -cloudinary_id",
-        },
-      ],
-    });
+  const user = await UserModel.findOne({ email }).populate({
+    path: "notifications",
+    model: "Message",
+    populate: [
+      {
+        path: "sender",
+        model: "User",
+        select: "name email profilePic",
+      },
+      {
+        path: "chat",
+        model: "Chat",
+        select: "-groupAdmin -cloudinary_id",
+      },
+    ],
+  });
   // Also check if entered password matches the password
   // stored in returned user
-  if (user?.matchPassword(password)) {
+  if (user?.matchPasswords(password)) {
     res.status(200).json({
       _id: user._id,
       name: user.name,
@@ -111,7 +109,7 @@ const authenticateUser = asyncHandler(async (req, res) => {
     });
   } else {
     res.status(401);
-    throw new Error("Invalid email or password");
+    throw new Error("Invalid Email or Password");
   }
 });
 

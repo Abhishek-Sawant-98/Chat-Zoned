@@ -21,12 +21,15 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
+// Arrow fn won't work here, as 'this' in arrow fn will point to 'module.exports'
+// but in regular fn, 'this' will point to 'userSchema', which is what we want
+
 // Checking if entered password by user during login is authentic
-userSchema.methods.matchPasswords = async (enteredPassword) => {
+userSchema.methods.matchPasswords = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-userSchema.pre("save", async (next) => {
+userSchema.pre("save", async function (next) {
   // Encrypt the password only if it's modified or created
   if (this.isModified("password")) {
     const salt = await bcrypt.genSalt();

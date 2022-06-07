@@ -96,7 +96,7 @@ const createGroupChat = asyncHandler(async (req, res) => {
     isGroupChat: true,
     groupAdmin: loggedInUserId,
     chatDisplayPic:
-      "https://res.cloudinary.com/abhi-sawant/image/upload/v1653670527/group_am193i.png",
+      "https://res.cloudinary.com/abhi-sawant/image/upload/v1654599490/group_mbuvht.png",
   });
 
   const populatedGroup = await ChatModel.findById(createdGroup._id)
@@ -127,7 +127,7 @@ const deleteGroupDP = asyncHandler(async (req, res) => {
     {
       cloudinary_id: "",
       chatDisplayPic:
-        "https://res.cloudinary.com/abhi-sawant/image/upload/v1653670527/group_am193i.png",
+        "https://res.cloudinary.com/abhi-sawant/image/upload/v1654599490/group_mbuvht.png",
     },
     { new: true }
   )

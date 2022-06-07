@@ -1,0 +1,26 @@
+@import url("https://fonts.googleapis.com/css2?family=Mirza:wght@400;500;600;700&display=swap");
+
+@import "App";
+@import "HomePage";
+@import "ChatsPage";
+@import "Login";
+@import "Register";
+
+body {
+  // display: flex;
+  // justify-content: center;
+  font-family: "Mirza";
+  background-size: cover;
+  background-attachment: fixed;
+  background-image: url("https://res.cloudinary.com/abhi-sawant/image/upload/v1654449776/app-bg_yi8kvq.jpg");
+  -ms-overflow-style: none; // Hide scrollbar in ie/edge
+  scrollbar-width: none; // Hide scrollbar in firefox
+  .pointer {
+    cursor: pointer;
+  }
+
+  //  Hide scrollbar for chrome/safari/opera
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
