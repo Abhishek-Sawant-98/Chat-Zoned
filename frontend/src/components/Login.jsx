@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "../config/axios";
 import { useNavigate } from "react-router-dom";
+import { AppState } from "../context/ContextProvider";
+import { CircularProgress } from "@mui/material";
 
 const Login = ({
+  loading,
+  setLoading,
+  disableIfLoading,
   formLabelClassName,
   formFieldClassName,
   inputFieldClassName,
@@ -13,9 +18,9 @@ const Login = ({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-
   const navigate = useNavigate();
+
+  const { displayToast } = AppState();
 
   const requiredIndicator = () => {
     return <span style={{ color: "#ff0000" }}>&nbsp;*</span>;
@@ -24,14 +29,15 @@ const Login = ({
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!email || !password) {
-      // show warning toast
-      // Please Enter All the Fields
-      // duration 5000
-      // position bottom
-      alert("Please enter all the fields");
+    // return setLoading(true);
 
-      return;
+    if (!email || !password) {
+      return displayToast({
+        message: "Please Enter All the Fields",
+        type: "warning",
+        duration: 5000,
+        position: "bottom-center",
+      });
     }
 
     setLoading(true);
@@ -50,16 +56,26 @@ const Login = ({
       );
 
       // Success toast : login successful
-      alert("login successful..."+JSON.stringify(data));
+      displayToast({
+        message: "Login Successful",
+        type: "success",
+        duration: 5000,
+        position: "bottom-center",
+      });
+      // alert("login successful..." + JSON.stringify(data));
 
       sessionStorage.setItem("loggedInUser", JSON.stringify(data));
       setLoading(false);
       navigate("/chats");
     } catch (error) {
-      alert(
-        "Oops login error occurred: " +
-          JSON.stringify(error.response.data.message)
-      );
+      displayToast({
+        title: "Login Failed",
+        message: error.response.data.message,
+        type: "error",
+        duration: 5000,
+        position: "bottom-center",
+      });
+      setLoading(false);
     }
   };
 
@@ -76,7 +92,7 @@ const Login = ({
   };
 
   return (
-    <form className="homepage__form user-select-none row">
+    <form className={`homepage__form user-select-none row`} disabled={loading}>
       {/* Email input */}
       <section className={`${formFieldClassName} mb-2 col-md-6`}>
         <label htmlFor="login__email" className={`${formLabelClassName}`}>
@@ -89,6 +105,7 @@ const Login = ({
           required
           name="email"
           id="login__email"
+          disabled={loading}
           className={`${inputFieldClassName}`}
           placeholder="Enter Email ID"
         />
@@ -106,11 +123,12 @@ const Login = ({
             required
             name="password"
             id="login__password"
+            disabled={loading}
             className={`${inputFieldClassName} rounded-end`}
             placeholder="Enter Password"
           />
           <span
-            className="input-group-text btn btn-outline-secondary rounded-pill rounded-start"
+            className={`input-group-text btn btn-outline-secondary ${disableIfLoading} rounded-pill rounded-start`}
             onClick={() => setShowPassword(!showPassword)}
           >
             {showPassword ? <VisibilityOff /> : <Visibility />}
@@ -128,7 +146,15 @@ const Login = ({
           onClick={handleLogin}
           className={`${btnSubmitClassName}`}
         >
-          Login
+          {loading ? (
+            <CircularProgress
+              size={25}
+              style={{ color: "white", margin: "0px 15px 0px -20px" }}
+            />
+          ) : (
+            ""
+          )}
+          {loading ? "Signing in..." : "Login"}
         </button>
         {/* Reset button */}
         <button
@@ -147,7 +173,8 @@ const Login = ({
           name="btnGetGuestCredentials"
           id="login__btnGetGuestCredentials"
           onClick={setGuestCredentials}
-          className="btn btn-outline-success w-100 fs-4 p-1 rounded-pill"
+          disabled={loading}
+          className={`btn btn-outline-success w-100 fs-4 p-1 rounded-pill`}
         >
           Get Guest Credentials
         </button>

@@ -97,7 +97,7 @@ const authenticateUser = asyncHandler(async (req, res) => {
   });
   // Also check if entered password matches the password
   // stored in returned user
-  if (user?.matchPasswords(password)) {
+  if (await user?.matchPasswords(password)) {
     res.status(200).json({
       _id: user._id,
       name: user.name,
