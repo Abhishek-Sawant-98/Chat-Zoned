@@ -1,0 +1,35 @@
+import { Logout, ManageAccounts } from "@mui/icons-material";
+import { ListItemIcon, MenuItem } from "@mui/material";
+import Menu, { menuIconProps, menuItemProps } from "./Menu";
+import { useState } from "react";
+import { AppState } from "../context/ContextProvider";
+
+const NotificationsMenu = () => {
+  const {
+    loggedInUser,
+    setLoggedInUser,
+    notificationsMenuAnchor,
+    setNotificationsMenuAnchor,
+  } = AppState();
+  const { notifications } = loggedInUser;
+  return (
+    <Menu
+      menuAnchor={notificationsMenuAnchor}
+      setMenuAnchor={setNotificationsMenuAnchor}
+    >
+      {notifications?.length ? (
+        notifications.map((n) => (
+          <MenuItem
+            key={n._id}
+            sx={menuItemProps}
+            onClick={() => {}}
+          >{`1 message from ${n.sender}`}</MenuItem>
+        ))
+      ) : (
+        <MenuItem sx={menuItemProps}>No notifications</MenuItem>
+      )}
+    </Menu>
+  );
+};
+
+export default NotificationsMenu;

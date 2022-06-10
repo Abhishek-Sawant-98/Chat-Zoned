@@ -3,29 +3,30 @@ import { AppState } from "../context/ContextProvider";
 
 const AppToast = () => {
   const { toastData, handleToastClose } = AppState();
+  const { isOpen, title, message, type, duration, position } = toastData;
+  const positions = position.split("-");
   return (
     <Snackbar
       anchorOrigin={{
-        vertical: toastData.position.split("-")[0],
-        horizontal: toastData.position.split("-")[1],
+        vertical: positions[0],
+        horizontal: positions[1],
       }}
-      open={toastData.isOpen}
-      autoHideDuration={toastData.duration}
+      open={isOpen}
+      autoHideDuration={duration}
       onClose={handleToastClose}
     >
       <Alert
+        className="text-start"
         variant="filled"
-        severity={toastData.type}
+        severity={type}
         onClose={handleToastClose}
       >
-        {toastData.title ? (
-          <AlertTitle className="text-start fw-bold user-select-none">
-            {toastData.title}
-          </AlertTitle>
+        {title ? (
+          <AlertTitle className="fw-bold user-select-none">{title}</AlertTitle>
         ) : (
           ""
         )}
-        {toastData.message}
+        {message}
       </Alert>
     </Snackbar>
   );

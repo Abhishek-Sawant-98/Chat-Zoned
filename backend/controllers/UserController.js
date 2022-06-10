@@ -78,7 +78,7 @@ const authenticateUser = asyncHandler(async (req, res) => {
     throw new Error("Invalid request params for user login");
   }
 
-  // Check if a user with entered email exists
+  // Find a user with the entered email
   const user = await UserModel.findOne({ email }).populate({
     path: "notifications",
     model: "Message",
@@ -95,9 +95,10 @@ const authenticateUser = asyncHandler(async (req, res) => {
       },
     ],
   });
-  // Also check if entered password matches the password
-  // stored in returned user
-  if (await user?.matchPasswords(password)) {
+
+  // Check if a user with entered email exists and check if entered password
+  // matches the stored user password
+  if (user && (await user.matchPasswords(password))) {
     res.status(200).json({
       _id: user._id,
       name: user.name,

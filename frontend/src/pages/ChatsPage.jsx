@@ -1,23 +1,31 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "../config/axios";
 import { useNavigate, useLocation } from "react-router-dom";
+import { AppState } from "../context/ContextProvider";
+import ChatpageHeader from "../components/ChatpageHeader";
 
 const ChatsPage = () => {
-  const [chats, setChats] = useState([]);
+  const { loggedInUser, setLoggedInUser } = AppState();
+
   const navigate = useNavigate();
   const location = useLocation().pathname;
-  const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
 
   useEffect(() => {
-    const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
-
-    // alert("Inside chatpage useeffect");
-    // alert(location);
-    // alert(JSON.stringify(loggedInUser));
-    if (!loggedInUser) navigate('/');
+    const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+    if (!user) return navigate("/");
+    setLoggedInUser(user);
   }, []);
 
-  return <div className="h1 text-white mt-5">{`Welcome ${loggedInUser.name} 😀`}</div>;
+  return (
+    <div className={`chatpage`}>
+      {/* Header component */}
+      <ChatpageHeader></ChatpageHeader>
+
+      {/* Chat List component */}
+
+      {/* Chat Messages component */}
+    </div>
+  );
 };
 
 export default ChatsPage;
