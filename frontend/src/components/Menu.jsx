@@ -1,6 +1,4 @@
 import { Menu as MuiMenu } from "@mui/material";
-import { useState } from "react";
-import { AppState } from "../context/ContextProvider";
 
 export const menuPaperProps = {
   elevation: 0,
@@ -18,6 +16,8 @@ export const menuPaperProps = {
 export const menuItemProps = {
   ":hover": { backgroundColor: "#505050" },
   color: "#e0e0e0",
+  fontFamily: 'Mirza',
+  fontSize: '19px'
 };
 
 export const menuIconProps = { color: "lightblue" };

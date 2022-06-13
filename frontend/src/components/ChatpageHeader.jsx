@@ -1,5 +1,15 @@
 import { Notifications, Search } from "@mui/icons-material";
-import { Avatar, IconButton, Tooltip } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
 import React from "react";
 import { AppState } from "../context/ContextProvider";
 import AppGif from "./AppGif";

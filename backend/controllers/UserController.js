@@ -177,6 +177,47 @@ const updateUserName = asyncHandler(async (req, res) => {
   res.status(200).json(updatedUser);
 });
 
+const updateUserPassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const loggedInUser = req.user?._id;
+
+  if (!currentPassword || !newPassword) {
+    res.status(400);
+    throw new Error("Invalid request params for update user password");
+  }
+
+  if (currentPassword === newPassword) {
+    res.status(400);
+    throw new Error("New Password must differ from Current Password");
+  }
+
+  // Find the logged in user by its id
+  const user = await UserModel.findById(loggedInUser);
+
+  // Check if it exists
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  // Now check if the entered 'currentPassword' matches the stored password
+  if (!(await user.matchPasswords(currentPassword))) {
+    res.status(400);
+    throw new Error("Invalid Current Password");
+  }
+
+  await UserModel.updateOne(
+    { _id: loggedInUser },
+    {
+      $set: { password: newPassword },
+    }
+  );
+
+  res
+    .status(200)
+    .json({ status: "success", message: "Password Updated successfully" });
+});
+
 const updateUserProfilePic = asyncHandler(async (req, res) => {
   const newProfilePic = req.file;
   const { currentProfilePic, cloudinary_id } = req.body;
@@ -395,6 +436,7 @@ module.exports = {
   authenticateUser,
   fetchUsers,
   updateUserName,
+  updateUserPassword,
   updateUserProfilePic,
   deleteUserProfilePic,
   addNotification,

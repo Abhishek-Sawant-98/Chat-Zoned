@@ -89,7 +89,7 @@ const Register = ({
       displayToast({
         message: "Registration Successful",
         type: "success",
-        duration: 5000,
+        duration: 3000,
         position: "bottom-center",
       });
 
@@ -138,7 +138,9 @@ const Register = ({
   };
 
   return (
-    <form className={`homepage__form user-select-none row ${disableIfLoading} `}>
+    <form
+      className={`homepage__form user-select-none row ${disableIfLoading} `}
+    >
       <section className="register__profilepic position-relative mb-4">
         <img
           className="img-fluid border border-2 border-primary rounded-circle mt-3"

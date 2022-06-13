@@ -59,10 +59,9 @@ const Login = ({
       displayToast({
         message: "Login Successful",
         type: "success",
-        duration: 5000,
+        duration: 3000,
         position: "bottom-center",
       });
-      // alert("login successful..." + JSON.stringify(data));
 
       sessionStorage.setItem("loggedInUser", JSON.stringify(data));
       setLoading(false);

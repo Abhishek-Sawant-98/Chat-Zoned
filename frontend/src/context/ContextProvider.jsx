@@ -34,6 +34,27 @@ const ContextProvider = ({ children }) => {
   const [profileSettingsMenuAnchor, setProfileSettingsMenuAnchor] =
     useState(null);
 
+  // Alert dialog config
+  const [dialogData, setDialogData] = useState({
+    isOpen: false,
+    title: "Alert Dialog",
+    content: "Dialog Content",
+    nolabel: "NO",
+    yeslabel: "YES",
+    action: () => {},
+  });
+  const [dialogBody, setDialogBody] = useState();
+
+  const displayAlertDialog = (options) => {
+    setDialogData({
+      isOpen: true,
+      ...options,
+    });
+  };
+  const handleAlertDialogClose = () => {
+    setDialogData({ ...dialogData, isOpen: false });
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -52,6 +73,11 @@ const ContextProvider = ({ children }) => {
         setNotificationsMenuAnchor,
         profileSettingsMenuAnchor,
         setProfileSettingsMenuAnchor,
+        alertDialogData: dialogData,
+        displayAlertDialog,
+        handleAlertDialogClose,
+        dialogBody,
+        setDialogBody,
       }}
     >
       {children}

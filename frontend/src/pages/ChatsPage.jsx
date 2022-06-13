@@ -3,9 +3,10 @@ import axios from "../config/axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AppState } from "../context/ContextProvider";
 import ChatpageHeader from "../components/ChatpageHeader";
+import CustomDialog from "../components/CustomDialog";
 
 const ChatsPage = () => {
-  const { loggedInUser, setLoggedInUser } = AppState();
+  const { loggedInUser, setLoggedInUser, dialogBody } = AppState();
 
   const navigate = useNavigate();
   const location = useLocation().pathname;
@@ -24,6 +25,9 @@ const ChatsPage = () => {
       {/* Chat List component */}
 
       {/* Chat Messages component */}
+
+      {/* Alert dialog */}
+      <CustomDialog>{dialogBody}</CustomDialog>
     </div>
   );
 };
