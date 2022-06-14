@@ -1,30 +1,40 @@
 import { useState } from "react";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import axios from "../config/axios";
+import axios from "../../config/axios";
 import { useNavigate } from "react-router-dom";
-import { AppState } from "../context/ContextProvider";
+import { AppState } from "../../context/ContextProvider";
 import { CircularProgress } from "@mui/material";
+import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
 
-const Login = ({
-  loading,
-  setLoading,
-  disableIfLoading,
-  formLabelClassName,
-  formFieldClassName,
-  inputFieldClassName,
-  btnSubmitClassName,
-  btnResetClassName,
-}) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  const { displayToast } = AppState();
+  const [userCredentials, setUserCredentials] = useState({
+    email: "",
+    password: "",
+  });
 
-  const requiredIndicator = () => {
-    return <span style={{ color: "#ff0000" }}>&nbsp;*</span>;
+  const { email, password } = userCredentials;
+
+  const handleChangeFor = (prop) => (e) => {
+    setUserCredentials({
+      ...userCredentials,
+      [prop]: e.target.value,
+    });
   };
+
+  const { displayToast, formClassNames } = AppState();
+
+  const {
+    loading,
+    setLoading,
+    disableIfLoading,
+    formLabelClassName,
+    formFieldClassName,
+    inputFieldClassName,
+    btnSubmitClassName,
+    btnResetClassName,
+  } = formClassNames;
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -69,7 +79,7 @@ const Login = ({
     } catch (error) {
       displayToast({
         title: "Login Failed",
-        message: error.response.data.message,
+        message: error.response?.data?.message || "Oops! Something Went Wrong",
         type: "error",
         duration: 5000,
         position: "bottom-center",
@@ -80,28 +90,33 @@ const Login = ({
 
   const handleReset = (e) => {
     e.preventDefault();
-    setEmail("");
-    setPassword("");
+    setUserCredentials({
+      email: "",
+      password: "",
+    });
   };
 
   const setGuestCredentials = (e) => {
     e.preventDefault();
-    setEmail("guest.user@gmail.com");
-    setPassword("guest@987");
+    setUserCredentials({
+      email: "guest.user@gmail.com",
+      password: "guest@987",
+    });
   };
 
   return (
-    <form className={`homepage__form user-select-none row`} disabled={loading}>
+    <form className={`app__form user-select-none row`} disabled={loading}>
       {/* Email input */}
       <section className={`${formFieldClassName} mb-2 col-md-6`}>
         <label htmlFor="login__email" className={`${formLabelClassName}`}>
-          Email ID {requiredIndicator()}
+          Email ID <span className="required">*</span>
         </label>
         <input
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={handleChangeFor("email")}
           required
+          autoFocus
           name="email"
           id="login__email"
           disabled={loading}
@@ -112,13 +127,13 @@ const Login = ({
       {/* Password input */}
       <section className={`${formFieldClassName} mb-4 col-md-6`}>
         <label htmlFor="login__password" className={`${formLabelClassName}`}>
-          Password {requiredIndicator()}
+          Password <span className="required">*</span>
         </label>
         <div className="input-group">
           <input
             type={showPassword ? "text" : "password"}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handleChangeFor("password")}
             required
             name="password"
             id="login__password"
@@ -126,12 +141,11 @@ const Login = ({
             className={`${inputFieldClassName} rounded-end`}
             placeholder="Enter Password"
           />
-          <span
-            className={`input-group-text btn btn-outline-secondary ${disableIfLoading} rounded-pill rounded-start`}
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? <VisibilityOff /> : <Visibility />}
-          </span>
+          <PasswordVisibilityToggle
+            disableIfLoading={disableIfLoading}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
+          />
         </div>
       </section>
       <section
@@ -146,14 +160,16 @@ const Login = ({
           className={`${btnSubmitClassName}`}
         >
           {loading ? (
-            <CircularProgress
-              size={25}
-              style={{ color: "white", margin: "0px 15px 0px -20px" }}
-            />
+            <>
+              <CircularProgress
+                size={25}
+                style={{ color: "white", margin: "0px 15px 0px -20px" }}
+              />
+              Signing in...
+            </>
           ) : (
-            ""
+            "Login"
           )}
-          {loading ? "Signing in..." : "Login"}
         </button>
         {/* Reset button */}
         <button

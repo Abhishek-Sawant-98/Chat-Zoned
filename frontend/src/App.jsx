@@ -3,14 +3,14 @@ import { Suspense, lazy } from "react";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
 const ChatsPage = lazy(() => import("./pages/ChatsPage"));
-const AppToast = lazy(() => import("./components/AppToast"));
+const AppToast = lazy(() => import("./components/utils/AppToast"));
 
 function App() {
   return (
     <div className="App">
       <Suspense
         fallback={
-          <div style={{marginTop: '200px'}}>
+          <div style={{ marginTop: "200px" }}>
             <h1 className="text-white">Loading...</h1>
           </div>
         }

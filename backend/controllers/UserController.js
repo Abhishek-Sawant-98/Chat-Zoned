@@ -188,7 +188,7 @@ const updateUserPassword = asyncHandler(async (req, res) => {
 
   if (currentPassword === newPassword) {
     res.status(400);
-    throw new Error("New Password must differ from Current Password");
+    throw new Error("New Password Must Differ from Current Password");
   }
 
   // Find the logged in user by its id
@@ -215,7 +215,7 @@ const updateUserPassword = asyncHandler(async (req, res) => {
 
   res
     .status(200)
-    .json({ status: "success", message: "Password Updated successfully" });
+    .json({ status: "success", message: "Password Updated Successfully" });
 });
 
 const updateUserProfilePic = asyncHandler(async (req, res) => {

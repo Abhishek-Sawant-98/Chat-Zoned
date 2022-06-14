@@ -10,9 +10,9 @@ import {
   IconButton,
   Tooltip,
 } from "@mui/material";
-import React from "react";
+import { useState } from "react";
 import { AppState } from "../context/ContextProvider";
-import AppGif from "./AppGif";
+import AppGif from "./utils/AppGif";
 import NotificationsMenu from "./NotificationsMenu";
 import ProfileSettingsMenu from "./ProfileSettingsMenu";
 
@@ -34,7 +34,6 @@ const ChatpageHeader = () => {
 
   return (
     <header
-      style={{ padding: "11px 15px" }}
       className={`chatpage__header d-flex justify-content-between align-items-center user-select-none`}
     >
       {/* Search Users to create/access chat */}

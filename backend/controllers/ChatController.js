@@ -20,7 +20,7 @@ const createOrRetrieveChat = asyncHandler(async (req, res) => {
       { users: { $elemMatch: loggedInUserId } },
     ],
   })
-    .populate("users", "-password")
+    .populate("users", "-password -notifications")
     .populate({
       path: "lastMessage",
       model: "Message",

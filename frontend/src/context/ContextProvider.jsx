@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 const AppContext = createContext();
 
@@ -43,16 +43,34 @@ const ContextProvider = ({ children }) => {
     yeslabel: "YES",
     action: () => {},
   });
-  const [dialogBody, setDialogBody] = useState();
 
-  const displayAlertDialog = (options) => {
+  // Custom Dialog config
+  const [dialogBody, setDialogBody] = useState(<></>);
+  const [showDialogActions, setShowDialogActions] = useState(true);
+
+  const displayDialog = (options) => {
     setDialogData({
       isOpen: true,
       ...options,
     });
   };
-  const handleAlertDialogClose = () => {
+  const handleDialogClose = () => {
     setDialogData({ ...dialogData, isOpen: false });
+  };
+
+  // Form field config
+  const [loading, setLoading] = useState(false);
+  const disableIfLoading = `${loading ? "disabled notAllowed" : ""}`;
+
+  const formClassNames = {
+    loading,
+    setLoading,
+    disableIfLoading,
+    formLabelClassName: `app__formlabel ${disableIfLoading} form-label pointer mb-1 ms-2`,
+    formFieldClassName: `app__formfield text-center`,
+    inputFieldClassName: `app__inputfield form-control ${disableIfLoading} text-info text-center bg-black bg-gradient border-secondary px-3 pt-1 rounded-pill`,
+    btnSubmitClassName: `btn btn-primary ${disableIfLoading} d-flex justify-content-center align-items-center col-8 fs-4 rounded-pill`,
+    btnResetClassName: `app__btnReset ${disableIfLoading} btn btn-outline-secondary text-light fs-4 rounded-pill`,
   };
 
   return (
@@ -73,11 +91,14 @@ const ContextProvider = ({ children }) => {
         setNotificationsMenuAnchor,
         profileSettingsMenuAnchor,
         setProfileSettingsMenuAnchor,
-        alertDialogData: dialogData,
-        displayAlertDialog,
-        handleAlertDialogClose,
+        dialogData,
+        displayDialog,
+        handleDialogClose,
         dialogBody,
         setDialogBody,
+        showDialogActions,
+        setShowDialogActions,
+        formClassNames,
       }}
     >
       {children}

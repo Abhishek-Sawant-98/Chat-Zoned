@@ -1,5 +1,5 @@
 import { Alert, AlertTitle, Snackbar } from "@mui/material";
-import { AppState } from "../context/ContextProvider";
+import { AppState } from "../../context/ContextProvider";
 
 const AppToast = () => {
   const { toastData, handleToastClose } = AppState();
@@ -11,6 +11,7 @@ const AppToast = () => {
         vertical: positions[0],
         horizontal: positions[1],
       }}
+      style={{ maxWidth: "340px", margin: "10px auto" }}
       open={isOpen}
       autoHideDuration={duration}
       onClose={handleToastClose}

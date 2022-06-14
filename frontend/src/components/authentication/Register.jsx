@@ -1,58 +1,65 @@
-import { Visibility, VisibilityOff, AddAPhoto } from "@mui/icons-material";
+import { AddAPhoto } from "@mui/icons-material";
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "../config/axios";
-import { AppState } from "../context/ContextProvider";
+import axios from "../../config/axios";
+import { AppState } from "../../context/ContextProvider";
 import { CircularProgress } from "@mui/material";
+import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
 
-const Register = ({
-  loading,
-  setLoading,
-  disableIfLoading,
-  formFieldClassName,
-  formLabelClassName,
-  inputFieldClassName,
-  btnSubmitClassName,
-  btnResetClassName,
-}) => {
+const Register = () => {
   const defaultPicUrl =
     "https://res.cloudinary.com/abhi-sawant/image/upload/v1653670527/user_dqzjdz.png";
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [profilePic, setProfilePic] = useState(null);
-  const [profilePicUrl, setProfilePicUrl] = useState(defaultPicUrl);
   const imgInput = useRef();
 
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    profilePic: null,
+    profilePicUrl: defaultPicUrl,
+  });
+
+  const { name, email, password, confirmPassword, profilePic, profilePicUrl } =
+    userData;
+
+  const handleChangeFor = (prop) => (e) => {
+    setUserData({ ...userData, [prop]: e.target.value });
+  };
+
   const navigate = useNavigate();
-  const { displayToast } = AppState();
+  const { displayToast, formClassNames } = AppState();
 
-  const visibilityToggle = () => {
-    return (
-      <span
-        className={`input-group-text ${disableIfLoading} btn btn-outline-secondary rounded-pill rounded-start`}
-        onClick={() => setShowPassword(!showPassword)}
-      >
-        {showPassword ? <VisibilityOff /> : <Visibility />}
-      </span>
-    );
-  };
-
-  const requiredIndicator = () => {
-    return <span style={{ color: "#ff0000" }}>&nbsp;*</span>;
-  };
+  const {
+    loading,
+    setLoading,
+    disableIfLoading,
+    formLabelClassName,
+    formFieldClassName,
+    inputFieldClassName,
+    btnSubmitClassName,
+    btnResetClassName,
+  } = formClassNames;
 
   const handleRegister = async (e) => {
     e.preventDefault();
 
     // return setLoading(true);
-    // return console.log("Selected pic", profilePic);
 
     if (!name || !email || !password || !confirmPassword) {
       return displayToast({
         message: "Please Enter All the Fields",
+        type: "warning",
+        duration: 5000,
+        position: "bottom-center",
+      });
+    }
+
+    // Validate email
+    if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+      return displayToast({
+        message: "Please Enter a Valid Email ID",
         type: "warning",
         duration: 5000,
         position: "bottom-center",
@@ -99,7 +106,7 @@ const Register = ({
     } catch (error) {
       displayToast({
         title: "Registration Failed",
-        message: error.response.data.message,
+        message: error.response?.data?.message || "Oops! Something Went Wrong",
         type: "error",
         duration: 5000,
         position: "bottom-center",
@@ -110,18 +117,19 @@ const Register = ({
 
   const handleReset = (e) => {
     e.preventDefault();
-    setName("");
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
-    setProfilePic(null);
+    setUserData({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      profilePic: null,
+      profilePicUrl: defaultPicUrl,
+    });
     imgInput.current.value = "";
-    setProfilePicUrl(defaultPicUrl);
   };
 
   const handleImgInputChange = (e) => {
     const image = e.target.files[0];
-    // console.log("Inside handleImgInputChange : ", image);
     if (!image) return;
 
     if (image.size >= 2097152) {
@@ -133,25 +141,26 @@ const Register = ({
         position: "bottom-center",
       });
     }
-    setProfilePic(image);
-    setProfilePicUrl(URL.createObjectURL(image));
+    setUserData({
+      ...userData,
+      profilePic: image,
+      profilePicUrl: URL.createObjectURL(image),
+    });
   };
 
   return (
-    <form
-      className={`homepage__form user-select-none row ${disableIfLoading} `}
-    >
-      <section className="register__profilepic position-relative mb-4">
+    <form className={`app__form user-select-none row ${disableIfLoading} `}>
+      {/* Select Profile Pic */}
+      <section className="app__formfield position-relative mb-4">
         <img
-          className="img-fluid border border-2 border-primary rounded-circle mt-3"
+          className="userProfilePic img-fluid border border-2 border-primary rounded-circle mt-3"
           id="register__imgProfile"
           src={profilePicUrl}
           alt="profilePic"
         />
         <i
           id="register__selectPic"
-          style={{ bottom: "0%", right: "calc(50% - 50px)" }}
-          className={`position-absolute p-2 d-flex ${disableIfLoading} justify-content-center align-items-center bg-success rounded-circle pointer`}
+          className={`selectPicIcon position-absolute p-2 d-flex ${disableIfLoading} justify-content-center align-items-center bg-success rounded-circle pointer`}
           onClick={() => {
             if (!loading) imgInput.current.click();
           }}
@@ -163,7 +172,7 @@ const Register = ({
           accept=".png, .jpg, .jpeg"
           onChange={handleImgInputChange}
           name="profilepic"
-          id="profilepic"
+          id="register__img_input"
           ref={imgInput}
           className={`d-none`}
           disabled={loading}
@@ -172,12 +181,12 @@ const Register = ({
       {/* Name input */}
       <section className={`${formFieldClassName} mb-2 col-md-6 order-md-1`}>
         <label htmlFor="register__username" className={`${formLabelClassName}`}>
-          Name {requiredIndicator()}
+          Name <span className="required">*</span>
         </label>
         <input
           type="text"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={handleChangeFor("name")}
           required
           name="username"
           id="register__username"
@@ -189,12 +198,12 @@ const Register = ({
       {/* Email input */}
       <section className={`${formFieldClassName} mb-2 col-md-6 order-md-3`}>
         <label htmlFor="register__email" className={`${formLabelClassName}`}>
-          Email ID {requiredIndicator()}
+          Email ID <span className="required">*</span>
         </label>
         <input
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={handleChangeFor("email")}
           required
           name="email"
           id="register__email"
@@ -206,13 +215,13 @@ const Register = ({
       {/* Password input */}
       <section className={`${formFieldClassName} mb-2 col-md-6 order-md-2`}>
         <label htmlFor="register__password" className={`${formLabelClassName}`}>
-          Password {requiredIndicator()}
+          Password <span className="required">*</span>
         </label>
         <div className="input-group">
           <input
             type={showPassword ? "text" : "password"}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handleChangeFor("password")}
             required
             name="password"
             id="register__password"
@@ -220,7 +229,11 @@ const Register = ({
             disabled={loading}
             placeholder="Enter Password"
           />
-          {visibilityToggle()}
+          <PasswordVisibilityToggle
+            disableIfLoading={disableIfLoading}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
+          />
         </div>
       </section>
       {/* Confirm Password input */}
@@ -229,13 +242,13 @@ const Register = ({
           htmlFor="register__confirmpassword"
           className={`${formLabelClassName}`}
         >
-          Confirm Password {requiredIndicator()}
+          Confirm Password <span className="required">*</span>
         </label>
         <div className="input-group">
           <input
             type={showPassword ? "text" : "password"}
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={handleChangeFor("confirmPassword")}
             required
             name="confirmpassword"
             id="register__confirmpassword"
@@ -243,7 +256,11 @@ const Register = ({
             disabled={loading}
             placeholder="Confirm Password"
           />
-          {visibilityToggle()}
+          <PasswordVisibilityToggle
+            disableIfLoading={disableIfLoading}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
+          />
         </div>
       </section>
       <section
@@ -258,14 +275,16 @@ const Register = ({
           className={`${btnSubmitClassName}`}
         >
           {loading ? (
-            <CircularProgress
-              size={25}
-              style={{ color: "white", margin: "0px 15px 0px -20px" }}
-            />
+            <>
+              <CircularProgress
+                size={25}
+                style={{ color: "white", margin: "0px 15px 0px -20px" }}
+              />
+              Signing Up...
+            </>
           ) : (
-            ""
+            "Register"
           )}
-          {loading ? "Signing Up..." : "Register"}
         </button>
         {/* Reset button */}
         <button

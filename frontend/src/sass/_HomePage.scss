@@ -5,42 +5,9 @@
     color: #414141;
     background-color: rgba(0, 0, 0, 0.6);
   }
-
   .homepage__header {
     font-size: 30px;
     color: rgb(235, 217, 55);
     font-weight: 700;
-  }
-
-  .homepage__body {
-    .homepage__btnToggle {
-      font-size: 20px;
-      transition: all 0.2s;
-    }
-
-    .homepage__form {
-      img {
-        display: inline-block;
-        width: 100px;
-        height: 100px;
-        object-fit: cover;
-      }
-
-      .homepage__formfield {
-        input {
-          font-weight: 200;
-          font-size: 20px;
-          // color: #93c2f727;
-        }
-      }
-
-      .homepage_formlabel {
-        font-size: 20px;
-      }
-
-      .homepage__btnReset {
-        width: 30%;
-      }
-    }
   }
 }

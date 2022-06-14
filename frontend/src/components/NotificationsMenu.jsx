@@ -1,6 +1,6 @@
 import { Logout, ManageAccounts } from "@mui/icons-material";
 import { ListItemIcon, MenuItem } from "@mui/material";
-import Menu, { menuIconProps, menuItemProps } from "./Menu";
+import Menu, { menuIconProps, menuItemProps } from "./utils/Menu";
 import { useState } from "react";
 import { AppState } from "../context/ContextProvider";
 

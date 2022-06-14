@@ -3,10 +3,17 @@ import axios from "../config/axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AppState } from "../context/ContextProvider";
 import ChatpageHeader from "../components/ChatpageHeader";
-import CustomDialog from "../components/CustomDialog";
+import CustomDialog from "../components/utils/CustomDialog";
 
 const ChatsPage = () => {
-  const { loggedInUser, setLoggedInUser, dialogBody } = AppState();
+  const {
+    loggedInUser,
+    setLoggedInUser,
+    dialogBody,
+    dialogData,
+    handleDialogClose,
+    showDialogActions,
+  } = AppState();
 
   const navigate = useNavigate();
   const location = useLocation().pathname;
@@ -27,7 +34,13 @@ const ChatsPage = () => {
       {/* Chat Messages component */}
 
       {/* Alert dialog */}
-      <CustomDialog>{dialogBody}</CustomDialog>
+      <CustomDialog
+        dialogData={dialogData}
+        handleDialogClose={handleDialogClose}
+        showDialogActions={showDialogActions}
+      >
+        {dialogBody}
+      </CustomDialog>
     </div>
   );
 };

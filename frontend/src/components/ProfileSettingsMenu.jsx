@@ -1,42 +1,138 @@
-import { Edit, Key, Logout, ManageAccounts } from "@mui/icons-material";
+import { Key, Logout, ManageAccounts, Person } from "@mui/icons-material";
 import { ListItemIcon, MenuItem } from "@mui/material";
-import Menu, { menuIconProps, menuItemProps } from "./Menu";
-import { useState } from "react";
+import Menu, { menuIconProps, menuItemProps } from "./utils/Menu";
 import { AppState } from "../context/ContextProvider";
 import { useNavigate } from "react-router-dom";
+import axios from "../config/axios";
+import ChangePasswordBody from "./utils/ChangePasswordBody";
+import ViewOrEditProfileBody from "./utils/ViewOrEditProfileBody";
 
-const ProfileSettingsMenu = ({ openEditProfileDialog }) => {
+const ProfileSettingsMenu = () => {
   const {
+    loggedInUser,
     profileSettingsMenuAnchor,
     setProfileSettingsMenuAnchor,
-    displayAlertDialog,
+    displayDialog,
     displayToast,
     setDialogBody,
+    setShowDialogActions,
+    formClassNames,
   } = AppState();
+
+  const { setLoading } = formClassNames;
+  const isGuestUser = loggedInUser?.email === "guest.user@gmail.com";
 
   const navigate = useNavigate();
 
+  let editPasswordData;
+
+  const getUpdatedState = (updatedState) => {
+    editPasswordData = updatedState;
+  };
+
   const openLogoutConfirmDialog = () => {
-    displayAlertDialog({
+    setShowDialogActions(true);
+    setDialogBody(<>Are you sure you want to log out?</>);
+    displayDialog({
       title: "Logout Confirmation",
       nolabel: "NO",
       yeslabel: "YES",
       action: () => {
         sessionStorage.removeItem("loggedInUser");
-        navigate("/");
         displayToast({
           message: "Logged Out",
           type: "info",
           duration: 2000,
           position: "bottom-center",
         });
+        return "loggingOut";
       },
     });
-    setDialogBody(<>Are you sure you want to log out?</>);
+  };
+
+  const openViewOrEditProfileDialog = () => {
+    setShowDialogActions(false);
+    setDialogBody(<ViewOrEditProfileBody />);
+    displayDialog({
+      title: isGuestUser ? "View Profile" : "Edit Profile",
+    });
   };
 
   const openEditPasswordDialog = () => {
-    // display
+    setShowDialogActions(true);
+    setDialogBody(<ChangePasswordBody getUpdatedState={getUpdatedState} />);
+    displayDialog({
+      title: "Change Password",
+      nolabel: "CANCEL",
+      yeslabel: "SAVE",
+      action: async () => {
+        const { currentPassword, newPassword, confirmNewPassword } =
+          editPasswordData;
+
+        if (!currentPassword || !newPassword || !confirmNewPassword) {
+          return displayToast({
+            message: "Please Enter All the Fields",
+            type: "warning",
+            duration: 5000,
+            position: "top-center",
+          });
+        }
+        if (currentPassword === newPassword) {
+          return displayToast({
+            message: "New Password Must Differ from Current Password",
+            type: "warning",
+            duration: 5000,
+            position: "top-center",
+          });
+        }
+        if (newPassword !== confirmNewPassword) {
+          return displayToast({
+            message: "New Password Must Match Confirm New Password",
+            type: "warning",
+            duration: 5000,
+            position: "top-center",
+          });
+        }
+
+        setLoading(true);
+
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${loggedInUser.token}`,
+          },
+        };
+
+        try {
+          await axios.put(
+            "/api/user/update/password",
+            { currentPassword, newPassword },
+            config
+          );
+          displayToast({
+            message:
+              "Password Updated Successfully. Please Login Again with Updated Password.",
+            type: "success",
+            duration: 5000,
+            position: "bottom-center",
+          });
+
+          setLoading(false);
+          sessionStorage.removeItem("loggedInUser");
+          return "passwordUpdated";
+        } catch (error) {
+          displayToast({
+            title: "Password Update Failed",
+            message:
+              error.response?.data?.message || "Oops! Something Went Wrong",
+            type: "error",
+            duration: 5000,
+            position: "top-center",
+          });
+          setLoading(false);
+        }
+      },
+    });
   };
 
   return (
@@ -44,18 +140,20 @@ const ProfileSettingsMenu = ({ openEditProfileDialog }) => {
       menuAnchor={profileSettingsMenuAnchor}
       setMenuAnchor={setProfileSettingsMenuAnchor}
     >
-      <MenuItem sx={menuItemProps}>
-        <ListItemIcon sx={menuIconProps} onClick={openEditProfileDialog}>
-          <ManageAccounts />
+      <MenuItem sx={menuItemProps} onClick={openViewOrEditProfileDialog}>
+        <ListItemIcon sx={menuIconProps}>
+          {isGuestUser ? <Person /> : <ManageAccounts />}
         </ListItemIcon>
-        Edit Profile
+        {isGuestUser ? "View" : "Edit"} Profile
       </MenuItem>
-      <MenuItem sx={menuItemProps}>
-        <ListItemIcon sx={menuIconProps} onClick={openEditPasswordDialog}>
-          <Key />
-        </ListItemIcon>
-        Change Password
-      </MenuItem>
+      {!isGuestUser && (
+        <MenuItem sx={menuItemProps} onClick={openEditPasswordDialog}>
+          <ListItemIcon sx={menuIconProps}>
+            <Key />
+          </ListItemIcon>
+          Change Password
+        </MenuItem>
+      )}
       <MenuItem sx={menuItemProps} onClick={openLogoutConfirmDialog}>
         <ListItemIcon sx={menuIconProps}>
           <Logout />
