@@ -1,15 +1,5 @@
 import { Notifications, Search } from "@mui/icons-material";
-import {
-  Avatar,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  IconButton,
-  Tooltip,
-} from "@mui/material";
+import { Avatar, IconButton, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { AppState } from "../context/ContextProvider";
 import AppGif from "./utils/AppGif";
@@ -19,17 +9,16 @@ import ProfileSettingsMenu from "./ProfileSettingsMenu";
 const ChatpageHeader = () => {
   const {
     loggedInUser,
-    setLoggedInUser,
     setNotificationsMenuAnchor,
     setProfileSettingsMenuAnchor,
   } = AppState();
 
   const openNotificationMenu = (e) => {
-    setNotificationsMenuAnchor(e.currentTarget);
+    setNotificationsMenuAnchor(e.target);
   };
 
   const openProfileSettingsMenu = (e) => {
-    setProfileSettingsMenuAnchor(e.currentTarget);
+    setProfileSettingsMenuAnchor(e.target);
   };
 
   return (
@@ -37,8 +26,16 @@ const ChatpageHeader = () => {
       className={`chatpage__header d-flex justify-content-between align-items-center user-select-none`}
     >
       {/* Search Users to create/access chat */}
-      <Tooltip title="Search Users" className={`rounded-pill`} arrow>
-        <button className={`btn btn-outline-secondary text-light px-3`}>
+      <Tooltip
+        title="Search Users"
+        placement="bottom"
+        sx={{ fontSize: "16px" }}
+        arrow
+      >
+        <button
+          style={{ borderRadius: "20px" }}
+          className={`btn btn-outline-secondary text-light px-3`}
+        >
           <Search className={`me-1`} />
           <span className={`d-none d-md-inline mb-1 fs-5`}>Search Users</span>
         </button>
@@ -54,23 +51,24 @@ const ChatpageHeader = () => {
 
       {/* User notification and profile settings icons */}
       <div>
-        <Tooltip title="Notifications" arrow>
+        <Tooltip title="Notifications" placement="bottom-end" arrow>
           <IconButton onClick={openNotificationMenu}>
             <Notifications className={`text-light`} />
           </IconButton>
         </Tooltip>
         <Tooltip
           title="Profile settings"
-          className="mx-md-3 mx-lg-4"
           size="small"
+          className="mx-md-3 mx-lg-4"
+          placement="bottom-end"
           arrow
         >
           <IconButton onClick={openProfileSettingsMenu}>
             <Avatar alt="Logged In User" src={loggedInUser?.profilePic} />
           </IconButton>
         </Tooltip>
-        <NotificationsMenu></NotificationsMenu>
-        <ProfileSettingsMenu></ProfileSettingsMenu>
+        <NotificationsMenu />
+        <ProfileSettingsMenu />
       </div>
     </header>
   );

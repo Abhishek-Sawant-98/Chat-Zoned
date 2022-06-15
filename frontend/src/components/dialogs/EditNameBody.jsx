@@ -3,9 +3,7 @@ import { AppState } from "../../context/ContextProvider";
 
 const EditNameBody = ({ getUpdatedName }) => {
   const { formClassNames, loggedInUser } = AppState();
-
   const { loading, formFieldClassName, inputFieldClassName } = formClassNames;
-
   const [name, setName] = useState(loggedInUser?.name);
 
   useEffect(() => {
@@ -13,10 +11,7 @@ const EditNameBody = ({ getUpdatedName }) => {
   }, [name]);
 
   return (
-    <section
-      className={`${formFieldClassName}`}
-      style={{ width: "360px" }}
-    >
+    <section className={`${formFieldClassName}`} style={{ width: "360px" }}>
       <input
         type="text"
         value={name}
@@ -24,7 +19,7 @@ const EditNameBody = ({ getUpdatedName }) => {
         name="username"
         id="editName"
         autoFocus
-        className={`${inputFieldClassName}`}
+        className={`${inputFieldClassName} mt-1`}
         disabled={loading}
         placeholder="Enter New Name"
       />

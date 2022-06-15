@@ -16,13 +16,19 @@ export const menuPaperProps = {
 export const menuItemProps = {
   ":hover": { backgroundColor: "#505050" },
   color: "#e0e0e0",
-  fontFamily: 'Mirza',
-  fontSize: '19px'
+  fontFamily: "Mirza",
+  fontSize: "19px",
 };
 
 export const menuIconProps = { color: "lightblue" };
 
-const Menu = ({ children, menuAnchor, setMenuAnchor }) => {
+const Menu = ({
+  children,
+  menuAnchor,
+  setMenuAnchor,
+  transformOrigin,
+  anchorOrigin,
+}) => {
   const isMenuOpen = Boolean(menuAnchor);
 
   const closeMenu = () => {
@@ -36,8 +42,8 @@ const Menu = ({ children, menuAnchor, setMenuAnchor }) => {
       onClose={closeMenu}
       onClick={closeMenu}
       PaperProps={menuPaperProps}
-      transformOrigin={{ horizontal: "right", vertical: "top" }}
-      anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      transformOrigin={transformOrigin}
+      anchorOrigin={anchorOrigin}
     >
       {children}
     </MuiMenu>

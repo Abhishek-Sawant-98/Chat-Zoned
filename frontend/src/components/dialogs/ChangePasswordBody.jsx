@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AppState } from "../../context/ContextProvider";
-import PasswordVisibilityToggle from "./PasswordVisibilityToggle";
+import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
 
 const ChangePasswordBody = ({ getUpdatedState }) => {
   const { formClassNames } = AppState();

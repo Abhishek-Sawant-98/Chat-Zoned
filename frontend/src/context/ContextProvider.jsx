@@ -29,6 +29,8 @@ const ContextProvider = ({ children }) => {
   };
 
   // Menu anchors config
+  const [editProfilePicMenuAnchor, setEditProfilePicMenuAnchor] =
+    useState(null);
   const [msgSettingsMenuAnchor, setMsgSettingsMenuAnchor] = useState(null);
   const [notificationsMenuAnchor, setNotificationsMenuAnchor] = useState(null);
   const [profileSettingsMenuAnchor, setProfileSettingsMenuAnchor] =
@@ -41,6 +43,7 @@ const ContextProvider = ({ children }) => {
     content: "Dialog Content",
     nolabel: "NO",
     yeslabel: "YES",
+    loadingYeslabel: "Please Wait...",
     action: () => {},
   });
 
@@ -85,6 +88,8 @@ const ContextProvider = ({ children }) => {
         toastData,
         displayToast,
         handleToastClose,
+        editProfilePicMenuAnchor,
+        setEditProfilePicMenuAnchor,
         msgSettingsMenuAnchor,
         setMsgSettingsMenuAnchor,
         notificationsMenuAnchor,

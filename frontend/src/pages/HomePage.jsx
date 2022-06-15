@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Login from "../components/authentication/Login";
 import SignUp from "../components/authentication/Register";
 import AppGif from "../components/utils/AppGif";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AppState } from "../context/ContextProvider";
 
 const HomePage = () => {
@@ -12,11 +12,9 @@ const HomePage = () => {
   const [showLogin, setShowLogin] = useState(true);
 
   const navigate = useNavigate();
-  const location = useLocation().pathname;
 
   useEffect(() => {
     const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
-
     if (loggedInUser) navigate("/chats");
   }, []);
 

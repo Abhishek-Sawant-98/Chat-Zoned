@@ -18,7 +18,8 @@ const CustomDialog = ({
   showDialogActions,
 }) => {
   const { formClassNames } = AppState();
-  const { isOpen, title, nolabel, yeslabel, action } = dialogData;
+  const { isOpen, title, nolabel, yeslabel, loadingYeslabel, action } =
+    dialogData;
   const { loading, disableIfLoading } = formClassNames;
   const navigate = useNavigate();
 
@@ -102,7 +103,7 @@ const CustomDialog = ({
             {loading ? (
               <>
                 <CircularProgress size={25} style={{ marginRight: "12px" }} />
-                <span style={{ marginRight: "22px" }}>{`Saving...`}</span>
+                <span style={{ marginRight: "22px" }}>{loadingYeslabel}</span>
               </>
             ) : (
               `${yeslabel}`

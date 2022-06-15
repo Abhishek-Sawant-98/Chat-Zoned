@@ -4,8 +4,8 @@ import Menu, { menuIconProps, menuItemProps } from "./utils/Menu";
 import { AppState } from "../context/ContextProvider";
 import { useNavigate } from "react-router-dom";
 import axios from "../config/axios";
-import ChangePasswordBody from "./utils/ChangePasswordBody";
-import ViewOrEditProfileBody from "./utils/ViewOrEditProfileBody";
+import ChangePasswordBody from "./dialogs/ChangePasswordBody";
+import ViewOrEditProfileBody from "./dialogs/EditProfileBody";
 
 const ProfileSettingsMenu = () => {
   const {
@@ -37,6 +37,7 @@ const ProfileSettingsMenu = () => {
       title: "Logout Confirmation",
       nolabel: "NO",
       yeslabel: "YES",
+      loadingYeslabel: "Logging Out...",
       action: () => {
         sessionStorage.removeItem("loggedInUser");
         displayToast({
@@ -65,6 +66,7 @@ const ProfileSettingsMenu = () => {
       title: "Change Password",
       nolabel: "CANCEL",
       yeslabel: "SAVE",
+      loadingYeslabel: "Saving...",
       action: async () => {
         const { currentPassword, newPassword, confirmNewPassword } =
           editPasswordData;
@@ -139,6 +141,8 @@ const ProfileSettingsMenu = () => {
     <Menu
       menuAnchor={profileSettingsMenuAnchor}
       setMenuAnchor={setProfileSettingsMenuAnchor}
+      transformOrigin={{ vertical: "top", horizontal: "right" }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
     >
       <MenuItem sx={menuItemProps} onClick={openViewOrEditProfileDialog}>
         <ListItemIcon sx={menuIconProps}>

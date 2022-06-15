@@ -16,6 +16,8 @@ const NotificationsMenu = () => {
     <Menu
       menuAnchor={notificationsMenuAnchor}
       setMenuAnchor={setNotificationsMenuAnchor}
+      transformOrigin={{ vertical: "top", horizontal: "right" }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
     >
       {notifications?.length ? (
         notifications.map((n) => (
