@@ -7,6 +7,7 @@ import EditNameBody from "./EditNameBody";
 import { CircularProgress } from "@mui/material";
 import EditProfilePicMenu from "../EditProfilePicMenu";
 import getCustomTooltip from "../utils/CustomTooltip";
+import { truncateString } from "../../utils/appUtils";
 
 const arrowStyles = {
   color: "#111",
@@ -338,9 +339,8 @@ const EditProfileBody = () => {
           <CustomTooltip title={`${name}`} placement="top-start" arrow>
             <input
               type="text"
-              value={name}
+              value={truncateString(name, 25, 21)}
               ref={nameInput}
-              onChange={handleChangeFor("name")}
               name="username"
               id="viewName"
               className={`${inputFieldClassName} ${
@@ -377,7 +377,7 @@ const EditProfileBody = () => {
         <CustomTooltip title={`${email}`} placement="bottom" arrow>
           <input
             type="text"
-            value={email}
+            value={truncateString(email, 27, 24)}
             id="viewEmail"
             className={`${inputFieldClassName}`}
             disabled={true}
