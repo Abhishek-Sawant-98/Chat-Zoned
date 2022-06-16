@@ -1,7 +1,7 @@
 import { AddAPhoto } from "@mui/icons-material";
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "../../config/axios";
+import axios from "../../utils/axios";
 import { AppState } from "../../context/ContextProvider";
 import { CircularProgress } from "@mui/material";
 import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
@@ -50,6 +50,15 @@ const Register = () => {
     if (!name || !email || !password || !confirmPassword) {
       return displayToast({
         message: "Please Enter All the Fields",
+        type: "warning",
+        duration: 5000,
+        position: "bottom-center",
+      });
+    }
+
+    if (name.length > 25) {
+      return displayToast({
+        message: "Name Must be Less than 25 characters",
         type: "warning",
         duration: 5000,
         position: "bottom-center",

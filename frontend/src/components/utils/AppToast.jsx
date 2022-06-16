@@ -22,10 +22,8 @@ const AppToast = () => {
         severity={type}
         onClose={handleToastClose}
       >
-        {title ? (
+        {title && (
           <AlertTitle className="fw-bold user-select-none">{title}</AlertTitle>
-        ) : (
-          ""
         )}
         {message}
       </Alert>

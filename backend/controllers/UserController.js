@@ -130,7 +130,7 @@ const fetchUsers = asyncHandler(async (req, res) => {
     .find({
       _id: { $ne: loggedInUser },
     })
-    .select("-password");
+    .select("-password -notifications");
 
   res.status(200).json(users);
 });

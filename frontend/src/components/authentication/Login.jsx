@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "../../config/axios";
+import axios from "../../utils/axios";
 import { useNavigate } from "react-router-dom";
 import { AppState } from "../../context/ContextProvider";
 import { CircularProgress } from "@mui/material";

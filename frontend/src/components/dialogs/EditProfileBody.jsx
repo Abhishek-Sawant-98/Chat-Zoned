@@ -1,11 +1,24 @@
 import { AccountCircle, Edit, Email } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
-import axios from "../../config/axios";
+import axios from "../../utils/axios";
 import { AppState } from "../../context/ContextProvider";
 import CustomDialog from "../utils/CustomDialog";
 import EditNameBody from "./EditNameBody";
-import { CircularProgress, Tooltip } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import EditProfilePicMenu from "../EditProfilePicMenu";
+import getCustomTooltip from "../utils/CustomTooltip";
+
+const arrowStyles = {
+  color: "#111",
+};
+const tooltipStyles = {
+  maxWidth: 250,
+  color: "#eee",
+  fontFamily: "Mirza",
+  fontSize: 17,
+  backgroundColor: "#111",
+};
+const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const EditProfileBody = () => {
   const {
@@ -38,6 +51,8 @@ const EditProfileBody = () => {
     name: loggedInUser?.name,
     email: loggedInUser?.email,
   });
+
+  // For profile pic upload loading indicator
   const [uploading, setUploading] = useState(false);
 
   const { profilePicUrl, name, email } = profileData;
@@ -278,7 +293,7 @@ const EditProfileBody = () => {
             alt="profilePic"
           />
           {!isGuestUser && (
-            <Tooltip title="Edit Profile Pic" placement="right" arrow>
+            <CustomTooltip title="Edit Profile Pic" placement="right" arrow>
               <i
                 id="editProfilePic"
                 tabIndex={2}
@@ -288,7 +303,7 @@ const EditProfileBody = () => {
               >
                 <Edit className="text-light fs-6" />
               </i>
-            </Tooltip>
+            </CustomTooltip>
           )}
           {/* Edit/Delete profile pic menu */}
           <EditProfilePicMenu
@@ -320,21 +335,23 @@ const EditProfileBody = () => {
           {" Name"}
         </label>
         <div className="input-group">
-          <input
-            type="text"
-            value={name}
-            ref={nameInput}
-            onChange={handleChangeFor("name")}
-            name="username"
-            id="viewName"
-            className={`${inputFieldClassName} ${
-              !isGuestUser && "rounded-end"
-            }`}
-            disabled={true}
-            placeholder="Enter New Name"
-          />
+          <CustomTooltip title={`${name}`} placement="top-start" arrow>
+            <input
+              type="text"
+              value={name}
+              ref={nameInput}
+              onChange={handleChangeFor("name")}
+              name="username"
+              id="viewName"
+              className={`${inputFieldClassName} ${
+                !isGuestUser && "rounded-end"
+              }`}
+              disabled={true}
+              placeholder="Enter New Name"
+            />
+          </CustomTooltip>
           {!isGuestUser && (
-            <Tooltip title="Edit Name" placement="top" arrow>
+            <CustomTooltip title="Edit Name" placement="top" arrow>
               <span
                 tabIndex={3}
                 onKeyDown={clickOnKeydown}
@@ -343,7 +360,7 @@ const EditProfileBody = () => {
               >
                 <Edit />
               </span>
-            </Tooltip>
+            </CustomTooltip>
           )}
         </div>
       </section>
@@ -357,13 +374,15 @@ const EditProfileBody = () => {
           <Email style={{ margin: "-2px 2px 0px -20px", color: "lightblue" }} />
           {" Email"}
         </label>
-        <input
-          type="text"
-          value={email}
-          id="viewEmail"
-          className={`${inputFieldClassName}`}
-          disabled={true}
-        />
+        <CustomTooltip title={`${email}`} placement="bottom" arrow>
+          <input
+            type="text"
+            value={email}
+            id="viewEmail"
+            className={`${inputFieldClassName}`}
+            disabled={true}
+          />
+        </CustomTooltip>
       </section>
       {/* Child confirmation dialog */}
       <CustomDialog

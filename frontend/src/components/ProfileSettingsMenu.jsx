@@ -3,7 +3,7 @@ import { ListItemIcon, MenuItem } from "@mui/material";
 import Menu, { menuIconProps, menuItemProps } from "./utils/Menu";
 import { AppState } from "../context/ContextProvider";
 import { useNavigate } from "react-router-dom";
-import axios from "../config/axios";
+import axios from "../utils/axios";
 import ChangePasswordBody from "./dialogs/ChangePasswordBody";
 import ViewOrEditProfileBody from "./dialogs/EditProfileBody";
 
