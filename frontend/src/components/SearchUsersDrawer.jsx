@@ -53,7 +53,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
       });
       setLoading(false);
     }
-  }, 1000);
+  }, 800);
 
   const { formClassNames, loggedInUser, displayToast } = AppState();
 
@@ -154,7 +154,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
                   <UserListItem key={user._id} user={user} />
                 ))
               ) : searchQuery ? (
-                <p className="text-light text-center fs-5 mt-3">
+                <p className="text-light text-center fs-5 mt-3 mx-5">
                   No results found for '
                   <span className="text-info">
                     {truncateString(searchQuery, 30, 26)}

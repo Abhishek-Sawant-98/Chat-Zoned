@@ -23,8 +23,8 @@ const UserListItem = ({ user }) => {
   return (
     <div
       className={`userListItem user-select-none w-100 d-flex text-light ${
-        userHovered ? "bg-black" : "bg-dark"
-      } justify-content-start align-items-center pointer px-3`}
+        userHovered ? "bg-dark" : "bg-black"
+      } justify-content-start bg-opacity-75 align-items-center pointer px-3`}
       onClick={() => {
         alert(JSON.stringify(user));
       }}

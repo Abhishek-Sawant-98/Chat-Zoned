@@ -16,8 +16,8 @@ const createOrRetrieveChat = asyncHandler(async (req, res) => {
   const existingChats = await ChatModel.find({
     $and: [
       { isGroupChat: false },
-      { users: { $elemMatch: receiverUserId } },
-      { users: { $elemMatch: loggedInUserId } },
+      { users: { $elemMatch: { $eq: receiverUserId } } },
+      { users: { $elemMatch: { $eq: loggedInUserId } } },
     ],
   })
     .populate("users", "-password -notifications")
@@ -55,7 +55,7 @@ const fetchChats = asyncHandler(async (req, res) => {
 
   // Fetch all the chats for the currently logged-in user
   const chats = await ChatModel.find({
-    users: { $elemMatch: loggedInUserId },
+    users: { $elemMatch: { $eq: loggedInUserId } },
   })
     .populate("users", "-password -notifications")
     .populate("groupAdmin", "-password -notifications")

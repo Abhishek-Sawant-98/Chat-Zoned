@@ -336,7 +336,7 @@ const addNotification = asyncHandler(async (req, res) => {
   const existingNotification = await UserModel.findOne({
     $and: [
       { _id: loggedInUser },
-      { notifications: { $elemMatch: notificationId } },
+      { notifications: { $elemMatch: { $eq: notificationId } } },
     ],
   });
 
@@ -391,7 +391,7 @@ const deleteNotification = asyncHandler(async (req, res) => {
   const existingNotification = await UserModel.findOne({
     $and: [
       { _id: loggedInUser },
-      { notifications: { $elemMatch: notificationId } },
+      { notifications: { $elemMatch: { $eq: notificationId } } },
     ],
   });
 
