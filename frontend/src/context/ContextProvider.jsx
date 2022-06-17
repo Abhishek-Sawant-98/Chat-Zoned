@@ -3,9 +3,9 @@ import { createContext, useContext, useState } from "react";
 const AppContext = createContext();
 
 const ContextProvider = ({ children }) => {
-  const [loggedInUser, setLoggedInUser] = useState({});
+  const [loggedInUser, setLoggedInUser] = useState(null);
   const [chats, setChats] = useState([]);
-  const [selectedChat, setSelectedChat] = useState({});
+  const [selectedChat, setSelectedChat] = useState(null);
 
   // Toast config
   const [toastData, setToastData] = useState({

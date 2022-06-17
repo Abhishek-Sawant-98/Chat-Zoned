@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { AppState } from "../context/ContextProvider";
 import ChatpageHeader from "../components/ChatpageHeader";
 import CustomDialog from "../components/utils/CustomDialog";
+import ChatListView from "../components/ChatListView";
+import MessagesView from "../components/MessagesView";
 
 const ChatsPage = () => {
   const {
@@ -11,6 +13,7 @@ const ChatsPage = () => {
     dialogData,
     handleDialogClose,
     showDialogActions,
+    selectedChat,
   } = AppState();
 
   const navigate = useNavigate();
@@ -21,14 +24,20 @@ const ChatsPage = () => {
     setLoggedInUser(user);
   }, []);
 
+  useEffect(() => {}, [selectedChat]);
+
   return (
     <div className={`chatpage`}>
       {/* Header component */}
-      <ChatpageHeader></ChatpageHeader>
+      <ChatpageHeader />
 
-      {/* Chat List component */}
+      <section className={`row g-1`}>
+        {/* Chat List component */}
+        <ChatListView />
 
-      {/* Chat Messages component */}
+        {/* Chat Messages component */}
+        <MessagesView />
+      </section>
 
       {/* Alert dialog */}
       <CustomDialog

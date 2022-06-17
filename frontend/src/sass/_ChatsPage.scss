@@ -1,7 +1,18 @@
 .chatpage {
-    min-width: 400px;
-  .chatpage__header {
-    background-color: #202c33c7;
+  min-width: 370;
+  min-height: 450px;
+  height: 100vh;
+  .chatpageDiv {
+    background-color: $chatpageBgColor;
     border-radius: 10px;
+  }
+  .chatpageView {
+    min-height: 450px;
+    height: 85vh;
+    margin: 15px 10px 10px 0px;
+  }
+  .chatListView {
+  }
+  .messagesView {
   }
 }

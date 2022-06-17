@@ -1,30 +1,26 @@
-@import url("https://fonts.googleapis.com/css2?family=Mirza:wght@400;500;600;700&display=swap");
-
+@import "variables";
 @import "App";
 @import "HomePage";
 @import "ChatsPage";
 @import "UserListItem";
+@import url($appFontUrl);
 
 body {
   font-family: "Mirza";
   background-size: 100% 100%;
   background-attachment: fixed;
-  background-image: url("https://res.cloudinary.com/abhi-sawant/image/upload/v1654753525/bg8_paxn6w.png");
+  background-image: url($appBgUrl);
   -ms-overflow-style: none; // Hide scrollbar in ie/edge
   scrollbar-width: none; // Hide scrollbar in firefox
-
   .pointer {
     cursor: pointer;
   }
-
   .notAllowed {
     cursor: not-allowed;
   }
-
   .app-gif {
-    width: 35px;
+    width: 30px;
   }
-
   //  Hide scrollbar for chrome/safari/opera
   ::-webkit-scrollbar {
     display: none;

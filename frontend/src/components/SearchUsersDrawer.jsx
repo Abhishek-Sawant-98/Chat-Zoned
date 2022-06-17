@@ -151,7 +151,11 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
             <>
               {searchResults.length > 0 ? (
                 searchResults.map((user) => (
-                  <UserListItem key={user._id} user={user} />
+                  <UserListItem
+                    key={user._id}
+                    user={user}
+                    handleClose={handleClose}
+                  />
                 ))
               ) : searchQuery ? (
                 <p className="text-light text-center fs-5 mt-3 mx-5">

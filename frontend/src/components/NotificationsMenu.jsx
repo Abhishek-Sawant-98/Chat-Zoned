@@ -11,7 +11,7 @@ const NotificationsMenu = () => {
     notificationsMenuAnchor,
     setNotificationsMenuAnchor,
   } = AppState();
-  const { notifications } = loggedInUser;
+  const notifs = loggedInUser?.notifications;
   return (
     <Menu
       menuAnchor={notificationsMenuAnchor}
@@ -19,8 +19,8 @@ const NotificationsMenu = () => {
       transformOrigin={{ vertical: "top", horizontal: "right" }}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
     >
-      {notifications?.length ? (
-        notifications.map((n) => (
+      {notifs?.length ? (
+        notifs.map((n) => (
           <MenuItem
             key={n._id}
             sx={menuItemProps}

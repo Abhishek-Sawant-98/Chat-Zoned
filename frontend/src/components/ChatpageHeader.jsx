@@ -40,7 +40,7 @@ const ChatpageHeader = () => {
 
   return (
     <header
-      className={`chatpage__header d-flex justify-content-between align-items-center user-select-none`}
+      className={`chatpageDiv d-flex justify-content-between align-items-center user-select-none`}
     >
       {/* Search Users to create/access chat */}
       <CustomTooltip
@@ -63,9 +63,9 @@ const ChatpageHeader = () => {
       />
 
       {/* App Logo */}
-      <div className={`d-flex align-items-center ms-4 ms-md-0 me-md-5`}>
+      <div className={`d-flex align-items-center ms-3 ms-md-0`}>
         <AppGif />
-        <span style={{ color: "orange" }} className={`h2`}>
+        <span style={{ color: "orange" }} className="fs-4 fw-bold">
           CHAT ZONED
         </span>
       </div>

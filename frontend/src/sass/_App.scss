@@ -1,27 +1,27 @@
 .App {
   text-align: center;
-  width: 100%;
-  height: 100%;
+  width: $fullDimension;
+  height: $fullDimension;
 }
 header {
   padding: 11px 15px;
 }
 .app__inputfield {
-  font-size: 20px;
+  font-size: $baseFontSize;
 }
 .required {
   font-family: "Times New Roman", Times, serif;
   color: #f17620;
 }
 .app__btnToggle {
-  font-size: 20px;
+  font-size: $baseFontSize;
   transition: all 0.2s;
 }
 .dialogField {
   width: 330px;
   img {
-    width: 200px;
-    height: 200px;
+    width: $baseImgDimension * 2;
+    height: $baseImgDimension * 2;
   }
 }
 .selectPicIcon {
@@ -35,12 +35,12 @@ header {
 .app__form {
   .app__formfield {
     img {
-      width: 100px;
-      height: 100px;
+      width: $baseImgDimension;
+      height: $baseImgDimension;
     }
   }
   .app__formlabel {
-    font-size: 20px;
+    font-size: $baseFontSize;
   }
   .app__btnReset {
     width: 30%;
