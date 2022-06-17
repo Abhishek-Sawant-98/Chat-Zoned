@@ -11,7 +11,10 @@ const EditNameBody = ({ getUpdatedName }) => {
   }, [name]);
 
   return (
-    <section className={`${formFieldClassName}`} style={{ width: "360px" }}>
+    <section
+      className={`${formFieldClassName} mx-auto`}
+      style={{ width: "clamp(250px, 60vw, 360px)" }}
+    >
       <input
         type="text"
         value={name}

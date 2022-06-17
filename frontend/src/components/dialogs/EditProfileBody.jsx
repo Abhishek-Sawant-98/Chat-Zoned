@@ -377,7 +377,7 @@ const EditProfileBody = () => {
         <CustomTooltip title={`${email}`} placement="bottom" arrow>
           <input
             type="text"
-            value={truncateString(email, 27, 24)}
+            value={truncateString(email, 25, 21)}
             id="viewEmail"
             className={`${inputFieldClassName}`}
             disabled={true}

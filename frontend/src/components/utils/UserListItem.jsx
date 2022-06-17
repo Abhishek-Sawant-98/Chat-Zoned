@@ -18,12 +18,13 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const UserListItem = ({ user, handleClose }) => {
+const UserListItem = ({ user, handleClose, listeners }) => {
   const { loggedInUser, displayToast, formClassNames, setSelectedChat } =
     AppState();
   const { loading, setLoading } = formClassNames;
   const { _id, name, email, profilePic } = user;
   const [userHovered, setUserHovered] = useState(false);
+  const [userClicked, setUserClicked] = useState(false);
 
   const createOrRetrieveChat = async () => {
     handleClose();
@@ -57,11 +58,13 @@ const UserListItem = ({ user, handleClose }) => {
   return (
     <div
       className={`userListItem user-select-none w-100 d-flex text-light ${
-        userHovered ? "bg-dark" : "bg-black"
+        userClicked ? "bg-success" : userHovered ? "bg-dark" : "bg-black"
       } justify-content-start bg-opacity-75 align-items-center pointer px-3`}
       onClick={createOrRetrieveChat}
       onMouseEnter={() => setUserHovered(true)}
       onMouseLeave={() => setUserHovered(false)}
+      onMouseDown={() => setUserClicked(true)}
+      onMouseUp={() => setUserClicked(false)}
     >
       <CustomTooltip title={`${name} (${email})`} placement="top-start" arrow>
         <Avatar src={profilePic} className={`userListAvatar`} />

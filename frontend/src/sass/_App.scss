@@ -18,7 +18,7 @@ header {
   transition: all 0.2s;
 }
 .dialogField {
-  width: 330px;
+  width: clamp(250px, 70vw, 320px);
   img {
     width: $baseImgDimension * 2;
     height: $baseImgDimension * 2;
