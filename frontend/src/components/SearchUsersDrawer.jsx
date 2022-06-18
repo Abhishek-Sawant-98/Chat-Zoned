@@ -9,6 +9,16 @@ import UserListItem from "./utils/UserListItem";
 const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const { formClassNames, loggedInUser, displayToast, setSelectedChat } =
+    AppState();
+
+  const {
+    loading,
+    setLoading,
+    disableIfLoading,
+    formFieldClassName,
+    inputFieldClassName,
+  } = formClassNames;
 
   useEffect(() => {
     if (isDrawerOpen) {
@@ -54,17 +64,6 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
       setLoading(false);
     }
   }, 800);
-
-  const { formClassNames, loggedInUser, displayToast, setSelectedChat } =
-    AppState();
-
-  const {
-    loading,
-    setLoading,
-    disableIfLoading,
-    formFieldClassName,
-    inputFieldClassName,
-  } = formClassNames;
 
   // Create/Retreive chat when a user item is clicked
   const createOrRetrieveChat = async (userId) => {
@@ -135,6 +134,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
             </IconButton>
           </span>
         </div>
+        {/* Search Bar */}
         <section className={`${formFieldClassName} pt-3 pb-2 mx-1`}>
           <div className="input-group">
             <span
@@ -157,7 +157,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
           </div>
         </section>
         <section
-          className="searchResultSkeleton position-relative mx-1 my-2"
+          className="position-relative mx-1 my-2"
           style={{ overflowY: "auto", overflowX: "hidden" }}
         >
           {loading ? (

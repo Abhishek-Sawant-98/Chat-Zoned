@@ -1,11 +1,17 @@
-const AppGif = () => {
-  return (
-    <img
-      className="app-gif d-none d-sm-inline mt-2 me-sm-1 me-md-2"
-      src="https://res.cloudinary.com/abhi-sawant/image/upload/v1655011052/chat-anim2_arb7t1.gif"
-      alt="chat-anim"
-    />
-  );
+import animationData from "../../animations/chat-gif.json";
+import lottie from "lottie-web/build/player/lottie_light";
+import { useEffect, useRef } from "react";
+
+const AppGif = ({ className, style }) => {
+  const appGif = useRef(null);
+
+  useEffect(() => {
+    lottie.loadAnimation({
+      container: appGif.current,
+      animationData: animationData,
+    });
+  }, []);
+  return <span ref={appGif} className={className} style={style}></span>;
 };
 
 export default AppGif;

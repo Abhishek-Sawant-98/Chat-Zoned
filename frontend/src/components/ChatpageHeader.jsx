@@ -64,7 +64,10 @@ const ChatpageHeader = () => {
 
       {/* App Logo */}
       <div className={`d-flex align-items-center ms-3 ms-md-0`}>
-        <AppGif />
+        <AppGif
+          className={"d-none d-sm-inline-block mt-2 me-sm-1 me-md-2"}
+          style={{ width: "35px", height: "35px" }}
+        />
         <span style={{ color: "orange" }} className="fs-3 fw-bold">
           CHAT ZONED
         </span>

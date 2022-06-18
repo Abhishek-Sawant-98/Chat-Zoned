@@ -5,11 +5,23 @@
     border-radius: 10px;
   }
   .chatpageView {
-    min-height: 450px;
-    height: calc(100vh - 94px);
+    min-height: 500px;
+    height: calc(100vh - 85px);
     margin: 15px 10px 10px 0px;
   }
   .chatListView {
+    .chatListHeader {
+      color: #6a9bf0;
+      border-radius: 20px;
+      .btnCreateGroup {
+        position: absolute;
+        top: 7px;
+        right: 9px;
+      }
+    }
+    .searchChat {
+      margin-top: -20px;
+    }
   }
   .messagesView {
   }
