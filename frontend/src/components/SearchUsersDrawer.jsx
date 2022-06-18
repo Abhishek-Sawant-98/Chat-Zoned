@@ -46,7 +46,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
     } catch (error) {
       displayToast({
         title: "Couldn't Fetch Users",
-        message: error.response?.data?.message || "Oops! Something Went Wrong",
+        message: error.response?.data?.message || "Oops! Server Down",
         type: "error",
         duration: 5000,
         position: "top-right",
@@ -55,7 +55,8 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
     }
   }, 800);
 
-  const { formClassNames, loggedInUser, displayToast } = AppState();
+  const { formClassNames, loggedInUser, displayToast, setSelectedChat } =
+    AppState();
 
   const {
     loading,
@@ -64,6 +65,36 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
     formFieldClassName,
     inputFieldClassName,
   } = formClassNames;
+
+  // Create/Retreive chat when a user item is clicked
+  const createOrRetrieveChat = async (userId) => {
+    handleClose();
+    setLoading(true);
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+    };
+
+    try {
+      const { data } = await axios.post(`/api/chat`, { userId }, config);
+
+      setLoading(false);
+      setSelectedChat(data);
+      console.log("Selected Chat : ", data);
+    } catch (error) {
+      displayToast({
+        title: "Create/Retrieve Chat Failed",
+        message: error.response?.data?.message || "Oops! Server Down",
+        type: "error",
+        duration: 5000,
+        position: "bottom",
+      });
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -148,14 +179,17 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
               </span>
             </div>
           ) : (
-            <>
+            <div
+              // 'Event delegation' (add only one event listener for
+              // parent element instead of adding for each child element)
+              onClick={(e) => {
+                const userId = e.target.dataset.user;
+                if (userId) createOrRetrieveChat(userId);
+              }}
+            >
               {searchResults.length > 0 ? (
                 searchResults.map((user) => (
-                  <UserListItem
-                    key={user._id}
-                    user={user}
-                    handleClose={handleClose}
-                  />
+                  <UserListItem key={user._id} user={user} />
                 ))
               ) : searchQuery ? (
                 <p className="text-light text-center fs-5 mt-3 mx-5">
@@ -168,7 +202,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
               ) : (
                 <></>
               )}
-            </>
+            </div>
           )}
         </section>
       </Drawer>

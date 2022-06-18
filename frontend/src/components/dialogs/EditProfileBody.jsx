@@ -120,7 +120,7 @@ const EditProfileBody = () => {
     } catch (error) {
       displayToast({
         title: "ProfilePic Update Failed",
-        message: error.response?.data?.message || "Oops! Something Went Wrong",
+        message: error.response?.data?.message || "Oops! Server Down",
         type: "error",
         duration: 5000,
         position: "top-center",
@@ -171,7 +171,7 @@ const EditProfileBody = () => {
           displayToast({
             title: "ProfilePic Deletion Failed",
             message:
-              error.response?.data?.message || "Oops! Something Went Wrong",
+              error.response?.data?.message || "Oops! Server Down",
             type: "error",
             duration: 5000,
             position: "top-center",
@@ -261,7 +261,7 @@ const EditProfileBody = () => {
           displayToast({
             title: "Name Update Failed",
             message:
-              error.response?.data?.message || "Oops! Something Went Wrong",
+              error.response?.data?.message || "Oops! Server Down",
             type: "error",
             duration: 5000,
             position: "top-center",

@@ -20,8 +20,7 @@ header {
 .dialogField {
   width: clamp(250px, 70vw, 320px);
   img {
-    width: $baseImgDimension * 2;
-    height: $baseImgDimension * 2;
+    @include getImgDimensions(2);
   }
 }
 .selectPicIcon {
@@ -35,8 +34,7 @@ header {
 .app__form {
   .app__formfield {
     img {
-      width: $baseImgDimension;
-      height: $baseImgDimension;
+      @include getImgDimensions(1);
     }
   }
   .app__formlabel {

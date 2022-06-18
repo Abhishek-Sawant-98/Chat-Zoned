@@ -126,7 +126,7 @@ const ProfileSettingsMenu = () => {
           displayToast({
             title: "Password Update Failed",
             message:
-              error.response?.data?.message || "Oops! Something Went Wrong",
+              error.response?.data?.message || "Oops! Server Down",
             type: "error",
             duration: 5000,
             position: "top-center",

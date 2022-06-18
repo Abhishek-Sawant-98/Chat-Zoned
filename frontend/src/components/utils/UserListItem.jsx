@@ -1,8 +1,4 @@
-import { Avatar } from "@mui/material";
-import { useState } from "react";
-import { AppState } from "../../context/ContextProvider";
 import { truncateString } from "../../utils/appUtils";
-import axios from "../../utils/axios";
 import getCustomTooltip from "../utils/CustomTooltip";
 
 const arrowStyles = {
@@ -18,63 +14,38 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const UserListItem = ({ user, handleClose, listeners }) => {
-  const { loggedInUser, displayToast, formClassNames, setSelectedChat } =
-    AppState();
-  const { loading, setLoading } = formClassNames;
+const UserListItem = ({ user }) => {
   const { _id, name, email, profilePic } = user;
-  const [userHovered, setUserHovered] = useState(false);
-  const [userClicked, setUserClicked] = useState(false);
-
-  const createOrRetrieveChat = async () => {
-    handleClose();
-    setLoading(true);
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
-
-    try {
-      const { data } = await axios.post(`/api/chat`, { userId: _id }, config);
-
-      setLoading(false);
-      setSelectedChat(data);
-      console.log("Selected Chat : ", data);
-    } catch (error) {
-      displayToast({
-        title: "Create/Retrieve Chat Failed",
-        message: error.response?.data?.message || "Oops! Something Went Wrong",
-        type: "error",
-        duration: 5000,
-        position: "bottom",
-      });
-      setLoading(false);
-    }
-  };
 
   return (
     <div
-      className={`userListItem user-select-none w-100 d-flex text-light ${
-        userClicked ? "bg-success" : userHovered ? "bg-dark" : "bg-black"
-      } justify-content-start bg-opacity-75 align-items-center pointer px-3`}
-      onClick={createOrRetrieveChat}
-      onMouseEnter={() => setUserHovered(true)}
-      onMouseLeave={() => setUserHovered(false)}
-      onMouseDown={() => setUserClicked(true)}
-      onMouseUp={() => setUserClicked(false)}
+      data-user={_id}
+      className={`userListItem user-select-none d-flex text-light justify-content-start align-items-center pointer px-3`}
     >
-      <CustomTooltip title={`${name} (${email})`} placement="top-start" arrow>
-        <Avatar src={profilePic} className={`userListAvatar`} />
+      <CustomTooltip
+        data-user={_id}
+        title={`${name} (${email})`}
+        placement="top-start"
+        arrow
+      >
+        <img
+          src={profilePic}
+          alt={_id}
+          data-user={_id}
+          className={`userListAvatar rounded-circle`}
+        />
       </CustomTooltip>
-      <div className="userListData d-flex flex-column align-items-start px-2">
-        <p className="userListName fs-4 fw-bold text-warning">
+      <div
+        data-user={_id}
+        className="userListData d-flex flex-column align-items-start px-2"
+      >
+        <p data-user={_id} className="userListName fs-4 fw-bold text-warning">
           {truncateString(name, 23, 20)}
         </p>
-        <p className="userListEmail">
-          <span className="fw-bold text-info">Email: </span>
+        <p data-user={_id} className="userListEmail">
+          <span data-user={_id} className="userList fw-bold text-info">
+            {"Email: "}
+          </span>
           {truncateString(email, 24, 20)}
         </p>
       </div>
