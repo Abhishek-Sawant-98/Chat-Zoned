@@ -14,6 +14,7 @@ const {
   // fetchFile,
 } = require("../controllers/UserController");
 
+/*   Base route: /api/user   */
 router.post("/register", upload.single("profilePic"), registerUser);
 router.post("/login", authenticateUser);
 router.get("/", authorizeUser, fetchUsers);

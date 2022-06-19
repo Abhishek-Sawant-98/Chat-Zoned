@@ -13,6 +13,7 @@ const {
   deleteGroupDP,
 } = require("../controllers/ChatController");
 
+/*   Base route: /api/chat   */
 router
   .route("/")
   .post(authorizeUser, createOrRetrieveChat)

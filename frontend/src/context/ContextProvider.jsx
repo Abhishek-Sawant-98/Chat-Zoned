@@ -3,9 +3,11 @@ import { createContext, useContext, useState } from "react";
 const AppContext = createContext();
 
 const ContextProvider = ({ children }) => {
+  // User and chat config
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [chats, setChats] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
+  const [refresh, setRefresh] = useState(false);
 
   // Toast config
   const [toastData, setToastData] = useState({
@@ -85,6 +87,8 @@ const ContextProvider = ({ children }) => {
         setChats,
         selectedChat,
         setSelectedChat,
+        refresh,
+        setRefresh,
         toastData,
         displayToast,
         handleToastClose,

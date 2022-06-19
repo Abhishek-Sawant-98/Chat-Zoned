@@ -170,8 +170,7 @@ const EditProfileBody = () => {
         } catch (error) {
           displayToast({
             title: "ProfilePic Deletion Failed",
-            message:
-              error.response?.data?.message || "Oops! Server Down",
+            message: error.response?.data?.message || "Oops! Server Down",
             type: "error",
             duration: 5000,
             position: "top-center",
@@ -260,8 +259,7 @@ const EditProfileBody = () => {
         } catch (error) {
           displayToast({
             title: "Name Update Failed",
-            message:
-              error.response?.data?.message || "Oops! Server Down",
+            message: error.response?.data?.message || "Oops! Server Down",
             type: "error",
             duration: 5000,
             position: "top-center",
@@ -347,7 +345,6 @@ const EditProfileBody = () => {
                 !isGuestUser && "rounded-end"
               }`}
               disabled={true}
-              placeholder="Enter New Name"
             />
           </CustomTooltip>
           {!isGuestUser && (

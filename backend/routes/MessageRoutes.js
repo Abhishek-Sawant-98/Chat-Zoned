@@ -8,6 +8,7 @@ const {
   sendMessage,
 } = require("../controllers/MessageController");
 
+/*   Base route: /api/message   */
 router.post("/", authorizeUser, upload.single("attachment"), sendMessage);
 router.get("/:chatId", authorizeUser, fetchMessages);
 

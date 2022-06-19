@@ -34,6 +34,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
 
   // Debouncing fetchUsers method to limit the no. of API calls
   const debouncedFetchUsers = debounce(async (e) => {
+    // return setLoading(true);
     const query = e.target.value.trim();
     setSearchQuery(query);
     if (!query) return setSearchResults([]);
@@ -59,7 +60,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
         message: error.response?.data?.message || "Oops! Server Down",
         type: "error",
         duration: 5000,
-        position: "top-right",
+        position: "bottom-left",
       });
       setLoading(false);
     }
@@ -156,54 +157,54 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
             />
           </div>
         </section>
+        {/* Search Results */}
         <section
-          className="position-relative mx-1 my-2"
+          className="position-relative mx-1 my-2 h-100"
           style={{ overflowY: "auto", overflowX: "hidden" }}
         >
-          {loading ? (
+          {loading && (
             <div
-              className="d-flex flex-column align-items-center position-absolute w-100"
+              className="d-flex flex-column align-items-center position-absolute w-100 h-100"
               style={{
-                zIndex: "2",
                 top: "0%",
                 left: "50%",
                 transform: "translateX(-50%)",
+                borderRadius: "20px",
               }}
             >
               <CircularProgress
                 size={75}
-                style={{ margin: "30px 0px", color: "lightblue" }}
-              />
+                style={{ margin: "80px 0px 30px 0px", color: "lightblue" }}
+              />{" "}
               <span style={{ marginBottom: "45px" }} className="text-light h1">
                 {" Fetching Users..."}
               </span>
             </div>
-          ) : (
-            <div
-              // 'Event delegation' (add only one event listener for
-              // parent element instead of adding for each child element)
-              onClick={(e) => {
-                const userId = e.target.dataset.user;
-                if (userId) createOrRetrieveChat(userId);
-              }}
-            >
-              {searchResults.length > 0 ? (
-                searchResults.map((user) => (
-                  <UserListItem key={user._id} user={user} />
-                ))
-              ) : searchQuery ? (
-                <p className="text-light text-center fs-5 mt-3 mx-5">
-                  No results found for '
-                  <span className="text-info">
-                    {truncateString(searchQuery, 30, 26)}
-                  </span>
-                  '
-                </p>
-              ) : (
-                <></>
-              )}
-            </div>
           )}
+          <div
+            // 'Event delegation' (add only one event listener for
+            // parent element instead of adding for each child element)
+            onClick={(e) => {
+              const userId = e.target.dataset.user;
+              if (userId) createOrRetrieveChat(userId);
+            }}
+          >
+            {searchResults.length > 0 ? (
+              searchResults.map((user) => (
+                <UserListItem key={user._id} user={user} />
+              ))
+            ) : searchQuery && !loading ? (
+              <p className="text-light text-center fs-5 mt-3 mx-5">
+                No results found for '
+                <span className="text-info">
+                  {truncateString(searchQuery, 30, 26)}
+                </span>
+                '
+              </p>
+            ) : (
+              <></>
+            )}
+          </div>
         </section>
       </Drawer>
     </>

@@ -29,7 +29,7 @@ const Register = () => {
   };
 
   const navigate = useNavigate();
-  const { displayToast, formClassNames } = AppState();
+  const { displayToast, formClassNames, setLoggedInUser } = AppState();
 
   const {
     loading,
@@ -110,6 +110,7 @@ const Register = () => {
       });
 
       sessionStorage.setItem("loggedInUser", JSON.stringify(data));
+      setLoggedInUser(data);
       setLoading(false);
       navigate("/chats");
     } catch (error) {

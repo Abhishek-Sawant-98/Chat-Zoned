@@ -8,6 +8,7 @@ import MessagesView from "../components/MessagesView";
 
 const ChatsPage = () => {
   const {
+    loggedInUser,
     setLoggedInUser,
     dialogBody,
     dialogData,
@@ -19,6 +20,7 @@ const ChatsPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Session storage persists data even after page refresh, unlike state
     const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
     if (!user) return navigate("/");
     setLoggedInUser(user);
@@ -27,27 +29,31 @@ const ChatsPage = () => {
   useEffect(() => {}, [selectedChat]);
 
   return (
-    <div className={`chatpage`}>
-      {/* Header component */}
-      <ChatpageHeader />
+    <>
+      {loggedInUser && (
+        <div className={`chatpage`}>
+          {/* Header component */}
+          <ChatpageHeader />
 
-      <section className={`row g-1`}>
-        {/* Chat List component */}
-        <ChatListView />
+          <section className={`row g-1`}>
+            {/* Chat List component */}
+            <ChatListView />
 
-        {/* Chat Messages component */}
-        <MessagesView />
-      </section>
+            {/* Chat Messages component */}
+            <MessagesView />
+          </section>
 
-      {/* Alert dialog */}
-      <CustomDialog
-        dialogData={dialogData}
-        handleDialogClose={handleDialogClose}
-        showDialogActions={showDialogActions}
-      >
-        {dialogBody}
-      </CustomDialog>
-    </div>
+          {/* Alert dialog */}
+          <CustomDialog
+            dialogData={dialogData}
+            handleDialogClose={handleDialogClose}
+            showDialogActions={showDialogActions}
+          >
+            {dialogBody}
+          </CustomDialog>
+        </div>
+      )}
+    </>
   );
 };
 

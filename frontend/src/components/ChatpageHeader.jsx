@@ -1,12 +1,13 @@
 import { Notifications, Search } from "@mui/icons-material";
 import { Avatar, IconButton } from "@mui/material";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AppState } from "../context/ContextProvider";
-import AppGif from "./utils/AppGif";
 import NotificationsMenu from "./NotificationsMenu";
 import ProfileSettingsMenu from "./ProfileSettingsMenu";
 import SearchUsersDrawer from "./SearchUsersDrawer";
 import getCustomTooltip from "./utils/CustomTooltip";
+import animationData from "../animations/chat-gif.json";
+import LottieAnimation from "./utils/LottieAnimation";
 
 const arrowStyles = {
   color: "#777",
@@ -25,7 +26,10 @@ const ChatpageHeader = () => {
     loggedInUser,
     setNotificationsMenuAnchor,
     setProfileSettingsMenuAnchor,
+    formClassNames,
   } = AppState();
+  const { loading } = formClassNames;
+  const appGif = useRef();
 
   const openNotificationMenu = (e) => {
     setNotificationsMenuAnchor(e.target);
@@ -64,9 +68,11 @@ const ChatpageHeader = () => {
 
       {/* App Logo */}
       <div className={`d-flex align-items-center ms-3 ms-md-0`}>
-        <AppGif
+        <LottieAnimation
+          ref={appGif}
           className={"d-none d-sm-inline-block mt-2 me-sm-1 me-md-2"}
           style={{ width: "35px", height: "35px" }}
+          animationData={animationData}
         />
         <span style={{ color: "orange" }} className="fs-3 fw-bold">
           CHAT ZONED
@@ -76,7 +82,15 @@ const ChatpageHeader = () => {
       {/* User notification and profile settings icons */}
       <div>
         <CustomTooltip title="Notifications" placement="bottom-end" arrow>
-          <IconButton onClick={openNotificationMenu}>
+          <IconButton
+            onClick={openNotificationMenu}
+            sx={{
+              color: "#999999",
+              ":hover": {
+                backgroundColor: "#aaaaaa20",
+              },
+            }}
+          >
             <Notifications className={`text-light`} />
           </IconButton>
         </CustomTooltip>
@@ -88,6 +102,12 @@ const ChatpageHeader = () => {
         >
           <IconButton
             className="mx-md-3 mx-lg-4"
+            sx={{
+              color: "#999999",
+              ":hover": {
+                backgroundColor: "#aaaaaa20",
+              },
+            }}
             onClick={openProfileSettingsMenu}
           >
             <Avatar alt="Logged In User" src={loggedInUser?.profilePic} />

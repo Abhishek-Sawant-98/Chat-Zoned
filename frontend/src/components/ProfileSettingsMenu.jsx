@@ -10,6 +10,7 @@ import ViewOrEditProfileBody from "./dialogs/EditProfileBody";
 const ProfileSettingsMenu = () => {
   const {
     loggedInUser,
+    setLoggedInUser,
     profileSettingsMenuAnchor,
     setProfileSettingsMenuAnchor,
     displayDialog,
@@ -40,6 +41,7 @@ const ProfileSettingsMenu = () => {
       loadingYeslabel: "Logging Out...",
       action: () => {
         sessionStorage.removeItem("loggedInUser");
+        setLoggedInUser(null);
         displayToast({
           message: "Logged Out",
           type: "info",
@@ -121,12 +123,12 @@ const ProfileSettingsMenu = () => {
 
           setLoading(false);
           sessionStorage.removeItem("loggedInUser");
+          setLoggedInUser(null);
           return "passwordUpdated";
         } catch (error) {
           displayToast({
             title: "Password Update Failed",
-            message:
-              error.response?.data?.message || "Oops! Server Down",
+            message: error.response?.data?.message || "Oops! Server Down",
             type: "error",
             duration: 5000,
             position: "top-center",

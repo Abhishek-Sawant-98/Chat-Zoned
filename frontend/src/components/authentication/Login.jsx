@@ -23,7 +23,7 @@ const Login = () => {
     });
   };
 
-  const { displayToast, formClassNames } = AppState();
+  const { displayToast, formClassNames, setLoggedInUser } = AppState();
 
   const {
     loading,
@@ -74,6 +74,7 @@ const Login = () => {
       });
 
       sessionStorage.setItem("loggedInUser", JSON.stringify(data));
+      setLoggedInUser(data);
       setLoading(false);
       navigate("/chats");
     } catch (error) {

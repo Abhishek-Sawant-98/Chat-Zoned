@@ -15,6 +15,7 @@
       border-radius: 20px;
       .btnCreateGroup {
         position: absolute;
+        border-radius: 20px;
         top: 7px;
         right: 9px;
       }
@@ -22,7 +23,26 @@
     .searchChat {
       margin-top: -20px;
     }
+    .chatList {
+      height: 100%;
+      background-color: #9fb1cf30;
+      border-radius: 15px;
+    }
   }
   .messagesView {
+    .messagesHeader {
+      border-radius: 10px;
+      margin-bottom: 5px;
+    }
+    .messageBody {
+      height: 100%;
+      background-color: #9fb1cf30;
+      border-radius: 15px;
+      .btnGoBack {
+      }
+      .messages {
+        height: 100%;
+      }
+    }
   }
 }

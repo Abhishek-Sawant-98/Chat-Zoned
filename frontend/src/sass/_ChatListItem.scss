@@ -1,0 +1,23 @@
+.chatListItem {
+  margin-bottom: 10px;
+  border-radius: 20px;
+  background-color: #101010;
+  &:hover {
+    background-color: #222;
+  }
+  &:active {
+    background-color: #3d0049;
+  }
+  .chatListAvatar {
+    @include getImgDimensions(0.5);
+    object-fit: cover;
+  }
+  .chatListData {
+    margin: 5px 0px;
+    .chatListName {
+      margin-bottom: -6px;
+    }
+    .chatListLastMessage {
+    }
+  }
+}
