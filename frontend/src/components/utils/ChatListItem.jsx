@@ -32,9 +32,7 @@ const ChatListItem = ({ chat }) => {
 
   const receiver = getOneOnOneChatReceiver(loggedInUser, users);
 
-  const tooltipTitle = isGroupChat
-    ? `Group: ${chatName}`
-    : `Receiver: ${receiver}`;
+  const tooltipTitle = isGroupChat ? `Group: ${chatName}` : `${receiver?.name}`;
 
   const lastMsgFile = lastMessage?.fileUrl;
   let lastMsgFileType;
@@ -55,7 +53,7 @@ const ChatListItem = ({ chat }) => {
   return (
     <div
       data-chat={_id}
-      className={`chatListItem user-select-none d-flex text-light justify-content-start align-items-center pointer px-3`}
+      className={`chatListItem user-select-none d-flex text-light justify-content-start align-items-center pointer p-3`}
     >
       <CustomTooltip
         data-chat={_id}

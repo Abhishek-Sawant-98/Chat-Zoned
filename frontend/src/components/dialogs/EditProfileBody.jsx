@@ -335,17 +335,19 @@ const EditProfileBody = () => {
         </label>
         <div className="input-group">
           <CustomTooltip title={`${name}`} placement="top-start" arrow>
-            <input
-              type="text"
-              value={truncateString(name, 25, 21)}
-              ref={nameInput}
-              name="username"
-              id="viewName"
-              className={`${inputFieldClassName} ${
-                !isGuestUser && "rounded-end"
-              }`}
-              disabled={true}
-            />
+            <span>
+              <input
+                type="text"
+                value={truncateString(name, 25, 21)}
+                ref={nameInput}
+                name="username"
+                id="viewName"
+                className={`${inputFieldClassName} ${
+                  !isGuestUser && "rounded-end"
+                }`}
+                disabled={true}
+              />
+            </span>
           </CustomTooltip>
           {!isGuestUser && (
             <CustomTooltip title="Edit Name" placement="top" arrow>
@@ -372,13 +374,15 @@ const EditProfileBody = () => {
           {" Email"}
         </label>
         <CustomTooltip title={`${email}`} placement="bottom" arrow>
-          <input
-            type="text"
-            value={truncateString(email, 25, 21)}
-            id="viewEmail"
-            className={`${inputFieldClassName}`}
-            disabled={true}
-          />
+          <span>
+            <input
+              type="text"
+              value={truncateString(email, 25, 21)}
+              id="viewEmail"
+              className={`${inputFieldClassName}`}
+              disabled={true}
+            />
+          </span>
         </CustomTooltip>
       </section>
       {/* Child confirmation dialog */}

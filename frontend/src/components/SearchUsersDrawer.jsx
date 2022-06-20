@@ -5,6 +5,7 @@ import { AppState } from "../context/ContextProvider";
 import axios from "../utils/axios";
 import { debounce, truncateString } from "../utils/appUtils";
 import UserListItem from "./utils/UserListItem";
+import LoadingIndicator from "./utils/LoadingIndicator";
 
 const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -34,7 +35,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
 
   // Debouncing fetchUsers method to limit the no. of API calls
   const debouncedFetchUsers = debounce(async (e) => {
-    // return setLoading(true);
+    return setLoading(true);
     const query = e.target.value.trim();
     setSearchQuery(query);
     if (!query) return setSearchResults([]);
@@ -163,23 +164,10 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
           style={{ overflowY: "auto", overflowX: "hidden" }}
         >
           {loading && (
-            <div
-              className="d-flex flex-column align-items-center position-absolute w-100 h-100"
-              style={{
-                top: "0%",
-                left: "50%",
-                transform: "translateX(-50%)",
-                borderRadius: "20px",
-              }}
-            >
-              <CircularProgress
-                size={75}
-                style={{ margin: "80px 0px 30px 0px", color: "lightblue" }}
-              />{" "}
-              <span style={{ marginBottom: "45px" }} className="text-light h1">
-                {" Fetching Users..."}
-              </span>
-            </div>
+            <LoadingIndicator
+              message={"Fetching Users..."}
+              msgStyleClasses={"text-light h2"}
+            />
           )}
           <div
             // 'Event delegation' (add only one event listener for

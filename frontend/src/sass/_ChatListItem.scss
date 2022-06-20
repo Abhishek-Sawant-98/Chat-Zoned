@@ -1,6 +1,6 @@
 .chatListItem {
-  margin-bottom: 10px;
-  border-radius: 20px;
+  margin-bottom: 5px;
+  border-radius: 10px;
   background-color: #101010;
   &:hover {
     background-color: #222;
@@ -9,7 +9,7 @@
     background-color: #3d0049;
   }
   .chatListAvatar {
-    @include getImgDimensions(0.5);
+    @include getImgDimensions(0.45);
     object-fit: cover;
   }
   .chatListData {

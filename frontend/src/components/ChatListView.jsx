@@ -1,10 +1,11 @@
 import { GroupAdd, Search } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
-import React, { useEffect } from "react";
+import { CircularProgress, IconButton } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import { AppState } from "../context/ContextProvider";
 import axios from "../utils/axios";
 import ChatListItem from "./utils/ChatListItem";
 import getCustomTooltip from "./utils/CustomTooltip";
+import LoadingIndicator from "./utils/LoadingIndicator";
 
 const arrowStyles = {
   color: "#777",
@@ -31,13 +32,10 @@ const ChatListView = () => {
     refresh,
   } = AppState();
 
-  const {
-    loading,
-    setLoading,
-    disableIfLoading,
-    formFieldClassName,
-    inputFieldClassName,
-  } = formClassNames;
+  const { disableIfLoading, formFieldClassName, inputFieldClassName } =
+    formClassNames;
+
+  const [loading, setLoading] = useState(false);
 
   const fetchChats = async () => {
     setLoading(true);
@@ -85,12 +83,15 @@ const ChatListView = () => {
             placement="bottom-end"
             arrow
           >
-            <button
-              className={`btnCreateGroup pointer btn btn-outline-secondary text-light px-3`}
-              onClick={() => {}}
-            >
-              <GroupAdd />
-            </button>
+            <span>
+              <button
+                className={`btnCreateGroup pointer btn btn-outline-secondary text-light px-3`}
+                onClick={() => {}}
+                disabled={loading}
+              >
+                <GroupAdd />
+              </button>
+            </span>
           </CustomTooltip>
         </p>
       </section>
@@ -119,15 +120,26 @@ const ChatListView = () => {
         </section>
       )}
       {/* Chat list */}
-      <section className="chatList m-1 p-1">
+      <section className="chatList m-1 p-1 overflow-auto position-relative">
         {loading ? (
-          "Loading Chats..."
+          <LoadingIndicator
+            message={"Fetching Chats..."}
+            msgStyleClasses={"text-light h3"}
+          />
         ) : chats?.length > 0 ? (
-          <>
+          <div
+            // 'Event delegation' (add only one event listener for
+            // parent element instead of adding for each child element)
+            onClick={(e) => {
+              const chatId = e.target.dataset.chat;
+              if (chatId)
+                setSelectedChat(chats.find((chat) => chat._id === chatId));
+            }}
+          >
             {chats.map((chat) => (
               <ChatListItem key={chat._id} chat={chat} />
             ))}
-          </>
+          </div>
         ) : (
           <>No Chats Found</>
         )}
