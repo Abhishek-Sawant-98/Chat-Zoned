@@ -80,7 +80,7 @@ const MessagesView = () => {
     <div
       className={`chatpageDiv chatpageView messagesView col text-light ms-2 ms-md-0 ${
         selectedChat ? "d-flex" : "d-none d-md-flex"
-      } flex-column p-2`}
+      } flex-column p-2 user-select-none`}
     >
       {selectedChat ? (
         <>
@@ -179,7 +179,7 @@ const MessagesView = () => {
             <span
               className="fw-bold"
               style={{ color: "#A798F2" }}
-            >{`${loggedInUser?.name?.toUpperCase()}`}</span>{" "}
+            >{`${loggedInUser?.name?.split(' ')[0]?.toUpperCase()}`}</span>{" "}
             👋
           </h2>
           <LottieAnimation
@@ -189,8 +189,8 @@ const MessagesView = () => {
             animationData={animationData}
           />
           <h4 className="mx-5" style={{ marginTop: "-20px", color: "#99C5EE" }}>
-            Click a Chat, Search a User, or Create a Group to start or open a
-            chat.
+            Search or Click a Chat, Search a User, or Create a Group to start or
+            open a chat.
           </h4>
           <h2 style={{ color: "#99C5EE" }}>Happy Chatting!😀</h2>
         </div>

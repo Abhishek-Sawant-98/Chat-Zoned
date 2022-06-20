@@ -35,7 +35,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
 
   // Debouncing fetchUsers method to limit the no. of API calls
   const debouncedFetchUsers = debounce(async (e) => {
-    return setLoading(true);
+    setLoading(true);
     const query = e.target.value.trim();
     setSearchQuery(query);
     if (!query) return setSearchResults([]);

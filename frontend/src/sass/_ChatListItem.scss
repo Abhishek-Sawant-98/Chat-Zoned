@@ -1,15 +1,14 @@
+$bgColor: $selectedChatBgColor;
 .chatListItem {
   margin-bottom: 5px;
   border-radius: 10px;
-  background-color: #101010;
-  &:hover {
-    background-color: #222;
-  }
+  padding: 12px 13px;
+  @include setDefaultAndHoverBg(#101010, #1e1e1e);
   &:active {
-    background-color: #3d0049;
+    background-color: $bgColor;
   }
   .chatListAvatar {
-    @include getImgDimensions(0.45);
+    @include getImgDimensions(0.494);
     object-fit: cover;
   }
   .chatListData {
@@ -20,4 +19,7 @@
     .chatListLastMessage {
     }
   }
+}
+.isSelected {
+  @include setDefaultAndHoverBg($bgColor, $bgColor);
 }

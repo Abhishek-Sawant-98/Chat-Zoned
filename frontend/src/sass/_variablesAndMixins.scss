@@ -1,4 +1,5 @@
 $chatpageBgColor: #202c33c7;
+$selectedChatBgColor: #00131b77;
 $baseFontSize: 20px;
 $baseImgDimension: 100px;
 $fullDimension: 100%;
@@ -8,4 +9,11 @@ $appBgUrl: "https://res.cloudinary.com/abhi-sawant/image/upload/v1654753525/bg8_
 @mixin getImgDimensions($factor) {
   width: $baseImgDimension * $factor;
   height: $baseImgDimension * $factor;
+}
+
+@mixin setDefaultAndHoverBg($defaultBgColor, $hoverBgColor) {
+  background-color: $defaultBgColor;
+  &:hover {
+    background-color: $hoverBgColor;
+  }
 }

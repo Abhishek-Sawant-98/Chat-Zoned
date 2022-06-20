@@ -26,13 +26,19 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const ChatListItem = ({ chat }) => {
-  const { loggedInUser } = AppState();
-  const { _id, chatName, isGroupChat, users, lastMessage, chatDisplayPic } =
-    chat;
+  const { selectedChat } = AppState();
+  const {
+    _id,
+    chatName,
+    receiverEmail,
+    isGroupChat,
+    lastMessage,
+    chatDisplayPic,
+  } = chat;
 
-  const receiver = getOneOnOneChatReceiver(loggedInUser, users);
-
-  const tooltipTitle = isGroupChat ? `Group: ${chatName}` : `${receiver?.name}`;
+  const tooltipTitle = isGroupChat
+    ? `Group: ${chatName}`
+    : `${chatName} (${receiverEmail})`;
 
   const lastMsgFile = lastMessage?.fileUrl;
   let lastMsgFileType;
@@ -53,8 +59,11 @@ const ChatListItem = ({ chat }) => {
   return (
     <div
       data-chat={_id}
-      className={`chatListItem user-select-none d-flex text-light justify-content-start align-items-center pointer p-3`}
+      className={`chatListItem ${
+        selectedChat?._id === _id && "isSelected"
+      } user-select-none d-flex text-light justify-content-start align-items-center pointer`}
     >
+      {/* Chat Display Pic */}
       <CustomTooltip
         data-chat={_id}
         title={tooltipTitle}
@@ -62,19 +71,22 @@ const ChatListItem = ({ chat }) => {
         arrow
       >
         <img
-          src={isGroupChat ? chatDisplayPic : receiver?.profilePic}
+          src={chatDisplayPic}
           alt={_id}
           data-chat={_id}
           className={`chatListAvatar rounded-circle`}
         />
       </CustomTooltip>
+      {/* Chat Data */}
       <div
         data-chat={_id}
         className="chatListData d-flex flex-column align-items-start px-2"
       >
+        {/* Chat Name */}
         <p data-chat={_id} className="chatListName fs-5 fw-bold text-warning">
-          {truncateString(isGroupChat ? chatName : receiver?.name, 23, 20)}
+          {truncateString(chatName, 23, 20)}
         </p>
+        {/* Last Message Data */}
         {lastMessage && (
           <p data-chat={_id} className="chatListLastMessage">
             <span data-chat={_id} className="chatList text-info">
