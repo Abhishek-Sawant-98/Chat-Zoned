@@ -86,21 +86,19 @@ const MessagesView = () => {
         <>
           <section className="messagesHeader d-flex justify-content-start position-relative w-100 fw-bold fs-4 bg-info bg-opacity-10 py-2">
             <CustomTooltip title="Go Back" placement="bottom-start" arrow>
-              <span>
-                <IconButton
-                  onClick={closeChat}
-                  className={`d-flex d-md-none ms-3`}
-                  disabled={loading}
-                  sx={{
-                    color: "#999999",
-                    ":hover": {
-                      backgroundColor: "#aaaaaa20",
-                    },
-                  }}
-                >
-                  <ArrowBack />
-                </IconButton>
-              </span>
+              <IconButton
+                onClick={closeChat}
+                className={`d-flex d-md-none ms-3`}
+                disabled={loading}
+                sx={{
+                  color: "#999999",
+                  ":hover": {
+                    backgroundColor: "#aaaaaa20",
+                  },
+                }}
+              >
+                <ArrowBack />
+              </IconButton>
             </CustomTooltip>
             <CustomTooltip
               title={
@@ -109,20 +107,15 @@ const MessagesView = () => {
               placement="bottom-start"
               arrow
             >
-              <span>
-                <Avatar
-                  src={
-                    getOneOnOneChatReceiver(loggedInUser, selectedChat?.users)
-                      ?.profilePic || ""
-                  }
-                  alt={"receiverAvatar"}
-                  className="pointer ms-2 ms-md-4"
-                  onClick={() => {
-                    alert("View profile");
-                  }}
-                  disabled={loading}
-                />
-              </span>
+              <Avatar
+                src={
+                  getOneOnOneChatReceiver(loggedInUser, selectedChat?.users)
+                    ?.profilePic || ""
+                }
+                alt={"receiverAvatar"}
+                className="pointer ms-2 ms-md-4"
+                onClick={() => {}}
+              />
             </CustomTooltip>
 
             <span className="ms-3">
@@ -133,24 +126,22 @@ const MessagesView = () => {
             </span>
 
             <CustomTooltip title="Close Chat" placement="bottom-end" arrow>
-              <span>
-                <IconButton
-                  onClick={closeChat}
-                  disabled={loading}
-                  className="d-none d-md-flex"
-                  sx={{
-                    position: "absolute",
-                    right: 15,
-                    top: 8,
-                    color: "#999999",
-                    ":hover": {
-                      backgroundColor: "#aaaaaa20",
-                    },
-                  }}
-                >
-                  <Close />
-                </IconButton>
-              </span>
+              <IconButton
+                onClick={closeChat}
+                disabled={loading}
+                className="d-none d-md-flex"
+                sx={{
+                  position: "absolute",
+                  right: 15,
+                  top: 8,
+                  color: "#999999",
+                  ":hover": {
+                    backgroundColor: "#aaaaaa20",
+                  },
+                }}
+              >
+                <Close />
+              </IconButton>
             </CustomTooltip>
           </section>
           <section className="messageBody m-1 p-2">

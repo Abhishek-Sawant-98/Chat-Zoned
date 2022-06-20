@@ -52,17 +52,14 @@ const ChatpageHeader = () => {
         placement="bottom-start"
         arrow
       >
-        <span>
-          <button
-            style={{ borderRadius: "20px" }}
-            className={`btn btn-outline-secondary text-light px-3`}
-            onClick={() => setIsDrawerOpen(true)}
-            disabled={loading}
-          >
-            <Search className={`me-1`} />
-            <span className={`d-none d-md-inline mb-1 fs-5`}>Search Users</span>
-          </button>
-        </span>
+        <button
+          style={{ borderRadius: "20px" }}
+          className={`btn btn-outline-secondary text-light px-3`}
+          onClick={() => setIsDrawerOpen(true)}
+        >
+          <Search className={`me-1`} />
+          <span className={`d-none d-md-inline mb-1 fs-5`}>Search Users</span>
+        </button>
       </CustomTooltip>
       <SearchUsersDrawer
         isDrawerOpen={isDrawerOpen}
@@ -85,20 +82,17 @@ const ChatpageHeader = () => {
       {/* User notification and profile settings icons */}
       <div>
         <CustomTooltip title="Notifications" placement="bottom-end" arrow>
-          <span>
-            <IconButton
-              onClick={openNotificationMenu}
-              sx={{
-                color: "#999999",
-                ":hover": {
-                  backgroundColor: "#aaaaaa20",
-                },
-              }}
-              disabled={loading}
-            >
-              <Notifications className={`text-light`} />
-            </IconButton>
-          </span>
+          <IconButton
+            onClick={openNotificationMenu}
+            sx={{
+              color: "#999999",
+              ":hover": {
+                backgroundColor: "#aaaaaa20",
+              },
+            }}
+          >
+            <Notifications className={`text-light`} />
+          </IconButton>
         </CustomTooltip>
         <CustomTooltip
           title="Profile Settings"
@@ -106,21 +100,18 @@ const ChatpageHeader = () => {
           placement="bottom-end"
           arrow
         >
-          <span>
-            <IconButton
-              className="mx-md-3 mx-lg-4"
-              sx={{
-                color: "#999999",
-                ":hover": {
-                  backgroundColor: "#aaaaaa20",
-                },
-              }}
-              disabled={loading}
-              onClick={openProfileSettingsMenu}
-            >
-              <Avatar alt="Logged In User" src={loggedInUser?.profilePic} />
-            </IconButton>
-          </span>
+          <IconButton
+            className="mx-md-3 mx-lg-4"
+            sx={{
+              color: "#999999",
+              ":hover": {
+                backgroundColor: "#aaaaaa20",
+              },
+            }}
+            onClick={openProfileSettingsMenu}
+          >
+            <Avatar alt="Logged In User" src={loggedInUser?.profilePic} />
+          </IconButton>
         </CustomTooltip>
         <NotificationsMenu />
         <ProfileSettingsMenu />

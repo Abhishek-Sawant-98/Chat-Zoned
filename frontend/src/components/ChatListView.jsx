@@ -83,15 +83,12 @@ const ChatListView = () => {
             placement="bottom-end"
             arrow
           >
-            <span>
-              <button
-                className={`btnCreateGroup pointer btn btn-outline-secondary text-light px-3`}
-                onClick={() => {}}
-                disabled={loading}
-              >
-                <GroupAdd />
-              </button>
-            </span>
+            <button
+              className={`btnCreateGroup pointer btn btn-outline-secondary text-light px-3`}
+              onClick={() => {}}
+            >
+              <GroupAdd />
+            </button>
           </CustomTooltip>
         </p>
       </section>
