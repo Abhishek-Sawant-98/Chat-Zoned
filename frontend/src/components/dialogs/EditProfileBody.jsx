@@ -17,6 +17,7 @@ const tooltipStyles = {
   color: "#eee",
   fontFamily: "Mirza",
   fontSize: 17,
+  border: "1px solid #333",
   backgroundColor: "#111",
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
@@ -61,8 +62,10 @@ const EditProfileBody = () => {
   const nameInput = useRef();
   const isGuestUser = loggedInUser?.email === "guest.user@gmail.com";
 
-  const handleChangeFor = (prop) => (e) => {
-    setProfileData({ ...profileData, [prop]: e.target.value });
+  const persistUpdatedUser = (updatedUser) => {
+    // Session storage persists updated user even after page refresh
+    sessionStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
+    setLoggedInUser(updatedUser);
   };
 
   // Click a button/icon upon 'Enter' or 'Space' keydown
@@ -72,7 +75,83 @@ const EditProfileBody = () => {
     }
   };
 
-  // Upload new profile pic
+  // Child Dialog config
+  const [childDialogData, setChildDialogData] = useState({
+    isOpen: false,
+    title: "Child Dialog",
+    content: "Dialog Content",
+    nolabel: "NO",
+    yeslabel: "YES",
+    loadingYeslabel: "Updating...",
+    action: () => {},
+  });
+  const [childDialogBody, setChildDialogBody] = useState(<></>);
+
+  const displayChildDialog = (options) => {
+    setChildDialogData({
+      isOpen: true,
+      ...options,
+    });
+  };
+  const handleChildDialogClose = () => {
+    setChildDialogData({ ...childDialogData, isOpen: false });
+  };
+
+  // Edited Name config
+  let editedName;
+
+  const getUpdatedName = (updatedName) => {
+    editedName = updatedName;
+  };
+
+  const updateProfileName = async () => {
+    if (!editedName) {
+      return displayToast({
+        message: "Please Enter a Valid Name",
+        type: "warning",
+        duration: 5000,
+        position: "top-center",
+      });
+    }
+    setLoading(true);
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loggedInUser?.token}`,
+      },
+    };
+
+    try {
+      const { data } = await axios.put(
+        "/api/user/update/name",
+        { newUserName: editedName },
+        config
+      );
+
+      displayToast({
+        message: "Name Updated Successfully.",
+        type: "success",
+        duration: 3000,
+        position: "bottom-center",
+      });
+
+      setLoading(false);
+      persistUpdatedUser({ ...data, token: loggedInUser.token });
+      return "profileUpdated";
+    } catch (error) {
+      displayToast({
+        title: "Name Update Failed",
+        message: error.response?.data?.message || "Oops! Server Down",
+        type: "error",
+        duration: 5000,
+        position: "top-center",
+      });
+      setLoading(false);
+    }
+  };
+
+  // Update Profile Pic
   const handleImgInputChange = async (e) => {
     const image = e.target.files[0];
     if (!image) return;
@@ -116,7 +195,7 @@ const EditProfileBody = () => {
       });
       setLoading(false);
       setUploading(false);
-      setLoggedInUser({ ...data, token: loggedInUser.token });
+      persistUpdatedUser({ ...data, token: loggedInUser.token });
     } catch (error) {
       displayToast({
         title: "ProfilePic Update Failed",
@@ -130,7 +209,60 @@ const EditProfileBody = () => {
     }
   };
 
-  // Delete profile pic
+  const deleteProfilePic = async () => {
+    setLoading(true);
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+    };
+
+    try {
+      const { data } = await axios.put(
+        "/api/user/delete/profile-pic",
+        {
+          currentProfilePic: loggedInUser?.profilePic,
+          cloudinary_id: loggedInUser?.cloudinary_id,
+        },
+        config
+      );
+
+      displayToast({
+        message: "ProfilePic Deleted Successfully.",
+        type: "success",
+        duration: 4000,
+        position: "bottom-center",
+      });
+      setLoading(false);
+      persistUpdatedUser({ ...data, token: loggedInUser.token });
+      return "profileUpdated";
+    } catch (error) {
+      displayToast({
+        title: "ProfilePic Deletion Failed",
+        message: error.response?.data?.message || "Oops! Server Down",
+        type: "error",
+        duration: 5000,
+        position: "top-center",
+      });
+      setLoading(false);
+    }
+  };
+
+  // Open edit name dialog
+  const openEditNameDialog = (e) => {
+    setChildDialogBody(<EditNameBody getUpdatedName={getUpdatedName} />);
+    displayChildDialog({
+      title: "Edit Name",
+      nolabel: "CANCEL",
+      yeslabel: "SAVE",
+      loadingYeslabel: "Saving...",
+      action: updateProfileName,
+    });
+  };
+
+  // Open delete photo confirm dialog
   const openDeletePhotoConfirmDialog = () => {
     setChildDialogBody(<>Are you sure you want to delete this profile pic?</>);
     displayChildDialog({
@@ -138,136 +270,12 @@ const EditProfileBody = () => {
       nolabel: "NO",
       yeslabel: "YES",
       loadingYeslabel: "Deleting...",
-      action: async () => {
-        setLoading(true);
-
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${loggedInUser.token}`,
-          },
-        };
-
-        try {
-          const { data } = await axios.put(
-            "/api/user/delete/profile-pic",
-            {
-              currentProfilePic: loggedInUser?.profilePic,
-              cloudinary_id: loggedInUser?.cloudinary_id,
-            },
-            config
-          );
-
-          displayToast({
-            message: "ProfilePic Deleted Successfully.",
-            type: "success",
-            duration: 4000,
-            position: "bottom-center",
-          });
-          setLoading(false);
-          setLoggedInUser({ ...data, token: loggedInUser.token });
-          return "profileUpdated";
-        } catch (error) {
-          displayToast({
-            title: "ProfilePic Deletion Failed",
-            message: error.response?.data?.message || "Oops! Server Down",
-            type: "error",
-            duration: 5000,
-            position: "top-center",
-          });
-          setLoading(false);
-        }
-      },
+      action: deleteProfilePic,
     });
   };
 
   const openEditProfilePicMenu = (e) => {
     setEditProfilePicMenuAnchor(e.target);
-  };
-
-  // 'Edit Name' Child Dialog config
-  const [childDialogData, setChildDialogData] = useState({
-    isOpen: false,
-    title: "Child Dialog",
-    content: "Dialog Content",
-    nolabel: "NO",
-    yeslabel: "YES",
-    loadingYeslabel: "Updating...",
-    action: () => {},
-  });
-  const [childDialogBody, setChildDialogBody] = useState(<></>);
-
-  const displayChildDialog = (options) => {
-    setChildDialogData({
-      isOpen: true,
-      ...options,
-    });
-  };
-  const handleChildDialogClose = () => {
-    setChildDialogData({ ...childDialogData, isOpen: false });
-  };
-
-  // Edited Name config
-  let editedName;
-
-  const getUpdatedName = (updatedName) => {
-    editedName = updatedName;
-  };
-
-  const openEditNameDialog = (e) => {
-    // Open edit name dialog
-    setChildDialogBody(<EditNameBody getUpdatedName={getUpdatedName} />);
-    displayChildDialog({
-      title: "Edit Name",
-      nolabel: "CANCEL",
-      yeslabel: "SAVE",
-      loadingYeslabel: "Saving...",
-      action: async () => {
-        if (!editedName) {
-          return displayToast({
-            message: "Please Enter a Valid Name",
-            type: "warning",
-            duration: 5000,
-            position: "top-center",
-          });
-        }
-        setLoading(true);
-
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${loggedInUser?.token}`,
-          },
-        };
-
-        try {
-          const { data } = await axios.put(
-            "/api/user/update/name",
-            { newUserName: editedName },
-            config
-          );
-          displayToast({
-            message: "Name Updated Successfully.",
-            type: "success",
-            duration: 3000,
-            position: "bottom-center",
-          });
-
-          setLoading(false);
-          setLoggedInUser({ ...data, token: loggedInUser.token });
-          return "profileUpdated";
-        } catch (error) {
-          displayToast({
-            title: "Name Update Failed",
-            message: error.response?.data?.message || "Oops! Server Down",
-            type: "error",
-            duration: 5000,
-            position: "top-center",
-          });
-          setLoading(false);
-        }
-      },
-    });
   };
 
   return (
@@ -286,7 +294,7 @@ const EditProfileBody = () => {
       ) : (
         <section className="dialogField d-flex position-relative mb-4">
           <img
-            className="userProfilePic d-flex mx-auto border border-2 border-primary rounded-circle mt-1"
+            className="img-fluid userProfilePic d-flex mx-auto border border-2 border-primary rounded-circle mt-1"
             id="viewedit__imgProfile"
             src={profilePicUrl}
             alt="profilePic"
@@ -326,7 +334,7 @@ const EditProfileBody = () => {
         <label
           htmlFor="viewName"
           style={{ cursor: "auto" }}
-          className={`${formLabelClassName}`}
+          className={formLabelClassName}
         >
           <AccountCircle
             style={{ margin: "-2px 2px 0px -20px", color: "lightblue" }}
@@ -334,7 +342,7 @@ const EditProfileBody = () => {
           {" Name"}
         </label>
         <div className="input-group">
-          <CustomTooltip title={`${name}`} placement="top-start" arrow>
+          <CustomTooltip title={name} placement="top-start" arrow>
             <input
               type="text"
               value={truncateString(name, 25, 21)}
@@ -366,17 +374,17 @@ const EditProfileBody = () => {
         <label
           htmlFor="viewEmail"
           style={{ cursor: "auto" }}
-          className={`${formLabelClassName}`}
+          className={formLabelClassName}
         >
           <Email style={{ margin: "-2px 2px 0px -20px", color: "lightblue" }} />
           {" Email"}
         </label>
-        <CustomTooltip title={`${email}`} placement="bottom" arrow>
+        <CustomTooltip title={email} placement="bottom" arrow>
           <input
             type="text"
             value={truncateString(email, 25, 21)}
             id="viewEmail"
-            className={`${inputFieldClassName}`}
+            className={inputFieldClassName}
             disabled={true}
           />
         </CustomTooltip>

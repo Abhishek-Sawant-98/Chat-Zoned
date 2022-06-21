@@ -32,7 +32,7 @@ const UserListItem = ({ user }) => {
           src={profilePic}
           alt={_id}
           data-user={_id}
-          className={`userListAvatar rounded-circle`}
+          className={`img-fluid userListAvatar rounded-circle`}
         />
       </CustomTooltip>
       <div

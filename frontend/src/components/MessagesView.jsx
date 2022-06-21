@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Avatar, IconButton } from "@mui/material";
 import { AppState } from "../context/ContextProvider";
-import { getOneOnOneChatReceiver } from "../utils/appUtils";
+import { getOneOnOneChatReceiver, truncateString } from "../utils/appUtils";
 import { ArrowBack, Close } from "@mui/icons-material";
 import getCustomTooltip from "./utils/CustomTooltip";
 import animationData from "../animations/letsChatGif.json";
@@ -41,6 +41,10 @@ const MessagesView = () => {
 
   const closeChat = () => setSelectedChat(null);
   const [messages, setMessages] = useState([]);
+
+  const chatName = selectedChat?.isGroupChat
+    ? selectedChat.chatName
+    : getOneOnOneChatReceiver(loggedInUser, selectedChat?.users)?.name;
 
   const fetchMessages = async () => {
     setLoading(true);
@@ -118,11 +122,8 @@ const MessagesView = () => {
               />
             </CustomTooltip>
 
-            <span className="ms-3">
-              {selectedChat?.isGroupChat
-                ? selectedChat.chatName
-                : getOneOnOneChatReceiver(loggedInUser, selectedChat?.users)
-                    ?.name}
+            <span className="ms-2 ms-md-3" title={chatName}>
+              {truncateString(chatName, 22, 17)}
             </span>
 
             <CustomTooltip title="Close Chat" placement="bottom-end" arrow>
@@ -179,7 +180,7 @@ const MessagesView = () => {
             <span
               className="fw-bold"
               style={{ color: "#A798F2" }}
-            >{`${loggedInUser?.name?.split(' ')[0]?.toUpperCase()}`}</span>{" "}
+            >{`${loggedInUser?.name?.split(" ")[0]?.toUpperCase()}`}</span>{" "}
             👋
           </h2>
           <LottieAnimation
@@ -188,11 +189,16 @@ const MessagesView = () => {
             style={{ marginBottom: "50px", height: "50%" }}
             animationData={animationData}
           />
-          <h4 className="mx-5" style={{ marginTop: "-20px", color: "#99C5EE" }}>
+          <p
+            className="h4 mx-5"
+            style={{ marginTop: "-20px", color: "#99C5EE" }}
+          >
             Search or Click a Chat, Search a User, or Create a Group to start or
             open a chat.
-          </h4>
-          <h2 style={{ color: "#99C5EE" }}>Happy Chatting!😀</h2>
+          </p>
+          <p className="h2" style={{ color: "#99C5EE" }}>
+            Happy Chatting!😀
+          </p>
         </div>
       )}
     </div>

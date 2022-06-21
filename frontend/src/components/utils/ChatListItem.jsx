@@ -74,7 +74,7 @@ const ChatListItem = ({ chat }) => {
           src={chatDisplayPic}
           alt={_id}
           data-chat={_id}
-          className={`chatListAvatar rounded-circle`}
+          className={`img-fluid chatListAvatar rounded-circle`}
         />
       </CustomTooltip>
       {/* Chat Data */}

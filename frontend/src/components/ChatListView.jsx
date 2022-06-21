@@ -1,12 +1,13 @@
 import { Close, GroupAdd, Search } from "@mui/icons-material";
 import { CircularProgress, IconButton } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppState } from "../context/ContextProvider";
 import { debounce, getOneOnOneChatReceiver } from "../utils/appUtils";
 import axios from "../utils/axios";
 import ChatListItem from "./utils/ChatListItem";
 import getCustomTooltip from "./utils/CustomTooltip";
 import LoadingIndicator from "./utils/LoadingIndicator";
+import SearchInput from "./utils/SearchInput";
 
 const arrowStyles = {
   color: "#777",
@@ -38,7 +39,7 @@ const ChatListView = () => {
 
   const [loading, setLoading] = useState(false);
   const [filteredChats, setFilteredChats] = useState(chats);
-  const [searchChatInput, setSearchChatInput] = useState("");
+  const searchChatInput = useRef();
 
   const fetchChats = async () => {
     setLoading(true);
@@ -81,18 +82,18 @@ const ChatListView = () => {
     }
   };
 
-  const debouncedFilterChats = debounce((input) => {
-    const chatNameInput = input?.toLowerCase()?.trim();
+  // Debouncing filterChats method to limit the no. of fn calls
+  const searchChats = debounce((e) => {
+    const chatNameInput = e.target?.value?.toLowerCase().trim();
     if (!chatNameInput) {
       return setFilteredChats(chats);
     }
     setFilteredChats(
-      chats?.filter((chat) =>
-        chat?.chatName?.toLowerCase()?.includes(chatNameInput)
+      chats.filter((chat) =>
+        chat?.chatName?.toLowerCase().includes(chatNameInput)
       )
     );
-    console.log(filteredChats);
-  }, 3000);
+  }, 600);
 
   useEffect(() => {
     fetchChats();
@@ -124,57 +125,14 @@ const ChatListView = () => {
       </section>
       {/* Search Bar */}
       {chats?.length > 0 && (
-        <section className={`searchChat ${formFieldClassName} pt-3 pb-2 mx-1`}>
-          <div className="input-group">
-            <span
-              className={`input-group-text ${disableIfLoading} bg-black bg-gradient border-secondary text-light rounded-pill rounded-end border-end-0`}
-            >
-              <Search className="ms-1" />
-            </span>
-            <input
-              type="text"
-              value={searchChatInput}
-              onChange={(e) => {
-                const input = e.target.value;
-                setSearchChatInput(input);
-                debouncedFilterChats(input);
-              }}
-              autoFocus
-              placeholder="Search Chat"
-              id="searchChatInput"
-              className={`${inputFieldClassName
-                .replace("text-center", "text-start")
-                .replace(
-                  "pill",
-                  "0"
-                )} border-start-0 border-end-0 d-inline-block`}
-              style={{ cursor: "auto", fontSize: "20px" }}
-            />
-            <span
-              className={`input-group-text ${disableIfLoading} bg-black bg-gradient border-secondary text-light rounded-pill rounded-start border-start-0`}
-            >
-              <IconButton
-                onClick={() => {
-                  setSearchChatInput("");
-                  setFilteredChats(chats);
-                }}
-                disabled={loading}
-                className={`${searchChatInput ? "d-inline-block" : "d-none"}`}
-                style={{
-                  padding: "0px 9px 2px 9px",
-                  margin: "-5px",
-                  color: "#999999",
-                }}
-                sx={{
-                  ":hover": {
-                    backgroundColor: "#aaaaaa20",
-                  },
-                }}
-              >
-                <Close style={{ fontSize: "19px" }} />
-              </IconButton>
-            </span>
-          </div>
+        <section className="searchChat">
+          <SearchInput
+            ref={searchChatInput}
+            searchHandler={searchChats}
+            autoFocus={false}
+            placeholder="Search Chat"
+            clearInput={() => setFilteredChats(chats)}
+          />
         </section>
       )}
       {/* Chat list */}

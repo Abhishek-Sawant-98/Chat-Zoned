@@ -1,17 +1,19 @@
-import { ChevronLeft, Search } from "@mui/icons-material";
+import { ChevronLeft, Close, Search } from "@mui/icons-material";
 import { CircularProgress, Drawer, IconButton } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppState } from "../context/ContextProvider";
 import axios from "../utils/axios";
 import { debounce, truncateString } from "../utils/appUtils";
 import UserListItem from "./utils/UserListItem";
 import LoadingIndicator from "./utils/LoadingIndicator";
+import SearchInput from "./utils/SearchInput";
 
 const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const { formClassNames, loggedInUser, displayToast, setSelectedChat } =
     AppState();
+  const searchUserInput = useRef(null);
 
   const {
     loading,
@@ -34,9 +36,8 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
   };
 
   // Debouncing fetchUsers method to limit the no. of API calls
-  const debouncedFetchUsers = debounce(async (e) => {
-    setLoading(true);
-    const query = e.target.value.trim();
+  const searchUsers = debounce(async (e) => {
+    const query = e.target?.value?.trim();
     setSearchQuery(query);
     if (!query) return setSearchResults([]);
 
@@ -54,7 +55,6 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
 
       setLoading(false);
       setSearchResults(data);
-      console.log(data);
     } catch (error) {
       displayToast({
         title: "Couldn't Fetch Users",
@@ -84,7 +84,6 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
 
       setLoading(false);
       setSelectedChat(data);
-      console.log("Selected Chat : ", data);
     } catch (error) {
       displayToast({
         title: "Create/Retrieve Chat Failed",
@@ -137,27 +136,66 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
           </span>
         </div>
         {/* Search Bar */}
-        <section className={`${formFieldClassName} pt-3 pb-2 mx-1`}>
+        {/* <section className={`${formFieldClassName} pt-3 pb-2 mx-1`}>
           <div className="input-group">
             <span
               className={`input-group-text ${disableIfLoading} bg-black bg-gradient border-secondary text-light rounded-pill rounded-end`}
             >
-              <Search className="ms-1" />
+              <Search className="ms-1 mt-1" />
             </span>
             <input
               type="text"
-              onChange={debouncedFetchUsers}
+              ref={searchUserInput}
+              onChange={searchUsers}
               autoFocus
               placeholder="Search by Name or Email"
               id="searchUsersInput"
-              className={`${inputFieldClassName.replace(
-                "text-center",
-                "text-start"
-              )} border-start-0 rounded-start d-inline-block`}
-              style={{ cursor: "auto", fontSize: "19px" }}
+              className={`${inputFieldClassName
+                .replace("text-center", "text-start")
+                .replace(
+                  "pill",
+                  "0"
+                )} border-start-0 border-end-0 d-inline-block`}
+              style={{ cursor: "auto", fontSize: "20px" }}
             />
+            <span
+              className={`input-group-text ${disableIfLoading} bg-black bg-gradient border-secondary text-light rounded-pill rounded-start border-start-0`}
+            >
+              <IconButton
+                onClick={() => {
+                  searchUserInput.current.value = "";
+                  setSearchResults([]);
+                }}
+                className={`${
+                  searchUserInput.current?.value ? "d-inline-block" : "d-none"
+                }`}
+                style={{
+                  padding: "0px 9px 2px 9px",
+                  margin: "-7px",
+                  color: "#999999",
+                }}
+                sx={{
+                  ":hover": {
+                    backgroundColor: "#aaaaaa20",
+                  },
+                }}
+              >
+                <Close style={{ fontSize: "19px" }} />
+              </IconButton>
+            </span>
           </div>
-        </section>
+        </section> */}
+        <SearchInput
+          ref={searchUserInput}
+          searchHandler={searchUsers}
+          autoFocus={true}
+          placeholder="Search by Name or Email"
+          clearInput={() => {
+            setSearchQuery("");
+            setSearchResults([]);
+            searchUserInput.current.focus();
+          }}
+        />
         {/* Search Results */}
         <section
           className="position-relative mx-1 my-2 h-100"

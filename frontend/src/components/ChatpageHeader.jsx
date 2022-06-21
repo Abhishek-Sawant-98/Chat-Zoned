@@ -110,7 +110,11 @@ const ChatpageHeader = () => {
             }}
             onClick={openProfileSettingsMenu}
           >
-            <Avatar alt="Logged In User" src={loggedInUser?.profilePic} />
+            <Avatar
+              alt="LoggedInUser"
+              className="img-fluid"
+              src={loggedInUser?.profilePic}
+            />
           </IconButton>
         </CustomTooltip>
         <NotificationsMenu />
