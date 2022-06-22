@@ -4,18 +4,13 @@ import Menu, { menuIconProps, menuItemProps } from "./utils/Menu";
 import { useState } from "react";
 import { AppState } from "../context/ContextProvider";
 
-const NotificationsMenu = () => {
-  const {
-    loggedInUser,
-    setLoggedInUser,
-    notificationsMenuAnchor,
-    setNotificationsMenuAnchor,
-  } = AppState();
+const NotificationsMenu = ({ anchor, setAnchor }) => {
+  const { loggedInUser, setLoggedInUser } = AppState();
   const notifs = loggedInUser?.notifications;
   return (
     <Menu
-      menuAnchor={notificationsMenuAnchor}
-      setMenuAnchor={setNotificationsMenuAnchor}
+      menuAnchor={anchor}
+      setMenuAnchor={setAnchor}
       transformOrigin={{ vertical: "top", horizontal: "right" }}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
     >

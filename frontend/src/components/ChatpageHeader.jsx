@@ -22,14 +22,13 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const ChatpageHeader = () => {
-  const {
-    loggedInUser,
-    setNotificationsMenuAnchor,
-    setProfileSettingsMenuAnchor,
-    formClassNames,
-  } = AppState();
+  const { loggedInUser, formClassNames } = AppState();
   const { loading } = formClassNames;
   const appGif = useRef();
+
+  const [notificationsMenuAnchor, setNotificationsMenuAnchor] = useState(null);
+  const [profileSettingsMenuAnchor, setProfileSettingsMenuAnchor] =
+    useState(null);
 
   const openNotificationMenu = (e) => {
     setNotificationsMenuAnchor(e.target);
@@ -117,8 +116,14 @@ const ChatpageHeader = () => {
             />
           </IconButton>
         </CustomTooltip>
-        <NotificationsMenu />
-        <ProfileSettingsMenu />
+        <NotificationsMenu
+          anchor={notificationsMenuAnchor}
+          setAnchor={setNotificationsMenuAnchor}
+        />
+        <ProfileSettingsMenu
+          anchor={profileSettingsMenuAnchor}
+          setAnchor={setProfileSettingsMenuAnchor}
+        />
       </div>
     </header>
   );

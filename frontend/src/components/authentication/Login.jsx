@@ -69,7 +69,7 @@ const Login = () => {
       displayToast({
         message: "Login Successful",
         type: "success",
-        duration: 3000,
+        duration: 2000,
         position: "bottom-center",
       });
 

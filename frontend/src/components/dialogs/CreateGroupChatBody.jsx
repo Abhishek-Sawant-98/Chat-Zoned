@@ -22,23 +22,26 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const EditProfileBody = () => {
-  const { formClassNames, loggedInUser, setLoggedInUser, displayToast } =
-    AppState();
+const CreateGroupChatBody = () => {
+  const {
+    formClassNames,
+    loggedInUser,
+    setLoggedInUser,
+    displayToast,
+    setEditProfilePicMenuAnchor,
+  } = AppState();
 
   const { loading, setLoading, disableIfLoading } = formClassNames;
 
-  const [profileData, setProfileData] = useState({
+  const [groupChatData, setGroupChatData] = useState({
     profilePicUrl: loggedInUser?.profilePic,
     name: loggedInUser?.name,
     email: loggedInUser?.email,
   });
-  const [editProfilePicMenuAnchor, setEditProfilePicMenuAnchor] =
-    useState(null);
 
   useEffect(() => {
-    setProfileData({
-      ...profileData,
+    setGroupChatData({
+      ...groupChatData,
       profilePicUrl: loggedInUser?.profilePic,
       name: loggedInUser?.name,
     });
@@ -47,7 +50,7 @@ const EditProfileBody = () => {
   // For profile pic upload loading indicator
   const [uploading, setUploading] = useState(false);
 
-  const { profilePicUrl, name, email } = profileData;
+  const { profilePicUrl, name, email } = groupChatData;
   const imgInput = useRef();
   const isGuestUser = loggedInUser?.email === "guest.user@gmail.com";
 
@@ -303,8 +306,6 @@ const EditProfileBody = () => {
           )}
           {/* Edit/Delete profile pic menu */}
           <EditProfilePicMenu
-            anchor={editProfilePicMenuAnchor}
-            setAnchor={setEditProfilePicMenuAnchor}
             selectProfilePic={() => imgInput.current.click()}
             openDeletePhotoConfirmDialog={openDeletePhotoConfirmDialog}
           />
@@ -375,4 +376,4 @@ const EditProfileBody = () => {
   );
 };
 
-export default EditProfileBody;
+export default CreateGroupChatBody;

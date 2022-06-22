@@ -2,17 +2,14 @@ import { Key, Logout, ManageAccounts, Person } from "@mui/icons-material";
 import { ListItemIcon, MenuItem } from "@mui/material";
 import Menu, { menuIconProps, menuItemProps } from "./utils/Menu";
 import { AppState } from "../context/ContextProvider";
-import { useNavigate } from "react-router-dom";
 import axios from "../utils/axios";
 import ChangePasswordBody from "./dialogs/ChangePasswordBody";
 import ViewOrEditProfileBody from "./dialogs/EditProfileBody";
 
-const ProfileSettingsMenu = () => {
+const ProfileSettingsMenu = ({ anchor, setAnchor }) => {
   const {
     loggedInUser,
     setLoggedInUser,
-    profileSettingsMenuAnchor,
-    setProfileSettingsMenuAnchor,
     displayDialog,
     displayToast,
     setDialogBody,
@@ -22,8 +19,6 @@ const ProfileSettingsMenu = () => {
 
   const { setLoading } = formClassNames;
   const isGuestUser = loggedInUser?.email === "guest.user@gmail.com";
-
-  const navigate = useNavigate();
 
   let editPasswordData;
 
@@ -124,7 +119,7 @@ const ProfileSettingsMenu = () => {
           setLoading(false);
           sessionStorage.removeItem("loggedInUser");
           setLoggedInUser(null);
-          return "passwordUpdated";
+          return "pwdUpdated";
         } catch (error) {
           displayToast({
             title: "Password Update Failed",
@@ -141,8 +136,8 @@ const ProfileSettingsMenu = () => {
 
   return (
     <Menu
-      menuAnchor={profileSettingsMenuAnchor}
-      setMenuAnchor={setProfileSettingsMenuAnchor}
+      menuAnchor={anchor}
+      setMenuAnchor={setAnchor}
       transformOrigin={{ vertical: "top", horizontal: "right" }}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
     >

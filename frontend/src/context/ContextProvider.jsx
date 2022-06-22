@@ -30,14 +30,6 @@ const ContextProvider = ({ children }) => {
     setToastData({ ...toastData, isOpen: false });
   };
 
-  // Menu anchors config
-  const [editProfilePicMenuAnchor, setEditProfilePicMenuAnchor] =
-    useState(null);
-  const [msgSettingsMenuAnchor, setMsgSettingsMenuAnchor] = useState(null);
-  const [notificationsMenuAnchor, setNotificationsMenuAnchor] = useState(null);
-  const [profileSettingsMenuAnchor, setProfileSettingsMenuAnchor] =
-    useState(null);
-
   // Alert dialog config
   const [dialogData, setDialogData] = useState({
     isOpen: false,
@@ -92,14 +84,6 @@ const ContextProvider = ({ children }) => {
         toastData,
         displayToast,
         handleToastClose,
-        editProfilePicMenuAnchor,
-        setEditProfilePicMenuAnchor,
-        msgSettingsMenuAnchor,
-        setMsgSettingsMenuAnchor,
-        notificationsMenuAnchor,
-        setNotificationsMenuAnchor,
-        profileSettingsMenuAnchor,
-        setProfileSettingsMenuAnchor,
         dialogData,
         displayDialog,
         handleDialogClose,

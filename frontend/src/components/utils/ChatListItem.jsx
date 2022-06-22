@@ -83,13 +83,13 @@ const ChatListItem = ({ chat }) => {
         className="chatListData d-flex flex-column align-items-start px-2"
       >
         {/* Chat Name */}
-        <p data-chat={_id} className="chatListName fs-5 fw-bold text-warning">
+        <p data-chat={_id} className="chatListName fs-5 fw-bold text-info">
           {truncateString(chatName, 23, 20)}
         </p>
         {/* Last Message Data */}
         {lastMessage && (
           <p data-chat={_id} className="chatListLastMessage">
-            <span data-chat={_id} className="chatList text-info">
+            <span data-chat={_id} className="chatList text-warning">
               {`${truncateString(lastMessage.sender?.name || "", 12, 8)}: `}
             </span>
             {lastMsgFile ? (

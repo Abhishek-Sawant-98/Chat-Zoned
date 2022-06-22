@@ -39,11 +39,11 @@ const UserListItem = ({ user }) => {
         data-user={_id}
         className="userListData d-flex flex-column align-items-start px-2"
       >
-        <p data-user={_id} className="userListName fs-4 fw-bold text-warning">
+        <p data-user={_id} className="userListName fs-4 fw-bold text-info">
           {truncateString(name, 23, 20)}
         </p>
         <p data-user={_id} className="userListEmail">
-          <span data-user={_id} className="userList fw-bold text-info">
+          <span data-user={_id} className="userList fw-bold text-warning">
             {"Email: "}
           </span>
           {truncateString(email, 24, 20)}

@@ -73,30 +73,34 @@ const fetchChats = asyncHandler(async (req, res) => {
 });
 
 const createGroupChat = asyncHandler(async (req, res) => {
+  const displayPic = req.file;
   let { chatName, users } = req.body;
   const loggedInUserId = req.user?._id;
 
   if (!chatName || !users) {
     res.status(400);
-    throw new Error("Please enter all the fields");
+    throw new Error("Please Enter All the Fields");
   }
 
   users = JSON.parse(users); // Since users array was stringified before sending it
 
   if (users.length < 2) {
     res.status(400);
-    throw new Error("Minimum of 3 users needed to form a group");
+    throw new Error("Minimum of 3 Users Needed to Create a Group");
   }
 
   users.push(loggedInUserId); // Since group includes currently logged-in user too
+
+  const uploadResponse = await cloudinary.uploader.upload(displayPic.path);
+  await deleteFile(displayPic.path); // Delete file from server after upload to cloudinary
 
   const createdGroup = await ChatModel.create({
     chatName,
     users,
     isGroupChat: true,
     groupAdmin: loggedInUserId,
-    chatDisplayPic:
-      "https://res.cloudinary.com/abhi-sawant/image/upload/v1654599490/group_mbuvht.png",
+    cloudinary_id: uploadResponse.public_id,
+    chatDisplayPic: uploadResponse.secure_url,
   });
 
   const populatedGroup = await ChatModel.findById(createdGroup._id)
@@ -115,9 +119,9 @@ const deleteGroupDP = asyncHandler(async (req, res) => {
   }
 
   // Delete the existing dp only if it's not the default dp
-  if (currentDP.endsWith("group_am193i.png")) {
+  if (currentDP.endsWith("group_mbuvht.png")) {
     res.status(400);
-    throw new Error("Cannot delete the default group dp");
+    throw new Error("Cannot Delete the Default Group DP");
   }
 
   await cloudinary.uploader.destroy(cloudinary_id);
@@ -152,7 +156,7 @@ const updateGroupDP = asyncHandler(async (req, res) => {
   }
 
   // Delete the existing dp only if it's not the default dp
-  if (!currentDP.endsWith("group_am193i.png")) {
+  if (!currentDP.endsWith("group_mbuvht.png")) {
     await cloudinary.uploader.destroy(cloudinary_id);
   }
   const uploadResponse = await cloudinary.uploader.upload(displayPic.path);
@@ -171,7 +175,7 @@ const updateGroupDP = asyncHandler(async (req, res) => {
 
   if (!updatedGroup) {
     res.status(404);
-    throw new Error("Group not found");
+    throw new Error("Group Not Found");
   }
 
   res.status(200).json(updatedGroup);

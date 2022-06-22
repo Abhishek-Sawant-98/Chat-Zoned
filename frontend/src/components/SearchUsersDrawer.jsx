@@ -136,55 +136,6 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
           </span>
         </div>
         {/* Search Bar */}
-        {/* <section className={`${formFieldClassName} pt-3 pb-2 mx-1`}>
-          <div className="input-group">
-            <span
-              className={`input-group-text ${disableIfLoading} bg-black bg-gradient border-secondary text-light rounded-pill rounded-end`}
-            >
-              <Search className="ms-1 mt-1" />
-            </span>
-            <input
-              type="text"
-              ref={searchUserInput}
-              onChange={searchUsers}
-              autoFocus
-              placeholder="Search by Name or Email"
-              id="searchUsersInput"
-              className={`${inputFieldClassName
-                .replace("text-center", "text-start")
-                .replace(
-                  "pill",
-                  "0"
-                )} border-start-0 border-end-0 d-inline-block`}
-              style={{ cursor: "auto", fontSize: "20px" }}
-            />
-            <span
-              className={`input-group-text ${disableIfLoading} bg-black bg-gradient border-secondary text-light rounded-pill rounded-start border-start-0`}
-            >
-              <IconButton
-                onClick={() => {
-                  searchUserInput.current.value = "";
-                  setSearchResults([]);
-                }}
-                className={`${
-                  searchUserInput.current?.value ? "d-inline-block" : "d-none"
-                }`}
-                style={{
-                  padding: "0px 9px 2px 9px",
-                  margin: "-7px",
-                  color: "#999999",
-                }}
-                sx={{
-                  ":hover": {
-                    backgroundColor: "#aaaaaa20",
-                  },
-                }}
-              >
-                <Close style={{ fontSize: "19px" }} />
-              </IconButton>
-            </span>
-          </div>
-        </section> */}
         <SearchInput
           ref={searchUserInput}
           searchHandler={searchUsers}

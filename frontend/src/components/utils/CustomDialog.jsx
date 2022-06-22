@@ -17,7 +17,7 @@ const CustomDialog = ({
   handleDialogClose,
   showDialogActions,
 }) => {
-  const { formClassNames } = AppState();
+  const { formClassNames, setSelectedChat } = AppState();
   const { isOpen, title, nolabel, yeslabel, loadingYeslabel, action } =
     dialogData;
   const { loading, disableIfLoading } = formClassNames;
@@ -25,9 +25,11 @@ const CustomDialog = ({
 
   const handleYes = async () => {
     const result = await action();
-    if (result === "profileUpdated") handleDialogClose();
-    else if (result === "passwordUpdated" || result === "loggingOut") {
+    if (result === "profileUpdated" || result === "createdGroup") {
       handleDialogClose();
+    } else if (result === "pwdUpdated" || result === "loggingOut") {
+      handleDialogClose();
+      setSelectedChat(null);
       navigate("/");
     }
   };

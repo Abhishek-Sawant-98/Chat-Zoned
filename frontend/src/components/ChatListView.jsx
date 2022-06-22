@@ -27,11 +27,15 @@ const ChatListView = () => {
     formClassNames,
     selectedChat,
     loggedInUser,
-    displayToast,
     setSelectedChat,
+    displayDialog,
+    displayToast,
+    setDialogBody,
+    setShowDialogActions,
     chats,
     setChats,
     refresh,
+    setRefresh,
   } = AppState();
 
   const { disableIfLoading, formFieldClassName, inputFieldClassName } =
@@ -40,6 +44,65 @@ const ChatListView = () => {
   const [loading, setLoading] = useState(false);
   const [filteredChats, setFilteredChats] = useState(chats);
   const searchChatInput = useRef();
+
+  const openCreateGroupChatDialog = () => {
+    setShowDialogActions(true);
+    setDialogBody(<></>);
+    displayDialog({
+      title: "Create Group Chat",
+      nolabel: "Cancel",
+      yeslabel: "Create Group",
+      loadingYeslabel: "Creating Group...",
+      action: async () => {
+        // const { currentPassword, newPassword, confirmNewPassword } =
+        //   editPasswordData;
+
+        // if (newPassword !== confirmNewPassword) {
+        //   return displayToast({
+        //     message: "New Password Must Match Confirm New Password",
+        //     type: "warning",
+        //     duration: 5000,
+        //     position: "top-center",
+        //   });
+        // }
+        setLoading(true);
+        const config = {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${loggedInUser.token}`,
+          },
+        };
+        try {
+          const formData = new FormData();
+          formData.append("displayPic", {});
+          formData.append("chatName", "New Group");
+          formData.append("users", JSON.stringify([]));
+
+          await axios.post("/api/chat/group", formData, config);
+
+          displayToast({
+            message: "Group Created Successfully",
+            type: "success",
+            duration: 2000,
+            position: "bottom-center",
+          });
+
+          setLoading(false);
+          setRefresh(!refresh);
+          return "createdGroup";
+        } catch (error) {
+          displayToast({
+            title: "Couldn't Create Group",
+            message: error.response?.data?.message || "Oops! Server Down",
+            type: "error",
+            duration: 5000,
+            position: "top-center",
+          });
+          setLoading(false);
+        }
+      },
+    });
+  };
 
   const fetchChats = async () => {
     setLoading(true);
@@ -116,7 +179,7 @@ const ChatListView = () => {
           >
             <button
               className={`btnCreateGroup pointer btn btn-outline-secondary text-light px-3`}
-              onClick={() => {}}
+              onClick={openCreateGroupChatDialog}
             >
               <GroupAdd />
             </button>

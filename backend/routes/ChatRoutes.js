@@ -19,7 +19,12 @@ router
   .post(authorizeUser, createOrRetrieveChat)
   .get(authorizeUser, fetchChats);
 
-router.post("/group", authorizeUser, createGroupChat);
+router.post(
+  "/group",
+  authorizeUser,
+  upload.single("displayPic"),
+  createGroupChat
+);
 router.put("/group/delete-dp", authorizeUser, deleteGroupDP);
 router.put(
   "/group/update-dp",

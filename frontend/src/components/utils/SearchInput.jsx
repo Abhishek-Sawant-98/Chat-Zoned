@@ -1,4 +1,4 @@
-import { Close, Search } from "@mui/icons-material";
+import { Clear, Search } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import { forwardRef, useState } from "react";
 import { AppState } from "../../context/ContextProvider";
@@ -56,7 +56,7 @@ const SearchInput = forwardRef((props, inputRef) => {
               },
             }}
           >
-            <Close style={{ fontSize: "19px" }} />
+            <Clear style={{ fontSize: "19px" }} />
           </IconButton>
         </span>
       </div>

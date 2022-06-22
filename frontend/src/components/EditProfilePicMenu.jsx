@@ -4,19 +4,17 @@ import Menu, { menuIconProps, menuItemProps } from "./utils/Menu";
 import { AppState } from "../context/ContextProvider";
 
 const EditProfilePicMenu = ({
+  anchor,
+  setAnchor,
   selectProfilePic,
   openDeletePhotoConfirmDialog,
 }) => {
-  const {
-    loggedInUser,
-    editProfilePicMenuAnchor,
-    setEditProfilePicMenuAnchor,
-  } = AppState();
+  const { loggedInUser } = AppState();
 
   return (
     <Menu
-      menuAnchor={editProfilePicMenuAnchor}
-      setMenuAnchor={setEditProfilePicMenuAnchor}
+      menuAnchor={anchor}
+      setMenuAnchor={setAnchor}
       transformOrigin={{ vertical: "top", horizontal: "left" }}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
     >

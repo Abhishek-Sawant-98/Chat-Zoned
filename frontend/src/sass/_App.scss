@@ -20,16 +20,12 @@ header {
 .dialogField {
   width: clamp(250px, 70vw, 320px);
   img {
-    @include getImgDimensions(2);
+    @include getImgDimensions(2.3);
   }
 }
 .selectPicIcon {
   bottom: 0%;
   right: calc(50% - 50px);
-}
-.userProfilePic {
-  display: inline-block;
-  object-fit: cover;
 }
 .app__form {
   .app__formfield {

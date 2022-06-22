@@ -7,6 +7,7 @@ import getCustomTooltip from "./utils/CustomTooltip";
 import animationData from "../animations/letsChatGif.json";
 import LottieAnimation from "./utils/LottieAnimation";
 import axios from "../utils/axios";
+import ViewProfileBody from "./dialogs/ViewProfileBody";
 
 const arrowStyles = {
   color: "#777",
@@ -24,11 +25,15 @@ const MessagesView = () => {
   const letsChatGif = useRef(null);
 
   const {
+    refresh,
     formClassNames,
     selectedChat,
     loggedInUser,
     displayToast,
     setSelectedChat,
+    setShowDialogActions,
+    setDialogBody,
+    displayDialog,
   } = AppState();
 
   const {
@@ -76,9 +81,21 @@ const MessagesView = () => {
     }
   };
 
+  const openViewProfileDialog = () => {
+    setShowDialogActions(false);
+    setDialogBody(<ViewProfileBody />);
+    displayDialog({
+      title: "View Profile",
+    });
+  };
+
   useEffect(() => {
     if (selectedChat) fetchMessages();
   }, [selectedChat]);
+
+  useEffect(() => {
+    // if (selectedChat) fetchMessages();
+  }, [refresh]);
 
   return (
     <div
@@ -93,7 +110,6 @@ const MessagesView = () => {
               <IconButton
                 onClick={closeChat}
                 className={`d-flex d-md-none ms-3`}
-                disabled={loading}
                 sx={{
                   color: "#999999",
                   ":hover": {
@@ -105,31 +121,37 @@ const MessagesView = () => {
               </IconButton>
             </CustomTooltip>
             <CustomTooltip
-              title={
-                selectedChat?.isGroupChat ? "View/Edit Group" : "View Profile"
-              }
+              title={selectedChat?.isGroupChat ? "Group Info" : "View Profile"}
               placement="bottom-start"
               arrow
             >
-              <Avatar
-                src={
-                  getOneOnOneChatReceiver(loggedInUser, selectedChat?.users)
-                    ?.profilePic || ""
-                }
-                alt={"receiverAvatar"}
+              <IconButton
+                sx={{
+                  margin: "-8px",
+                  ":hover": {
+                    backgroundColor: "#aaaaaa20",
+                  },
+                }}
                 className="pointer ms-2 ms-md-4"
-                onClick={() => {}}
-              />
+                onClick={openViewProfileDialog}
+              >
+                <Avatar
+                  src={
+                    getOneOnOneChatReceiver(loggedInUser, selectedChat?.users)
+                      ?.profilePic || ""
+                  }
+                  alt={"receiverAvatar"}
+                />
+              </IconButton>
             </CustomTooltip>
 
-            <span className="ms-2 ms-md-3" title={chatName}>
+            <span className="ms-2 ms-md-3 text-info" title={chatName}>
               {truncateString(chatName, 22, 17)}
             </span>
 
             <CustomTooltip title="Close Chat" placement="bottom-end" arrow>
               <IconButton
                 onClick={closeChat}
-                disabled={loading}
                 className="d-none d-md-flex"
                 sx={{
                   position: "absolute",

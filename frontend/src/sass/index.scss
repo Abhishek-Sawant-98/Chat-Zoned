@@ -23,4 +23,8 @@ body {
   ::-webkit-scrollbar {
     display: none;
   }
+  img {
+    display: inline-block;
+    object-fit: cover;
+  }
 }
