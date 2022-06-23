@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+import { defaultGroupDisplayPic } from "../utils/appUtils";
 
 const AppContext = createContext();
 
@@ -46,13 +47,13 @@ const ContextProvider = ({ children }) => {
   const [showDialogActions, setShowDialogActions] = useState(true);
 
   const displayDialog = (options) => {
-    setDialogData({
-      isOpen: true,
-      ...options,
-    });
+    setDialogData({ ...options, isOpen: true });
   };
-  const handleDialogClose = () => {
+  const closeDialog = () => {
     setDialogData({ ...dialogData, isOpen: false });
+  };
+  const setDialogAction = (action) => {
+    setDialogData({ ...dialogData, action });
   };
 
   // Form field config
@@ -65,7 +66,7 @@ const ContextProvider = ({ children }) => {
     disableIfLoading,
     formLabelClassName: `app__formlabel ${disableIfLoading} form-label pointer mb-1 ms-2`,
     formFieldClassName: `app__formfield text-center`,
-    inputFieldClassName: `app__inputfield form-control ${disableIfLoading} text-info text-center bg-black bg-gradient border-secondary px-3 pt-1 rounded-pill`,
+    inputFieldClassName: `app__inputfield form-control ${disableIfLoading} text-info text-center bg-black bg-gradient border-secondary ps-2 pt-1 rounded-pill`,
     btnSubmitClassName: `btn btn-primary ${disableIfLoading} d-flex justify-content-center align-items-center col-8 fs-4 rounded-pill`,
     btnResetClassName: `app__btnReset ${disableIfLoading} btn btn-outline-secondary text-light fs-4 rounded-pill`,
   };
@@ -86,7 +87,8 @@ const ContextProvider = ({ children }) => {
         handleToastClose,
         dialogData,
         displayDialog,
-        handleDialogClose,
+        closeDialog,
+        setDialogAction,
         dialogBody,
         setDialogBody,
         showDialogActions,

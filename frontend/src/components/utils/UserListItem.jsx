@@ -14,8 +14,9 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const UserListItem = ({ user }) => {
+const UserListItem = ({ user, truncateValues }) => {
   const { _id, name, email, profilePic } = user;
+  const [max, index] = truncateValues;
 
   return (
     <div
@@ -40,13 +41,10 @@ const UserListItem = ({ user }) => {
         className="userListData d-flex flex-column align-items-start px-2"
       >
         <p data-user={_id} className="userListName fs-4 fw-bold text-info">
-          {truncateString(name, 23, 20)}
+          {truncateString(name, max, index)}
         </p>
         <p data-user={_id} className="userListEmail">
-          <span data-user={_id} className="userList fw-bold text-warning">
-            {"Email: "}
-          </span>
-          {truncateString(email, 24, 20)}
+          {truncateString(email, max, index)}
         </p>
       </div>
     </div>

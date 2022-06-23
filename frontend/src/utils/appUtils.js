@@ -30,3 +30,9 @@ export const getOneOnOneChatReceiver = (loggedInUser, chatUsers) => {
   if (!chatUsers?.length || !loggedInUser) return;
   return loggedInUser._id !== chatUsers[0]._id ? chatUsers[0] : chatUsers[1];
 };
+
+export const DEFAULT_USER_DP =
+  "https://res.cloudinary.com/abhi-sawant/image/upload/v1653670527/user_dqzjdz.png";
+
+export const DEFAULT_GROUP_DP =
+  "https://res.cloudinary.com/abhi-sawant/image/upload/v1654599490/group_mbuvht.png";

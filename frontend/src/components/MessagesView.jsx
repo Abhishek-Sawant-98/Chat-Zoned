@@ -137,8 +137,12 @@ const MessagesView = () => {
               >
                 <Avatar
                   src={
-                    getOneOnOneChatReceiver(loggedInUser, selectedChat?.users)
-                      ?.profilePic || ""
+                    selectedChat?.isGroupChat
+                      ? selectedChat?.chatDisplayPic
+                      : getOneOnOneChatReceiver(
+                          loggedInUser,
+                          selectedChat?.users
+                        )?.profilePic || ""
                   }
                   alt={"receiverAvatar"}
                 />

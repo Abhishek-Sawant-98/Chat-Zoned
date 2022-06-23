@@ -1,12 +1,12 @@
 import { ChevronLeft, Close, Search } from "@mui/icons-material";
 import { CircularProgress, Drawer, IconButton } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import { AppState } from "../context/ContextProvider";
-import axios from "../utils/axios";
-import { debounce, truncateString } from "../utils/appUtils";
-import UserListItem from "./utils/UserListItem";
-import LoadingIndicator from "./utils/LoadingIndicator";
-import SearchInput from "./utils/SearchInput";
+import { AppState } from "../../context/ContextProvider";
+import axios from "../../utils/axios";
+import { debounce, truncateString } from "../../utils/appUtils";
+import UserListItem from "./UserListItem";
+import LoadingIndicator from "./LoadingIndicator";
+import SearchInput from "./SearchInput";
 
 const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -168,7 +168,11 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
           >
             {searchResults.length > 0 ? (
               searchResults.map((user) => (
-                <UserListItem key={user._id} user={user} />
+                <UserListItem
+                  key={user._id}
+                  user={user}
+                  truncateValues={[27, 24]}
+                />
               ))
             ) : searchQuery && !loading ? (
               <p className="text-light text-center fs-5 mt-3 mx-5">

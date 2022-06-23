@@ -91,16 +91,29 @@ const createGroupChat = asyncHandler(async (req, res) => {
 
   users.push(loggedInUserId); // Since group includes currently logged-in user too
 
-  const uploadResponse = await cloudinary.uploader.upload(displayPic.path);
-  await deleteFile(displayPic.path); // Delete file from server after upload to cloudinary
+  let displayPicData;
+  // If display pic not selected, then set it as the default one
+  if (!displayPic) {
+    displayPicData = {
+      cloudinary_id: "",
+      chatDisplayPic:
+        "https://res.cloudinary.com/abhi-sawant/image/upload/v1654599490/group_mbuvht.png",
+    };
+  } else {
+    const uploadResponse = await cloudinary.uploader.upload(displayPic.path);
+    await deleteFile(displayPic.path); // Delete file from server after upload to cloudinary
+    displayPicData = {
+      cloudinary_id: uploadResponse.public_id,
+      chatDisplayPic: uploadResponse.secure_url,
+    };
+  }
 
   const createdGroup = await ChatModel.create({
     chatName,
     users,
     isGroupChat: true,
     groupAdmin: loggedInUserId,
-    cloudinary_id: uploadResponse.public_id,
-    chatDisplayPic: uploadResponse.secure_url,
+    ...displayPicData,
   });
 
   const populatedGroup = await ChatModel.findById(createdGroup._id)

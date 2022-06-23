@@ -6,6 +6,24 @@
 header {
   padding: 6px 15px;
 }
+.btnArrowIcons {
+  color: white;
+  font-size: 22px;
+}
+.addGroupMembers {
+  height: 430px;
+  & > * {
+    width: clamp(250px, 70vw, 320px);
+  }
+  .userChip {
+    height: 40px;
+    margin: 2px;
+    font-family: "Mirza";
+    .userChipAvatar {
+      @include getImgDimensions(0.3);
+    }
+  }
+}
 .app__inputfield {
   font-size: $baseFontSize;
 }
@@ -21,6 +39,12 @@ header {
   width: clamp(250px, 70vw, 320px);
   img {
     @include getImgDimensions(2.3);
+  }
+}
+.newGroup {
+  width: clamp(230px, 55vw, 300px);
+  img {
+    @include getImgDimensions(1.9);
   }
 }
 .selectPicIcon {

@@ -18,7 +18,7 @@ const SearchInput = forwardRef((props, inputRef) => {
         <span
           className={`input-group-text ${disableIfLoading} bg-black bg-gradient border-secondary text-light rounded-pill rounded-end`}
         >
-          <Search className="ms-1" style={{ marginTop: "3px" }} />
+          <Search className="mx-0" style={{ marginTop: "3px" }} />
         </span>
         <input
           type="text"

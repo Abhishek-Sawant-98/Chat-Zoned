@@ -5,10 +5,9 @@ import axios from "../../utils/axios";
 import { AppState } from "../../context/ContextProvider";
 import { CircularProgress } from "@mui/material";
 import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
+import { DEFAULT_USER_DP } from "../../utils/appUtils";
 
 const Register = () => {
-  const defaultPicUrl =
-    "https://res.cloudinary.com/abhi-sawant/image/upload/v1653670527/user_dqzjdz.png";
   const [showPassword, setShowPassword] = useState(false);
   const imgInput = useRef();
 
@@ -18,7 +17,7 @@ const Register = () => {
     password: "",
     confirmPassword: "",
     profilePic: null,
-    profilePicUrl: defaultPicUrl,
+    profilePicUrl: DEFAULT_USER_DP,
   });
 
   const { name, email, password, confirmPassword, profilePic, profilePicUrl } =
@@ -133,7 +132,7 @@ const Register = () => {
       password: "",
       confirmPassword: "",
       profilePic: null,
-      profilePicUrl: defaultPicUrl,
+      profilePicUrl: DEFAULT_USER_DP,
     });
     imgInput.current.value = "";
   };
@@ -179,7 +178,7 @@ const Register = () => {
         </i>
         <input
           type="file"
-          accept=".png, .jpg, .jpeg"
+          accept=".png, .jpg, .jpeg .svg"
           onChange={handleImgInputChange}
           name="profilepic"
           id="register__img_input"

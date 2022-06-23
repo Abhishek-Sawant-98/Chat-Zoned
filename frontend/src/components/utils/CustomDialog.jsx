@@ -1,4 +1,8 @@
-import { Close } from "@mui/icons-material";
+import {
+  Close,
+  KeyboardDoubleArrowLeft,
+  KeyboardDoubleArrowRight,
+} from "@mui/icons-material";
 import {
   Button,
   CircularProgress,
@@ -11,11 +15,22 @@ import {
 import { useNavigate } from "react-router-dom";
 import { AppState } from "../../context/ContextProvider";
 
+export const btnHoverStyle = {
+  ":hover": { backgroundColor: "#93c2f727" },
+};
+export const btnCustomStyle = {
+  fontSize: "19px",
+  color: "#8cc2ff",
+  fontFamily: "Mirza",
+  borderRadius: "10px",
+};
+
 const CustomDialog = ({
   children,
   dialogData,
   handleDialogClose,
   showDialogActions,
+  showDialogClose,
 }) => {
   const { formClassNames, setSelectedChat } = AppState();
   const { isOpen, title, nolabel, yeslabel, loadingYeslabel, action } =
@@ -32,16 +47,6 @@ const CustomDialog = ({
       setSelectedChat(null);
       navigate("/");
     }
-  };
-
-  const btnHoverStyle = {
-    ":hover": { backgroundColor: "#93c2f727" },
-  };
-  const btnCustomStyle = {
-    fontSize: "19px",
-    color: "#8cc2ff",
-    fontFamily: "Mirza",
-    borderRadius: "10px",
   };
 
   return (
@@ -61,25 +66,27 @@ const CustomDialog = ({
       >
         <span
           className="d-flex"
-          style={{ marginTop: "-5px", marginRight: "70px" }}
+          style={{ marginTop: "-5px", marginRight: "10px" }}
         >
           {title}
         </span>
-        <IconButton
-          onClick={handleDialogClose}
-          disabled={loading}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: "#999999",
-            ":hover": {
-              backgroundColor: "#aaaaaa20",
-            },
-          }}
-        >
-          <Close />
-        </IconButton>
+        {showDialogClose && (
+          <IconButton
+            onClick={handleDialogClose}
+            disabled={loading}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: "#999999",
+              ":hover": {
+                backgroundColor: "#aaaaaa20",
+              },
+            }}
+          >
+            <Close />
+          </IconButton>
+        )}
       </DialogTitle>
       <DialogContent
         style={{ fontSize: "19px", color: "#e0e0e0", fontFamily: "Mirza" }}
@@ -94,7 +101,19 @@ const CustomDialog = ({
             style={btnCustomStyle}
             onClick={handleDialogClose}
           >
-            {nolabel}
+            {nolabel === "Back" ? (
+              <span>
+                <KeyboardDoubleArrowLeft
+                  className="btnArrowIcons"
+                  style={{
+                    margin: "0px 5px 2px 0px",
+                  }}
+                />
+                Back
+              </span>
+            ) : (
+              nolabel
+            )}
           </Button>
           <Button
             sx={btnHoverStyle}
@@ -102,13 +121,27 @@ const CustomDialog = ({
             style={btnCustomStyle}
             onClick={handleYes}
           >
-            {loading ? (
+            {loading && yeslabel !== "Next" ? (
               <>
                 <CircularProgress size={25} style={{ marginRight: "12px" }} />
                 <span style={{ marginRight: "22px" }}>{loadingYeslabel}</span>
               </>
             ) : (
-              `${yeslabel}`
+              <>
+                {yeslabel === "Next" ? (
+                  <span>
+                    Next
+                    <KeyboardDoubleArrowRight
+                      className="btnArrowIcons"
+                      style={{
+                        marginLeft: "4px",
+                      }}
+                    />
+                  </span>
+                ) : (
+                  yeslabel
+                )}
+              </>
             )}
           </Button>
         </DialogActions>

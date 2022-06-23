@@ -12,7 +12,7 @@ const ChatsPage = () => {
     setLoggedInUser,
     dialogBody,
     dialogData,
-    handleDialogClose,
+    closeDialog,
     showDialogActions,
     selectedChat,
   } = AppState();
@@ -46,8 +46,9 @@ const ChatsPage = () => {
           {/* Alert dialog */}
           <CustomDialog
             dialogData={dialogData}
-            handleDialogClose={handleDialogClose}
+            handleDialogClose={closeDialog}
             showDialogActions={showDialogActions}
+            showDialogClose={true}
           >
             {dialogBody}
           </CustomDialog>

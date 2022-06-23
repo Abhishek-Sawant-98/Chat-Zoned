@@ -5,7 +5,7 @@ import { AppState } from "../../context/ContextProvider";
 import CustomDialog from "../utils/CustomDialog";
 import EditNameBody from "./EditNameBody";
 import { CircularProgress, IconButton } from "@mui/material";
-import EditProfilePicMenu from "../EditProfilePicMenu";
+import EditPicMenu from "../menus/EditPicMenu";
 import getCustomTooltip from "../utils/CustomTooltip";
 import { truncateString } from "../../utils/appUtils";
 
@@ -77,12 +77,9 @@ const EditProfileBody = () => {
   const [childDialogBody, setChildDialogBody] = useState(<></>);
 
   const displayChildDialog = (options) => {
-    setChildDialogData({
-      isOpen: true,
-      ...options,
-    });
+    setChildDialogData({ ...options, isOpen: true });
   };
-  const handleChildDialogClose = () => {
+  const closeChildDialog = () => {
     setChildDialogData({ ...childDialogData, isOpen: false });
   };
 
@@ -98,7 +95,7 @@ const EditProfileBody = () => {
       return displayToast({
         message: "Please Enter a Valid Name",
         type: "warning",
-        duration: 5000,
+        duration: 3000,
         position: "top-center",
       });
     }
@@ -150,7 +147,7 @@ const EditProfileBody = () => {
       return displayToast({
         message: "Please Select an Image Smaller than 2 MB",
         type: "warning",
-        duration: 5000,
+        duration: 4000,
         position: "top-center",
       });
     }
@@ -179,7 +176,7 @@ const EditProfileBody = () => {
       displayToast({
         message: "ProfilePic Updated Successfully.",
         type: "success",
-        duration: 4000,
+        duration: 3000,
         position: "bottom-center",
       });
       setLoading(false);
@@ -240,7 +237,7 @@ const EditProfileBody = () => {
   };
 
   // Open edit name dialog
-  const openEditNameDialog = (e) => {
+  const openEditNameDialog = () => {
     setChildDialogBody(<EditNameBody getUpdatedName={getUpdatedName} />);
     displayChildDialog({
       title: "Edit Name",
@@ -302,18 +299,21 @@ const EditProfileBody = () => {
             </CustomTooltip>
           )}
           {/* Edit/Delete profile pic menu */}
-          <EditProfilePicMenu
+          <EditPicMenu
             anchor={editProfilePicMenuAnchor}
             setAnchor={setEditProfilePicMenuAnchor}
             selectProfilePic={() => imgInput.current.click()}
             openDeletePhotoConfirmDialog={openDeletePhotoConfirmDialog}
+            deletePhotoCondition={
+              !loggedInUser?.profilePic?.endsWith("user_dqzjdz.png")
+            }
           />
           <input
             type="file"
-            accept=".png, .jpg, .jpeg"
+            accept=".png, .jpg, .jpeg .svg"
             onChange={handleImgInputChange}
             name="profilepic"
-            id="viewOrEditProfilePic"
+            id="editProfilePic"
             ref={imgInput}
             className={`d-none`}
             disabled={loading}
@@ -323,7 +323,7 @@ const EditProfileBody = () => {
       {/* View Name */}
       <section className={`dialogField text-center mb-2`}>
         <div className="input-group" style={{ marginTop: "-15px" }}>
-          <CustomTooltip title={name} placement="top" arrow>
+          <CustomTooltip title={name || "Name"} placement="top" arrow>
             <div
               className="w-100 h1 fw-bold mx-4 text-info"
               style={{ fontSize: "35px" }}
@@ -357,7 +357,7 @@ const EditProfileBody = () => {
         className={`dialogField text-center mb-2`}
         style={{ marginTop: "-10px" }}
       >
-        <CustomTooltip title={email} placement="bottom" arrow>
+        <CustomTooltip title={email || "Email"} placement="bottom" arrow>
           <span className="h4" style={{ color: "lightblue" }}>
             {truncateString(email, 25, 21)}
           </span>
@@ -366,8 +366,9 @@ const EditProfileBody = () => {
       {/* Child confirmation dialog */}
       <CustomDialog
         dialogData={childDialogData}
-        handleDialogClose={handleChildDialogClose}
+        handleDialogClose={closeChildDialog}
         showDialogActions={true}
+        showDialogClose={true}
       >
         {childDialogBody}
       </CustomDialog>

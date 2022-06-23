@@ -1,16 +1,14 @@
 import { Delete, Upload } from "@mui/icons-material";
 import { ListItemIcon, MenuItem } from "@mui/material";
-import Menu, { menuIconProps, menuItemProps } from "./utils/Menu";
-import { AppState } from "../context/ContextProvider";
+import Menu, { menuIconProps, menuItemProps } from "../utils/Menu";
 
-const EditProfilePicMenu = ({
+const EditPicMenu = ({
   anchor,
   setAnchor,
   selectProfilePic,
   openDeletePhotoConfirmDialog,
+  deletePhotoCondition,
 }) => {
-  const { loggedInUser } = AppState();
-
   return (
     <Menu
       menuAnchor={anchor}
@@ -24,7 +22,7 @@ const EditProfilePicMenu = ({
         </ListItemIcon>
         Upload Photo
       </MenuItem>
-      {!loggedInUser?.profilePic?.endsWith("user_dqzjdz.png") && (
+      {deletePhotoCondition && (
         <MenuItem sx={menuItemProps} onClick={openDeletePhotoConfirmDialog}>
           <ListItemIcon sx={menuIconProps}>
             <Delete />
@@ -36,4 +34,4 @@ const EditProfilePicMenu = ({
   );
 };
 
-export default EditProfilePicMenu;
+export default EditPicMenu;

@@ -1,5 +1,5 @@
 .userListItem {
-  margin-bottom: 6px;
+  margin-bottom: 5px;
   border-radius: 20px;
   background-color: #101010;
   &:hover {
@@ -9,13 +9,15 @@
     background-color: #3d0049;
   }
   .userListAvatar {
-    @include getImgDimensions(0.5);
+    @include getImgDimensions(0.42);
     object-fit: cover;
   }
   .userListData {
-    margin: 5px 0px;
     .userListName {
-      margin-bottom: -6px;
+      margin-bottom: -12px;
+    }
+    .userListEmail {
+      margin-bottom: 12px;
     }
   }
 }

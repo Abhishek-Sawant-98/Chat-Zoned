@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { AppState } from "../context/ContextProvider";
 import { debounce, getOneOnOneChatReceiver } from "../utils/appUtils";
 import axios from "../utils/axios";
+import CreateGroupChatBody from "./dialogs/CreateGroupChatBody";
+import NewGroupBody from "./dialogs/NewGroupBody";
 import ChatListItem from "./utils/ChatListItem";
 import getCustomTooltip from "./utils/CustomTooltip";
 import LoadingIndicator from "./utils/LoadingIndicator";
@@ -47,60 +49,12 @@ const ChatListView = () => {
 
   const openCreateGroupChatDialog = () => {
     setShowDialogActions(true);
-    setDialogBody(<></>);
+    setDialogBody(<CreateGroupChatBody />);
     displayDialog({
-      title: "Create Group Chat",
+      title: "Add Group Members",
       nolabel: "Cancel",
-      yeslabel: "Create Group",
-      loadingYeslabel: "Creating Group...",
-      action: async () => {
-        // const { currentPassword, newPassword, confirmNewPassword } =
-        //   editPasswordData;
-
-        // if (newPassword !== confirmNewPassword) {
-        //   return displayToast({
-        //     message: "New Password Must Match Confirm New Password",
-        //     type: "warning",
-        //     duration: 5000,
-        //     position: "top-center",
-        //   });
-        // }
-        setLoading(true);
-        const config = {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${loggedInUser.token}`,
-          },
-        };
-        try {
-          const formData = new FormData();
-          formData.append("displayPic", {});
-          formData.append("chatName", "New Group");
-          formData.append("users", JSON.stringify([]));
-
-          await axios.post("/api/chat/group", formData, config);
-
-          displayToast({
-            message: "Group Created Successfully",
-            type: "success",
-            duration: 2000,
-            position: "bottom-center",
-          });
-
-          setLoading(false);
-          setRefresh(!refresh);
-          return "createdGroup";
-        } catch (error) {
-          displayToast({
-            title: "Couldn't Create Group",
-            message: error.response?.data?.message || "Oops! Server Down",
-            type: "error",
-            duration: 5000,
-            position: "top-center",
-          });
-          setLoading(false);
-        }
-      },
+      yeslabel: "Next",
+      action: null,
     });
   };
 

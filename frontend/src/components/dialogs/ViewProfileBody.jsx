@@ -24,16 +24,14 @@ const ViewProfileBody = () => {
   return (
     <>
       {/* View Profile Pic */}
-      {
-        <section className="dialogField d-flex position-relative mb-4">
-          <img
-            className="img-fluid d-flex mx-auto border border-2 border-primary rounded-circle mt-1"
-            id="view_profilePic"
-            src={profilePic}
-            alt="profilePic"
-          />
-        </section>
-      }
+      <section className="dialogField d-flex position-relative mb-4">
+        <img
+          className="img-fluid d-flex mx-auto border border-2 border-primary rounded-circle mt-1"
+          id="view_profilePic"
+          src={profilePic}
+          alt="profilePic"
+        />
+      </section>
       {/* View Name */}
       <section className={`dialogField text-center mb-2`}>
         <div className="input-group" style={{ marginTop: "-15px" }}>

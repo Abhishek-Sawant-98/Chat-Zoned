@@ -1,10 +1,10 @@
 import { Key, Logout, ManageAccounts, Person } from "@mui/icons-material";
 import { ListItemIcon, MenuItem } from "@mui/material";
-import Menu, { menuIconProps, menuItemProps } from "./utils/Menu";
-import { AppState } from "../context/ContextProvider";
-import axios from "../utils/axios";
-import ChangePasswordBody from "./dialogs/ChangePasswordBody";
-import ViewOrEditProfileBody from "./dialogs/EditProfileBody";
+import Menu, { menuIconProps, menuItemProps } from "../utils/Menu";
+import { AppState } from "../../context/ContextProvider";
+import axios from "../../utils/axios";
+import ChangePasswordBody from "../dialogs/ChangePasswordBody";
+import EditProfileBody from "../dialogs/EditProfileBody";
 
 const ProfileSettingsMenu = ({ anchor, setAnchor }) => {
   const {
@@ -48,9 +48,9 @@ const ProfileSettingsMenu = ({ anchor, setAnchor }) => {
     });
   };
 
-  const openViewOrEditProfileDialog = () => {
+  const openEditProfileDialog = () => {
     setShowDialogActions(false);
-    setDialogBody(<ViewOrEditProfileBody />);
+    setDialogBody(<EditProfileBody />);
     displayDialog({
       title: isGuestUser ? "View Profile" : "Edit Profile",
     });
@@ -141,7 +141,7 @@ const ProfileSettingsMenu = ({ anchor, setAnchor }) => {
       transformOrigin={{ vertical: "top", horizontal: "right" }}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
     >
-      <MenuItem sx={menuItemProps} onClick={openViewOrEditProfileDialog}>
+      <MenuItem sx={menuItemProps} onClick={openEditProfileDialog}>
         <ListItemIcon sx={menuIconProps}>
           {isGuestUser ? <Person /> : <ManageAccounts />}
         </ListItemIcon>

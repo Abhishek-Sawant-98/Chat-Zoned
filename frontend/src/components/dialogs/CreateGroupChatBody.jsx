@@ -1,77 +1,45 @@
-import { Edit } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
-import axios from "../../utils/axios";
 import { AppState } from "../../context/ContextProvider";
+import {} from "@mui/icons-material";
+import { Avatar, Button, Chip, DialogActions, IconButton } from "@mui/material";
 import CustomDialog from "../utils/CustomDialog";
-import EditNameBody from "./EditNameBody";
-import { CircularProgress, IconButton } from "@mui/material";
-import EditProfilePicMenu from "../EditProfilePicMenu";
-import getCustomTooltip from "../utils/CustomTooltip";
-import { truncateString } from "../../utils/appUtils";
-
-const arrowStyles = {
-  color: "#111",
-};
-const tooltipStyles = {
-  maxWidth: 250,
-  color: "#eee",
-  fontFamily: "Mirza",
-  fontSize: 17,
-  border: "1px solid #333",
-  backgroundColor: "#111",
-};
-const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
+import axios from "../../utils/axios";
+import {
+  debounce,
+  DEFAULT_GROUP_DP,
+  truncateString,
+} from "../../utils/appUtils";
+import UserListItem from "../utils/UserListItem";
+import LoadingIndicator from "../utils/LoadingIndicator";
+import SearchInput from "../utils/SearchInput";
+import NewGroupBody from "./NewGroupBody";
 
 const CreateGroupChatBody = () => {
   const {
     formClassNames,
     loggedInUser,
-    setLoggedInUser,
     displayToast,
-    setEditProfilePicMenuAnchor,
+    refresh,
+    setRefresh,
+    setDialogAction,
   } = AppState();
+  const { loading, setLoading } = formClassNames;
 
-  const { loading, setLoading, disableIfLoading } = formClassNames;
-
+  const searchUserInput = useRef(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
   const [groupChatData, setGroupChatData] = useState({
-    profilePicUrl: loggedInUser?.profilePic,
-    name: loggedInUser?.name,
-    email: loggedInUser?.email,
+    chatDisplayPic: null,
+    chatDisplayPicUrl: DEFAULT_GROUP_DP,
+    chatName: "",
+    users: [],
   });
-
-  useEffect(() => {
-    setGroupChatData({
-      ...groupChatData,
-      profilePicUrl: loggedInUser?.profilePic,
-      name: loggedInUser?.name,
-    });
-  }, [loggedInUser]);
-
-  // For profile pic upload loading indicator
-  const [uploading, setUploading] = useState(false);
-
-  const { profilePicUrl, name, email } = groupChatData;
-  const imgInput = useRef();
-  const isGuestUser = loggedInUser?.email === "guest.user@gmail.com";
-
-  const persistUpdatedUser = (updatedUser) => {
-    // Session storage persists updated user even after page refresh
-    sessionStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
-    setLoggedInUser(updatedUser);
-  };
-
-  // Click a button/icon upon 'Enter' or 'Space' keydown
-  const clickOnKeydown = (e) => {
-    if (e.key === " " || e.key === "Enter") {
-      e.target.click();
-    }
-  };
+  const { users } = groupChatData;
 
   // Child Dialog config
   const [childDialogData, setChildDialogData] = useState({
     isOpen: false,
     title: "Child Dialog",
-    content: "Dialog Content",
     nolabel: "NO",
     yeslabel: "YES",
     loadingYeslabel: "Updating...",
@@ -80,128 +48,104 @@ const CreateGroupChatBody = () => {
   const [childDialogBody, setChildDialogBody] = useState(<></>);
 
   const displayChildDialog = (options) => {
-    setChildDialogData({
-      isOpen: true,
-      ...options,
-    });
+    setChildDialogData({ ...options, isOpen: true });
   };
-  const handleChildDialogClose = () => {
+  const closeChildDialog = () => {
     setChildDialogData({ ...childDialogData, isOpen: false });
   };
 
-  // Edited Name config
-  let editedName;
+  // Create group chat
+  const createGroupChat = async () => {
+    const { chatDisplayPic, chatName, users } = groupChatData;
 
-  const getUpdatedName = (updatedName) => {
-    editedName = updatedName;
-  };
-
-  const updateProfileName = async () => {
-    if (!editedName) {
+    if (!chatName) {
       return displayToast({
-        message: "Please Enter a Valid Name",
+        message: "Please Enter a Group Name",
         type: "warning",
-        duration: 5000,
-        position: "top-center",
-      });
-    }
-    setLoading(true);
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser?.token}`,
-      },
-    };
-
-    try {
-      const { data } = await axios.put(
-        "/api/user/update/name",
-        { newUserName: editedName },
-        config
-      );
-
-      displayToast({
-        message: "Name Updated Successfully.",
-        type: "success",
         duration: 3000,
-        position: "bottom-center",
-      });
-
-      setLoading(false);
-      persistUpdatedUser({ ...data, token: loggedInUser.token });
-      return "profileUpdated";
-    } catch (error) {
-      displayToast({
-        title: "Name Update Failed",
-        message: error.response?.data?.message || "Oops! Server Down",
-        type: "error",
-        duration: 5000,
         position: "top-center",
       });
-      setLoading(false);
     }
-  };
-
-  // Update Profile Pic
-  const handleImgInputChange = async (e) => {
-    const image = e.target.files[0];
-    if (!image) return;
-
-    if (image.size >= 2097152) {
-      imgInput.current.value = "";
+    if (users.length < 2) {
       return displayToast({
-        message: "Please Select an Image Smaller than 2 MB",
+        message: "Please Add Atleast 2 Members",
         type: "warning",
-        duration: 5000,
+        duration: 3000,
         position: "top-center",
       });
     }
-    setLoading(true);
-    setUploading(true);
 
+    setLoading(true);
     const config = {
       headers: {
         "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${loggedInUser.token}`,
       },
     };
-
-    const formData = new FormData();
-    formData.append("profilePic", image);
-    formData.append("currentProfilePic", loggedInUser?.profilePic);
-    formData.append("cloudinary_id", loggedInUser?.cloudinary_id);
-
     try {
-      const { data } = await axios.put(
-        "/api/user/update/profile-pic",
-        formData,
-        config
-      );
+      const formData = new FormData();
+      formData.append("displayPic", chatDisplayPic);
+      formData.append("chatName", chatName);
+      formData.append("users", JSON.stringify(users.map((user) => user._id)));
+
+      await axios.post("/api/chat/group", formData, config);
 
       displayToast({
-        message: "ProfilePic Updated Successfully.",
+        message: "Group Created Successfully",
         type: "success",
-        duration: 4000,
+        duration: 2000,
         position: "bottom-center",
       });
+
       setLoading(false);
-      setUploading(false);
-      persistUpdatedUser({ ...data, token: loggedInUser.token });
+      setRefresh(!refresh);
+      return "createdGroup";
     } catch (error) {
       displayToast({
-        title: "ProfilePic Update Failed",
+        title: "Couldn't Create Group",
         message: error.response?.data?.message || "Oops! Server Down",
         type: "error",
         duration: 5000,
         position: "top-center",
       });
       setLoading(false);
-      setUploading(false);
     }
   };
 
-  const deleteProfilePic = async () => {
+  const getUpdatedGroupData = (updatedData) => {
+    setGroupChatData(updatedData);
+  };
+
+  const openNewGroupDialog = () => {
+    if (users.length < 2) {
+      return displayToast({
+        message: "Please Add Atleast 2 Members",
+        type: "warning",
+        duration: 3000,
+        position: "top-center",
+      });
+    }
+    setChildDialogBody(
+      <NewGroupBody data={groupChatData} getData={getUpdatedGroupData} />
+    );
+    displayChildDialog({
+      title: "Create New Group",
+      nolabel: "Back",
+      yeslabel: "Create Group",
+      loadingYeslabel: "Creating Group...",
+      action: createGroupChat,
+    });
+  };
+
+  useEffect(() => {
+    setDialogAction(openNewGroupDialog);
+  }, [groupChatData]);
+
+  const searchUsers = debounce(async (e) => {
+    const query = e.target?.value?.trim();
+    setSearchQuery(query);
+    if (!query) return setSearchResults([]);
+
     setLoading(true);
 
     const config = {
@@ -210,169 +154,144 @@ const CreateGroupChatBody = () => {
         Authorization: `Bearer ${loggedInUser.token}`,
       },
     };
-
     try {
-      const { data } = await axios.put(
-        "/api/user/delete/profile-pic",
-        {
-          currentProfilePic: loggedInUser?.profilePic,
-          cloudinary_id: loggedInUser?.cloudinary_id,
-        },
-        config
-      );
+      const { data } = await axios.get(`/api/user?search=${query}`, config);
 
-      displayToast({
-        message: "ProfilePic Deleted Successfully.",
-        type: "success",
-        duration: 4000,
-        position: "bottom-center",
-      });
       setLoading(false);
-      persistUpdatedUser({ ...data, token: loggedInUser.token });
-      return "profileUpdated";
+      setSearchResults(data);
     } catch (error) {
       displayToast({
-        title: "ProfilePic Deletion Failed",
+        title: "Couldn't Fetch Users",
         message: error.response?.data?.message || "Oops! Server Down",
         type: "error",
         duration: 5000,
-        position: "top-center",
+        position: "bottom-left",
       });
       setLoading(false);
     }
-  };
+  }, 800);
 
-  // Open edit name dialog
-  const openEditNameDialog = (e) => {
-    setChildDialogBody(<EditNameBody getUpdatedName={getUpdatedName} />);
-    displayChildDialog({
-      title: "Edit Name",
-      nolabel: "CANCEL",
-      yeslabel: "SAVE",
-      loadingYeslabel: "Saving...",
-      action: updateProfileName,
+  useEffect(() => {
+    setSearchResults([]);
+    setLoading(false);
+    setSearchQuery("");
+    setGroupChatData({
+      chatDisplayPic: null,
+      chatDisplayPicUrl: DEFAULT_GROUP_DP,
+      chatName: "",
+      users: [],
     });
-  };
+  }, []);
 
-  // Open delete photo confirm dialog
-  const openDeletePhotoConfirmDialog = () => {
-    setChildDialogBody(<>Are you sure you want to delete this profile pic?</>);
-    displayChildDialog({
-      title: "Delete Profile Pic",
-      nolabel: "NO",
-      yeslabel: "YES",
-      loadingYeslabel: "Deleting...",
-      action: deleteProfilePic,
+  const unselectUser = (userId) => {
+    setGroupChatData({
+      ...groupChatData,
+      users: users.filter((u) => u._id !== userId),
     });
-  };
-
-  const openEditProfilePicMenu = (e) => {
-    setEditProfilePicMenuAnchor(e.target);
   };
 
   return (
-    <>
-      {/* View/Edit Profile Pic */}
-      {loading && uploading ? (
-        <div className="d-flex flex-column justify-content-center align-items-center">
-          <CircularProgress
-            size={75}
-            style={{ margin: "30px 0px", color: "lightblue" }}
-          />
-          <span style={{ marginBottom: "45px" }} className="text-light h1">
-            {" Updating Photo..."}
-          </span>
-        </div>
-      ) : (
-        <section className="dialogField d-flex position-relative mb-4">
-          <img
-            className="img-fluid d-flex mx-auto border border-2 border-primary rounded-circle mt-1"
-            id="viewedit__profilePic"
-            src={profilePicUrl}
-            alt="profilePic"
-          />
-          {!isGuestUser && (
-            <CustomTooltip title="Edit Profile Pic" placement="right" arrow>
-              <i
-                id="editProfilePic"
-                tabIndex={2}
-                onKeyDown={clickOnKeydown}
-                className={`selectPicIcon position-absolute p-2 d-flex ${disableIfLoading} justify-content-center align-items-center bg-success rounded-circle pointer`}
-                onClick={openEditProfilePicMenu}
-              >
-                <Edit className="text-light fs-6" />
-              </i>
-            </CustomTooltip>
-          )}
-          {/* Edit/Delete profile pic menu */}
-          <EditProfilePicMenu
-            selectProfilePic={() => imgInput.current.click()}
-            openDeletePhotoConfirmDialog={openDeletePhotoConfirmDialog}
-          />
-          <input
-            type="file"
-            accept=".png, .jpg, .jpeg"
-            onChange={handleImgInputChange}
-            name="profilepic"
-            id="viewOrEditProfilePic"
-            ref={imgInput}
-            className={`d-none`}
-            disabled={loading}
-          />
-        </section>
-      )}
-      {/* View Name */}
-      <section className={`dialogField text-center mb-2`}>
-        <div className="input-group" style={{ marginTop: "-15px" }}>
-          <CustomTooltip title={name} placement="top" arrow>
-            <div
-              className="w-100 h1 fw-bold mx-4 text-info"
-              style={{ fontSize: "35px" }}
-            >
-              {truncateString(name, 25, 21)}
-            </div>
-          </CustomTooltip>
-          {!isGuestUser && (
-            <CustomTooltip title="Edit Name" placement="top" arrow>
-              <IconButton
-                tabIndex={3}
-                onKeyDown={clickOnKeydown}
-                onClick={openEditNameDialog}
-                sx={{
-                  position: "absolute",
-                  right: -8,
-                  top: 6,
-                  ":hover": {
-                    backgroundColor: "#aaaaaa30",
-                  },
-                }}
-              >
-                <Edit className="text-light" />
-              </IconButton>
-            </CustomTooltip>
-          )}
-        </div>
-      </section>
-      {/* View Email */}
+    <div className="addGroupMembers d-flex flex-column">
+      {/* Selected Users tag list */}
       <section
-        className={`dialogField text-center mb-2`}
-        style={{ marginTop: "-10px" }}
+        className="mx-auto px-3 py-2 overflow-auto d-flex flex-wrap"
+        style={{
+          flex: "0.33",
+          borderRadius: "15px",
+          backgroundColor: "#303030",
+        }}
       >
-        <CustomTooltip title={email} placement="bottom" arrow>
-          <span className="h4" style={{ color: "lightblue" }}>
-            {truncateString(email, 25, 21)}
-          </span>
-        </CustomTooltip>
+        {users?.map((user) => (
+          <Chip
+            key={user?._id}
+            className="userChip text-light bg-success rounded-pill fs-6"
+            avatar={
+              <Avatar
+                className="userChipAvatar"
+                alt={user?.name}
+                src={user?.profilePic}
+              />
+            }
+            label={truncateString(user?.name?.split(" ")[0], 12, 8)}
+            onDelete={() => unselectUser(user?._id)}
+          />
+        ))}
+      </section>
+      {/* Search Bar */}
+      <SearchInput
+        ref={searchUserInput}
+        searchHandler={searchUsers}
+        autoFocus={true}
+        placeholder="Search Members"
+        clearInput={() => {
+          setSearchQuery("");
+          setSearchResults([]);
+          searchUserInput.current.focus();
+        }}
+      />
+      {/* Search Results */}
+      <section
+        className="position-relative mx-auto mt-2 overflow-auto"
+        style={{ flex: "1", marginBottom: "-10px" }}
+      >
+        {loading && (
+          <LoadingIndicator
+            message={"Fetching Users..."}
+            msgStyleClasses={"text-light h3"}
+          />
+        )}
+        <div
+          // 'Event delegation' (add only one event listener for
+          // parent element instead of adding for each child element)
+          onClick={(e) => {
+            const userId = e.target.dataset.user;
+            if (!userId) return;
+
+            if (users.find((u) => u._id === userId)) {
+              return displayToast({
+                message: "Member Already Added",
+                type: "warning",
+                duration: 1500,
+                position: "top-center",
+              });
+            }
+            // Add selected user to tag list
+            setGroupChatData({
+              ...groupChatData,
+              users: [...users, searchResults.find((u) => u._id === userId)],
+            });
+          }}
+        >
+          {searchResults.length > 0
+            ? searchResults.map((user) => (
+                <UserListItem
+                  key={user._id}
+                  user={user}
+                  truncateValues={[21, 18]}
+                />
+              ))
+            : searchQuery &&
+              !loading && (
+                <p className="text-light text-center fs-5 mt-3 mx-5">
+                  No results found for '
+                  <span className="text-info">
+                    {truncateString(searchQuery, 25, 22)}
+                  </span>
+                  '
+                </p>
+              )}
+        </div>
       </section>
       {/* Child confirmation dialog */}
       <CustomDialog
         dialogData={childDialogData}
-        handleDialogClose={handleChildDialogClose}
+        handleDialogClose={closeChildDialog}
         showDialogActions={true}
+        showDialogClose={false}
       >
         {childDialogBody}
       </CustomDialog>
-    </>
+    </div>
   );
 };
 
