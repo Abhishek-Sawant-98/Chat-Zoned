@@ -35,7 +35,11 @@ const ViewProfileBody = () => {
       {/* View Name */}
       <section className={`dialogField text-center mb-2`}>
         <div className="input-group" style={{ marginTop: "-15px" }}>
-          <CustomTooltip title={name} placement="top" arrow>
+          <CustomTooltip
+            title={name?.length > 24 ? name : ""}
+            placement="top"
+            arrow
+          >
             <div
               className="w-100 h1 fw-bold mx-4 text-info"
               style={{ fontSize: "35px" }}
@@ -50,7 +54,11 @@ const ViewProfileBody = () => {
         className={`dialogField text-center mb-2`}
         style={{ marginTop: "-10px" }}
       >
-        <CustomTooltip title={email} placement="bottom" arrow>
+        <CustomTooltip
+          title={email?.length > 24 ? email : ""}
+          placement="bottom"
+          arrow
+        >
           <span className="h4" style={{ color: "lightblue" }}>
             {truncateString(email, 25, 21)}
           </span>

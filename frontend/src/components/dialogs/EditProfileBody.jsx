@@ -8,6 +8,7 @@ import { CircularProgress, IconButton } from "@mui/material";
 import EditPicMenu from "../menus/EditPicMenu";
 import getCustomTooltip from "../utils/CustomTooltip";
 import { truncateString } from "../../utils/appUtils";
+import ChildDialog from "../utils/ChildDialog";
 
 const arrowStyles = {
   color: "#111",
@@ -23,10 +24,17 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const EditProfileBody = () => {
-  const { formClassNames, loggedInUser, setLoggedInUser, displayToast } =
-    AppState();
+  const {
+    formClassNames,
+    loggedInUser,
+    setLoggedInUser,
+    displayToast,
+    childDialogMethods,
+    getChildDialogMethods,
+  } = AppState();
 
   const { loading, setLoading, disableIfLoading } = formClassNames;
+  const { setChildDialogBody, displayChildDialog } = childDialogMethods;
 
   const [profileData, setProfileData] = useState({
     profilePicUrl: loggedInUser?.profilePic,
@@ -62,25 +70,6 @@ const EditProfileBody = () => {
     if (e.key === " " || e.key === "Enter") {
       e.target.click();
     }
-  };
-
-  // Child Dialog config
-  const [childDialogData, setChildDialogData] = useState({
-    isOpen: false,
-    title: "Child Dialog",
-    content: "Dialog Content",
-    nolabel: "NO",
-    yeslabel: "YES",
-    loadingYeslabel: "Updating...",
-    action: () => {},
-  });
-  const [childDialogBody, setChildDialogBody] = useState(<></>);
-
-  const displayChildDialog = (options) => {
-    setChildDialogData({ ...options, isOpen: true });
-  };
-  const closeChildDialog = () => {
-    setChildDialogData({ ...childDialogData, isOpen: false });
   };
 
   // Edited Name config
@@ -238,7 +227,13 @@ const EditProfileBody = () => {
 
   // Open edit name dialog
   const openEditNameDialog = () => {
-    setChildDialogBody(<EditNameBody getUpdatedName={getUpdatedName} />);
+    setChildDialogBody(
+      <EditNameBody
+        originalName={loggedInUser?.name}
+        getUpdatedName={getUpdatedName}
+        placeholder="Enter New Name"
+      />
+    );
     displayChildDialog({
       title: "Edit Name",
       nolabel: "CANCEL",
@@ -323,7 +318,11 @@ const EditProfileBody = () => {
       {/* View Name */}
       <section className={`dialogField text-center mb-2`}>
         <div className="input-group" style={{ marginTop: "-15px" }}>
-          <CustomTooltip title={name || "Name"} placement="top" arrow>
+          <CustomTooltip
+            title={name?.length > 24 ? name : ""}
+            placement="top-start"
+            arrow
+          >
             <div
               className="w-100 h1 fw-bold mx-4 text-info"
               style={{ fontSize: "35px" }}
@@ -357,21 +356,18 @@ const EditProfileBody = () => {
         className={`dialogField text-center mb-2`}
         style={{ marginTop: "-10px" }}
       >
-        <CustomTooltip title={email || "Email"} placement="bottom" arrow>
+        <CustomTooltip
+          title={email?.length > 24 ? email : ""}
+          placement="bottom"
+          arrow
+        >
           <span className="h4" style={{ color: "lightblue" }}>
             {truncateString(email, 25, 21)}
           </span>
         </CustomTooltip>
       </section>
       {/* Child confirmation dialog */}
-      <CustomDialog
-        dialogData={childDialogData}
-        handleDialogClose={closeChildDialog}
-        showDialogActions={true}
-        showDialogClose={true}
-      >
-        {childDialogBody}
-      </CustomDialog>
+      <ChildDialog getChildDialogMethods={getChildDialogMethods} />
     </>
   );
 };

@@ -32,7 +32,7 @@ const CustomDialog = ({
   showDialogActions,
   showDialogClose,
 }) => {
-  const { formClassNames, setSelectedChat } = AppState();
+  const { formClassNames, setSelectedChat, closeDialog } = AppState();
   const { isOpen, title, nolabel, yeslabel, loadingYeslabel, action } =
     dialogData;
   const { loading, disableIfLoading } = formClassNames;
@@ -40,8 +40,12 @@ const CustomDialog = ({
 
   const handleYes = async () => {
     const result = await action();
-    if (result === "profileUpdated" || result === "createdGroup") {
+    if (result === "profileUpdated") {
       handleDialogClose();
+    } else if (result === "createdGroup") {
+      handleDialogClose();
+      // Close Parent Dialog as well
+      closeDialog();
     } else if (result === "pwdUpdated" || result === "loggingOut") {
       handleDialogClose();
       setSelectedChat(null);

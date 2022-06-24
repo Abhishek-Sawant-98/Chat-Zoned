@@ -8,7 +8,7 @@ const {
   updateGroupDP,
   updateGroupName,
   removeUserFromGroup,
-  addUserToGroup,
+  addUsersToGroup,
   deleteGroupChat,
   deleteGroupDP,
 } = require("../controllers/ChatController");
@@ -34,7 +34,7 @@ router.put(
 );
 router.put("/group/update-name", authorizeUser, updateGroupName);
 router.put("/group/remove", authorizeUser, removeUserFromGroup);
-router.put("/group/add", authorizeUser, addUserToGroup);
+router.put("/group/add", authorizeUser, addUsersToGroup);
 router.put("/group/delete", authorizeUser, deleteGroupChat);
 
 module.exports = router;

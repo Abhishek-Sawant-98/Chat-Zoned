@@ -13,8 +13,9 @@ import UserListItem from "../utils/UserListItem";
 import LoadingIndicator from "../utils/LoadingIndicator";
 import SearchInput from "../utils/SearchInput";
 import NewGroupBody from "./NewGroupBody";
+import ChildDialog from "../utils/ChildDialog";
 
-const CreateGroupChatBody = () => {
+const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded }) => {
   const {
     formClassNames,
     loggedInUser,
@@ -22,8 +23,14 @@ const CreateGroupChatBody = () => {
     refresh,
     setRefresh,
     setDialogAction,
+    childDialogMethods,
+    getChildDialogMethods,
   } = AppState();
   const { loading, setLoading } = formClassNames;
+
+  // 'groupData' prop is passed while adding members to group
+  // from 'group info' dialog
+  const [addedMembers, setAddedMembers] = useState(groupInfo?.users || []);
 
   const searchUserInput = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,24 +42,19 @@ const CreateGroupChatBody = () => {
     users: [],
   });
   const { users } = groupChatData;
+  const { setChildDialogBody, displayChildDialog } = childDialogMethods;
 
-  // Child Dialog config
-  const [childDialogData, setChildDialogData] = useState({
-    isOpen: false,
-    title: "Child Dialog",
-    nolabel: "NO",
-    yeslabel: "YES",
-    loadingYeslabel: "Updating...",
-    action: () => {},
-  });
-  const [childDialogBody, setChildDialogBody] = useState(<></>);
+  useEffect(() => {
+    if (groupInfo) {
+      getUsersToBeAdded({ ...users });
+    } else {
+      setDialogAction(openNewGroupDialog);
+    }
+  }, [groupChatData]);
 
-  const displayChildDialog = (options) => {
-    setChildDialogData({ ...options, isOpen: true });
-  };
-  const closeChildDialog = () => {
-    setChildDialogData({ ...childDialogData, isOpen: false });
-  };
+  useEffect(() => {
+    setSearchResults([...addedMembers]);
+  }, [addedMembers]);
 
   // Create group chat
   const createGroupChat = async () => {
@@ -137,10 +139,6 @@ const CreateGroupChatBody = () => {
     });
   };
 
-  useEffect(() => {
-    setDialogAction(openNewGroupDialog);
-  }, [groupChatData]);
-
   const searchUsers = debounce(async (e) => {
     const query = e.target?.value?.trim();
     setSearchQuery(query);
@@ -157,8 +155,16 @@ const CreateGroupChatBody = () => {
     try {
       const { data } = await axios.get(`/api/user?search=${query}`, config);
 
+      // Remove all the already added members from search results
+      let membersNotAdded = [...data];
+      addedMembers.forEach((addedMember) => {
+        membersNotAdded = membersNotAdded.filter(
+          (m) => m._id !== addedMember._id
+        );
+      });
+
       setLoading(false);
-      setSearchResults(data);
+      setSearchResults(membersNotAdded);
     } catch (error) {
       displayToast({
         title: "Couldn't Fetch Users",
@@ -188,6 +194,8 @@ const CreateGroupChatBody = () => {
       ...groupChatData,
       users: users.filter((u) => u._id !== userId),
     });
+    setAddedMembers(addedMembers.filter((u) => u._id !== userId));
+    setSearchResults(searchResults);
   };
 
   return (
@@ -256,10 +264,12 @@ const CreateGroupChatBody = () => {
               });
             }
             // Add selected user to tag list
+            const selectedUser = searchResults.find((u) => u._id === userId);
             setGroupChatData({
               ...groupChatData,
-              users: [...users, searchResults.find((u) => u._id === userId)],
+              users: [...users, selectedUser],
             });
+            setAddedMembers([...addedMembers, selectedUser]);
           }}
         >
           {searchResults.length > 0
@@ -283,16 +293,9 @@ const CreateGroupChatBody = () => {
         </div>
       </section>
       {/* Child confirmation dialog */}
-      <CustomDialog
-        dialogData={childDialogData}
-        handleDialogClose={closeChildDialog}
-        showDialogActions={true}
-        showDialogClose={false}
-      >
-        {childDialogBody}
-      </CustomDialog>
+      <ChildDialog getChildDialogMethods={getChildDialogMethods} />
     </div>
   );
 };
 
-export default CreateGroupChatBody;
+export default AddMembersToGroup;

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AppState } from "../context/ContextProvider";
 import { debounce, getOneOnOneChatReceiver } from "../utils/appUtils";
 import axios from "../utils/axios";
-import CreateGroupChatBody from "./dialogs/CreateGroupChatBody";
+import AddMembersToGroup from "./dialogs/AddMembersToGroup";
 import NewGroupBody from "./dialogs/NewGroupBody";
 import ChatListItem from "./utils/ChatListItem";
 import getCustomTooltip from "./utils/CustomTooltip";
@@ -49,7 +49,7 @@ const ChatListView = () => {
 
   const openCreateGroupChatDialog = () => {
     setShowDialogActions(true);
-    setDialogBody(<CreateGroupChatBody />);
+    setDialogBody(<AddMembersToGroup />);
     displayDialog({
       title: "Add Group Members",
       nolabel: "Cancel",

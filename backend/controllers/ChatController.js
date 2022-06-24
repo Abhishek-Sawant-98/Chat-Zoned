@@ -61,9 +61,11 @@ const fetchChats = asyncHandler(async (req, res) => {
     .populate("groupAdmin", "-password -notifications")
     .populate({
       path: "lastMessage",
+      model: "Message",
       // Nested populate in mongoose
       populate: {
         path: "sender",
+        model: "User",
         select: "name email profilePic",
       },
     })
@@ -88,8 +90,8 @@ const createGroupChat = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Minimum of 3 Users Needed to Create a Group");
   }
-
-  users.push(loggedInUserId); // Since group includes currently logged-in user too
+  // Since group includes currently logged-in user too
+  users = [loggedInUserId, ...users];
 
   let displayPicData;
   // If display pic not selected, then set it as the default one
@@ -214,7 +216,7 @@ const updateGroupName = asyncHandler(async (req, res) => {
 
   if (!updatedGroup) {
     res.status(404);
-    throw new Error("Group not found");
+    throw new Error("Group Not Found");
   }
 
   res.status(200).json(updatedGroup);
@@ -253,21 +255,19 @@ const removeUserFromGroup = asyncHandler(async (req, res) => {
   res.status(200).json(updatedGroup);
 });
 
-const addUserToGroup = asyncHandler(async (req, res) => {
-  const { userToBeAdded, chatId } = req.body;
-  // const loggedInUser = req.user?._id;
+const addUsersToGroup = asyncHandler(async (req, res) => {
+  let { usersToBeAdded, chatId } = req.body;
+  usersToBeAdded = JSON.parse(usersToBeAdded);
 
-  if (!userToBeAdded || !chatId) {
+  if (!usersToBeAdded?.length || !chatId) {
     res.status(400);
     throw new Error("Invalid request params for adding user to group");
   }
-
   // Group admin check should be done in the frontend itself, to save time
-
   const updatedGroup = await ChatModel.findByIdAndUpdate(
     chatId,
     {
-      $push: { users: userToBeAdded },
+      $push: { users: { $each: usersToBeAdded } },
     },
     { new: true }
   )
@@ -313,6 +313,6 @@ module.exports = {
   updateGroupDP,
   updateGroupName,
   removeUserFromGroup,
-  addUserToGroup,
+  addUsersToGroup,
   deleteGroupChat,
 };

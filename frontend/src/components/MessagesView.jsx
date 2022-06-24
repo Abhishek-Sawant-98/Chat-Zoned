@@ -8,6 +8,7 @@ import animationData from "../animations/letsChatGif.json";
 import LottieAnimation from "./utils/LottieAnimation";
 import axios from "../utils/axios";
 import ViewProfileBody from "./dialogs/ViewProfileBody";
+import GroupInfoBody from "./dialogs/GroupInfoBody";
 
 const arrowStyles = {
   color: "#777",
@@ -89,6 +90,15 @@ const MessagesView = () => {
     });
   };
 
+  const openGroupInfoDialog = () => {
+    // Open group info dialog
+    setShowDialogActions(false);
+    setDialogBody(<GroupInfoBody />);
+    displayDialog({
+      title: "Group Info",
+    });
+  };
+
   useEffect(() => {
     if (selectedChat) fetchMessages();
   }, [selectedChat]);
@@ -133,7 +143,11 @@ const MessagesView = () => {
                   },
                 }}
                 className="pointer ms-2 ms-md-4"
-                onClick={openViewProfileDialog}
+                onClick={
+                  selectedChat?.isGroupChat
+                    ? openGroupInfoDialog
+                    : openViewProfileDialog
+                }
               >
                 <Avatar
                   src={

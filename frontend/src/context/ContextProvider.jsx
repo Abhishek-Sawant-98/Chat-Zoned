@@ -56,6 +56,17 @@ const ContextProvider = ({ children }) => {
     setDialogData({ ...dialogData, action });
   };
 
+  // Child dialog config
+  const [childDialogMethods, setChildDialogMethods] = useState({
+    setChildDialogBody: null,
+    displayChildDialog: null,
+    closeChildDialog: null,
+  });
+
+  const getChildDialogMethods = (dialogMethods) => {
+    setChildDialogMethods({ ...dialogMethods });
+  };
+
   // Form field config
   const [loading, setLoading] = useState(false);
   const disableIfLoading = `${loading ? "disabled notAllowed" : ""}`;
@@ -93,6 +104,8 @@ const ContextProvider = ({ children }) => {
         setDialogBody,
         showDialogActions,
         setShowDialogActions,
+        childDialogMethods,
+        getChildDialogMethods,
         formClassNames,
       }}
     >

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { AppState } from "../../context/ContextProvider";
 
-const EditNameBody = ({ getUpdatedName }) => {
+const EditNameBody = ({ originalName, getUpdatedName, placeholder }) => {
   const { formClassNames, loggedInUser } = AppState();
   const { loading, formFieldClassName, inputFieldClassName } = formClassNames;
-  const [name, setName] = useState(loggedInUser?.name);
+  const [name, setName] = useState(originalName);
 
   useEffect(() => {
     getUpdatedName(name);
@@ -19,12 +19,11 @@ const EditNameBody = ({ getUpdatedName }) => {
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        name="username"
-        id="editName"
+        name="editname"
         autoFocus
         className={`${inputFieldClassName} mt-1`}
         disabled={loading}
-        placeholder="Enter New Name"
+        placeholder={placeholder}
       />
     </section>
   );

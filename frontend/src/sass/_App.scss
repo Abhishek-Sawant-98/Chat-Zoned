@@ -24,6 +24,11 @@ header {
     }
   }
 }
+.groupDialog {
+  & > * {
+    width: clamp(250px, 70vw, 320px);
+  }
+}
 .app__inputfield {
   font-size: $baseFontSize;
 }

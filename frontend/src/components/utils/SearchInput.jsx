@@ -32,7 +32,7 @@ const SearchInput = forwardRef((props, inputRef) => {
           className={`${inputFieldClassName
             .replace("text-center", "text-start")
             .replace("pill", "0")} border-start-0 border-end-0 d-inline-block`}
-          style={{ cursor: "auto", fontSize: "19px" }}
+          style={{ cursor: "auto", fontSize: "18px" }}
         />
         <span
           className={`input-group-text ${disableIfLoading} bg-black bg-gradient border-secondary text-light rounded-pill rounded-start border-start-0`}
