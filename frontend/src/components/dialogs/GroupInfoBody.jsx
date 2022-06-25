@@ -1,40 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { AppState } from "../../context/ContextProvider";
 import {
-  AddAPhoto,
-  ArrowCircleRight,
-  ArrowForward,
-  ArrowForwardIos,
-  ArrowRight,
+  Delete,
   Edit,
-  KeyboardDoubleArrowRight,
+  InfoOutlined,
+  Logout,
   PersonAdd,
-  Visibility,
 } from "@mui/icons-material";
-import {
-  Avatar,
-  Button,
-  Chip,
-  CircularProgress,
-  DialogActions,
-  IconButton,
-} from "@mui/material";
-import CustomDialog from "../utils/CustomDialog";
+import { CircularProgress, IconButton } from "@mui/material";
 import axios from "../../utils/axios";
-import getCustomTooltip from "../utils/CustomTooltip";
-import {
-  debounce,
-  DEFAULT_GROUP_DP,
-  truncateString,
-} from "../../utils/appUtils";
-import UserListItem from "../utils/UserListItem";
-import LoadingIndicator from "../utils/LoadingIndicator";
-import SearchInput from "../utils/SearchInput";
-import { btnHoverStyle, btnCustomStyle } from "../utils/CustomDialog";
+import { truncateString } from "../../utils/appUtils";
 import EditPicMenu from "../menus/EditPicMenu";
 import EditNameBody from "./EditNameBody";
 import ChildDialog from "../utils/ChildDialog";
 import AddMembersToGroup from "./AddMembersToGroup";
+import ViewGroupMembers from "./ViewGroupMembers";
+import getCustomTooltip from "../utils/CustomTooltip";
+import FullSizeImage from "../utils/FullSizeImage";
 
 const arrowStyles = {
   color: "#111",
@@ -56,29 +38,23 @@ const GroupInfoBody = () => {
     displayToast,
     refresh,
     setRefresh,
-    closeDialog,
-    setDialogAction,
     selectedChat,
     setSelectedChat,
     childDialogMethods,
     getChildDialogMethods,
   } = AppState();
-  const {
-    loading,
-    setLoading,
-    disableIfLoading,
-    formFieldClassName,
-    inputFieldClassName,
-    formLabelClassName,
-  } = formClassNames;
-
+  const { loading, setLoading, disableIfLoading } = formClassNames;
   const { setChildDialogBody, displayChildDialog } = childDialogMethods;
-  const [editGroupDpMenuAnchor, setEditGroupDpMenuAnchor] = useState(null);
   const [groupData, setGroupData] = useState(selectedChat);
   const { chatDisplayPic, chatName, users } = groupData;
   const [uploading, setUploading] = useState(false);
-  const imgInput = useRef(null);
+  const [adding, setAdding] = useState(false);
+  const [editGroupDpMenuAnchor, setEditGroupDpMenuAnchor] = useState(null);
   const isUserGroupAdmin = loggedInUser?._id === groupData?.groupAdmin?._id;
+  const [showDialogActions, setShowDialogActions] = useState(true);
+  const [showDialogClose, setShowDialogClose] = useState(false);
+  const imgInput = useRef(null);
+  const btnClassName = "w-100 btn text-light fs-5 rounded-pill";
 
   // router.put("/group/remove", authorizeUser, removeUserFromGroup);
   // router.put("/group/add", authorizeUser, addUsersToGroup);
@@ -253,8 +229,13 @@ const GroupInfoBody = () => {
     }
   };
 
+  const exitGroup = async () => {};
+  const deleteGroup = async () => {};
+
   // Open edit name dialog
   const openEditGroupNameDialog = () => {
+    setShowDialogActions(true);
+    setShowDialogClose(false);
     setChildDialogBody(
       <EditNameBody
         originalName={chatName}
@@ -273,6 +254,8 @@ const GroupInfoBody = () => {
 
   // Open delete photo confirm dialog
   const openDeletePhotoConfirmDialog = () => {
+    setShowDialogActions(true);
+    setShowDialogClose(false);
     setChildDialogBody(<>Are you sure you want to delete this display pic?</>);
     displayChildDialog({
       title: "Delete Display Pic",
@@ -306,6 +289,7 @@ const GroupInfoBody = () => {
       });
     }
     setLoading(true);
+    setAdding(true);
 
     const config = {
       headers: {
@@ -332,6 +316,7 @@ const GroupInfoBody = () => {
       });
 
       setLoading(false);
+      setAdding(false);
       updateView(data);
       return "profileUpdated";
     } catch (error) {
@@ -343,15 +328,19 @@ const GroupInfoBody = () => {
         position: "top-center",
       });
       setLoading(false);
+      setAdding(false);
     }
   };
 
   // Open Add members dialog
   const openAddMembersDialog = () => {
+    setShowDialogActions(true);
+    setShowDialogClose(false);
     setChildDialogBody(
       <AddMembersToGroup
         groupInfo={groupData}
         getUsersToBeAdded={getUsersToBeAdded}
+        adding={adding}
       />
     );
     displayChildDialog({
@@ -364,19 +353,20 @@ const GroupInfoBody = () => {
   };
 
   const openViewMembersDialog = () => {
-    setChildDialogBody(
-      <EditNameBody
-        originalName={chatName}
-        getUpdatedName={getUpdatedName}
-        placeholder="Enter New Group Name"
-      />
-    );
+    setShowDialogActions(false);
+    setShowDialogClose(true);
+    setChildDialogBody(<ViewGroupMembers groupData={groupData} />);
     displayChildDialog({
-      title: "Edit Group Name",
-      nolabel: "CANCEL",
-      yeslabel: "SAVE",
-      loadingYeslabel: "Saving...",
-      action: updateGroupName,
+      title: `${groupData?.users?.length} Members`,
+    });
+  };
+
+  const displayFullSizeImage = (e) => {
+    setShowDialogActions(false);
+    setShowDialogClose(true);
+    setChildDialogBody(<FullSizeImage event={e} />);
+    displayChildDialog({
+      title: e.target?.alt || "Display Pic",
     });
   };
 
@@ -399,13 +389,17 @@ const GroupInfoBody = () => {
         </div>
       ) : (
         <section className="dialogField d-flex position-relative mb-4">
-          <img
-            className="img-fluid d-flex mx-auto border border-2 border-primary rounded-circle"
-            id="groupInfo__displayPic"
-            src={groupData?.chatDisplayPic || "GroupDp"}
-            style={{ width: "130px", height: "130px" }}
-            alt="displayPic"
-          />
+          <CustomTooltip title="View DP" placement="right" arrow>
+            <img
+              className="img-fluid d-flex mx-auto border border-2 border-primary rounded-circle pointer"
+              id="groupInfo__displayPic"
+              src={groupData?.chatDisplayPic || "GroupDp"}
+              style={{ width: "120px", height: "120px" }}
+              onClick={displayFullSizeImage}
+              alt={groupData?.chatName}
+            />
+          </CustomTooltip>
+
           <CustomTooltip title="Edit Group DP" placement="right" arrow>
             <i
               id="editProfilePic"
@@ -439,8 +433,8 @@ const GroupInfoBody = () => {
       )}
 
       {/* Group Name */}
-      <section className={`dialogField text-center mb-2`}>
-        <div className="input-group" style={{ marginTop: "-15px" }}>
+      <section className={`dialogField text-center mb-3`}>
+        <div className="input-group" style={{ marginTop: "-10px" }}>
           <CustomTooltip
             title={chatName?.length > 24 ? chatName : ""}
             placement="top"
@@ -448,7 +442,7 @@ const GroupInfoBody = () => {
           >
             <div
               className="w-100 fw-bold mx-4 text-info"
-              style={{ fontSize: "30px" }}
+              style={{ fontSize: "30px", lineHeight: "30px" }}
             >
               {truncateString(chatName, 25, 21)}
             </div>
@@ -461,7 +455,7 @@ const GroupInfoBody = () => {
               sx={{
                 position: "absolute",
                 right: -8,
-                top: 6,
+                top: 0,
                 ":hover": {
                   backgroundColor: "#aaaaaa30",
                 },
@@ -481,11 +475,11 @@ const GroupInfoBody = () => {
         {`Group : ${groupData?.users?.length} Members`}
       </section>
 
-      {/* Add Members */}
+      {/* Add Members (only for admins) */}
       {isUserGroupAdmin && (
         <section className={`dialogField text-center mb-2`}>
           <button
-            className={`w-100 btn btn-outline-success bg-opacity-50 text-light fs-5 rounded-pill`}
+            className={`${btnClassName} btn-outline-success`}
             onClick={openAddMembersDialog}
           >
             <PersonAdd className="text-light" style={{ marginLeft: "-20px" }} />
@@ -497,16 +491,47 @@ const GroupInfoBody = () => {
       {/* View Members */}
       <section className={`dialogField text-center mb-2`}>
         <button
-          className={`w-100 btn btn-outline-primary bg-opacity-50 text-light fs-5 rounded-pill`}
+          className={`${btnClassName} btn-outline-primary`}
           onClick={openViewMembersDialog}
         >
-          <Visibility className="text-light" style={{ marginLeft: "-20px" }} />
+          <InfoOutlined
+            className="text-light"
+            style={{ marginLeft: "-15px" }}
+          />
           <span className="ms-2">View Members</span>
         </button>
       </section>
 
-      {/* Child confirmation dialog */}
-      <ChildDialog getChildDialogMethods={getChildDialogMethods} />
+      {/* Exit Group */}
+      <section className={`dialogField text-center mb-2`}>
+        <button
+          className={`${btnClassName} btn-outline-danger`}
+          onClick={exitGroup}
+        >
+          <Logout className="text-light" style={{ marginLeft: "-30px" }} />
+          <span className="ms-2">Exit Group</span>
+        </button>
+      </section>
+
+      {/* Delete Group (only for admins) */}
+      {isUserGroupAdmin && (
+        <section className={`dialogField text-center mb-2`}>
+          <button
+            className={`${btnClassName} btn-outline-danger`}
+            onClick={deleteGroup}
+          >
+            <Delete className="text-light" style={{ marginLeft: "-20px" }} />
+            <span className="ms-2">Delete Group</span>
+          </button>
+        </section>
+      )}
+
+      {/* Child dialog */}
+      <ChildDialog
+        getChildDialogMethods={getChildDialogMethods}
+        showChildDialogActions={showDialogActions}
+        showChildDialogClose={showDialogClose}
+      />
     </div>
   );
 };

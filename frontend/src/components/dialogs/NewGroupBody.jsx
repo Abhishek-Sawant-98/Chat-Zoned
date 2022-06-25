@@ -1,27 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { AppState } from "../../context/ContextProvider";
-import {
-  AddAPhoto,
-  ArrowCircleRight,
-  ArrowForward,
-  ArrowForwardIos,
-  ArrowRight,
-  Edit,
-  KeyboardDoubleArrowRight,
-} from "@mui/icons-material";
-import { Avatar, Button, Chip, DialogActions, IconButton } from "@mui/material";
-import CustomDialog from "../utils/CustomDialog";
-import axios from "../../utils/axios";
+import { Edit } from "@mui/icons-material";
 import getCustomTooltip from "../utils/CustomTooltip";
-import {
-  debounce,
-  DEFAULT_GROUP_DP,
-  truncateString,
-} from "../../utils/appUtils";
-import UserListItem from "../utils/UserListItem";
-import LoadingIndicator from "../utils/LoadingIndicator";
-import SearchInput from "../utils/SearchInput";
-import { btnHoverStyle, btnCustomStyle } from "../utils/CustomDialog";
+import { DEFAULT_GROUP_DP } from "../../utils/appUtils";
 import EditPicMenu from "../menus/EditPicMenu";
 
 const arrowStyles = {
@@ -38,18 +19,9 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const NewGroupBody = ({ data, getData }) => {
-  const {
-    formClassNames,
-    loggedInUser,
-    displayToast,
-    refresh,
-    setRefresh,
-    closeDialog,
-    setDialogAction,
-  } = AppState();
+  const { formClassNames, displayToast } = AppState();
   const {
     loading,
-    setLoading,
     disableIfLoading,
     formFieldClassName,
     inputFieldClassName,
@@ -58,7 +30,7 @@ const NewGroupBody = ({ data, getData }) => {
 
   const [editGroupDpMenuAnchor, setEditGroupDpMenuAnchor] = useState(null);
   const [groupData, setGroupData] = useState(data);
-  const { chatDisplayPic, chatDisplayPicUrl, chatName } = groupData;
+  const { chatDisplayPicUrl, chatName } = groupData;
   const imgInput = useRef();
 
   useEffect(() => {

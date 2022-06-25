@@ -33,6 +33,7 @@ import { btnHoverStyle, btnCustomStyle } from "../utils/CustomDialog";
 import EditPicMenu from "../menus/EditPicMenu";
 import EditNameBody from "./EditNameBody";
 import ChildDialog from "../utils/ChildDialog";
+import GroupMemberItem from "../utils/GroupMemberItem";
 
 const arrowStyles = {
   color: "#111",
@@ -47,7 +48,7 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const ViewGroupMembers = () => {
+const ViewGroupMembers = ({ groupData }) => {
   const {
     formClassNames,
     loggedInUser,
@@ -70,51 +71,41 @@ const ViewGroupMembers = () => {
     formLabelClassName,
   } = formClassNames;
 
-  //   const [filteredMembers, setFilteredMembers] = useState(users);
+  const { users } = groupData;
   const filterMemberInput = useRef(null);
+  const [filteredMembers, setFilteredMembers] = useState(users);
 
-  // Debouncing filterChats method to limit the no. of fn calls
-  //   const filterUsers = debounce((e) => {
-  //     const memberNameInput = e.target?.value?.toLowerCase().trim();
-  //     if (!memberNameInput) {
-  //       return setFilteredMembers(users);
-  //     }
-  //     setFilteredMembers(
-  //       users?.filter(
-  //         (user) =>
-  //           user?.name?.toLowerCase().includes(memberNameInput) ||
-  //           user?.email?.toLowerCase().includes(memberNameInput)
-  //       )
-  //     );
-  //   }, 600);
+  // Debouncing filterMembers method to limit the no. of fn calls
+  const filterMembers = debounce((e) => {
+    const memberNameInput = e.target?.value?.toLowerCase().trim();
+    if (!memberNameInput) {
+      return setFilteredMembers(users);
+    }
+    setFilteredMembers(
+      users?.filter(
+        (user) =>
+          user?.name?.toLowerCase().includes(memberNameInput) ||
+          user?.email?.toLowerCase().includes(memberNameInput)
+      )
+    );
+  }, 600);
 
   return (
-    <div>
-      {/* No. of members */}
-      {/* <section
-        className={`dialogField text-center mb-2`}
-        style={{ marginTop: "-15px" }}
-      >
-        {`Group : ${groupData?.users?.length} Members`}
-      </section> */}
-
+    <div className="addGroupMembers d-flex flex-column">
       {/* Search Bar */}
-      {/* {users?.length > 0 && (
+      {users?.length > 0 && (
         <section className="searchChat" style={{ marginTop: "-15px" }}>
           <SearchInput
             ref={filterMemberInput}
-            searchHandler={filterUsers}
+            searchHandler={filterMembers}
             autoFocus={false}
             placeholder="Search Member"
             clearInput={() => setFilteredMembers(users)}
           />
         </section>
-      )} */}
+      )}
       {/* Member list */}
-      {/* <section
-        className="chatList p-1 overflow-auto position-relative"
-        style={{ marginTop: "-5px" }}
-      >
+      <section className="chatList p-1 overflow-auto position-relative">
         {filteredMembers?.length > 0 ? (
           <div
             // 'Event delegation' (add only one event listener for
@@ -138,7 +129,7 @@ const ViewGroupMembers = () => {
             No Members Found
           </span>
         )}
-      </section> */}
+      </section>
     </div>
   );
 };

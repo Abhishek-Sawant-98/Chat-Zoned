@@ -1,6 +1,6 @@
-import getCustomTooltip from "../utils/CustomTooltip";
 import { getOneOnOneChatReceiver, truncateString } from "../../utils/appUtils";
 import { AppState } from "../../context/ContextProvider";
+import getCustomTooltip from "../utils/CustomTooltip";
 const arrowStyles = {
   color: "#111",
 };
@@ -29,7 +29,7 @@ const ViewProfileBody = () => {
           className="img-fluid d-flex mx-auto border border-2 border-primary rounded-circle mt-1"
           id="view_profilePic"
           src={profilePic}
-          alt="profilePic"
+          alt={name}
         />
       </section>
       {/* View Name */}

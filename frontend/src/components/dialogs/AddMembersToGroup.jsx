@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AppState } from "../../context/ContextProvider";
 import {} from "@mui/icons-material";
-import { Avatar, Button, Chip, DialogActions, IconButton } from "@mui/material";
-import CustomDialog from "../utils/CustomDialog";
+import { Avatar, Chip } from "@mui/material";
 import axios from "../../utils/axios";
 import {
   debounce,
@@ -15,7 +14,7 @@ import SearchInput from "../utils/SearchInput";
 import NewGroupBody from "./NewGroupBody";
 import ChildDialog from "../utils/ChildDialog";
 
-const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded }) => {
+const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded, adding }) => {
   const {
     formClassNames,
     loggedInUser,
@@ -26,7 +25,9 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded }) => {
     childDialogMethods,
     getChildDialogMethods,
   } = AppState();
-  const { loading, setLoading } = formClassNames;
+  const { setLoading } = formClassNames;
+  const [fetching, setFetching] = useState(false);
+  const [isMemberSelected, setIsMemberSelected] = useState(false);
 
   // 'groupData' prop is passed while adding members to group
   // from 'group info' dialog
@@ -45,16 +46,13 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded }) => {
   const { setChildDialogBody, displayChildDialog } = childDialogMethods;
 
   useEffect(() => {
+    // Update usersToBeAdded in parent dialog
     if (groupInfo) {
-      getUsersToBeAdded({ ...users });
+      getUsersToBeAdded([...users]);
     } else {
       setDialogAction(openNewGroupDialog);
     }
   }, [groupChatData]);
-
-  useEffect(() => {
-    setSearchResults([...addedMembers]);
-  }, [addedMembers]);
 
   // Create group chat
   const createGroupChat = async () => {
@@ -144,7 +142,8 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded }) => {
     setSearchQuery(query);
     if (!query) return setSearchResults([]);
 
-    setLoading(true);
+    setFetching(true);
+    if (isMemberSelected) setIsMemberSelected(false);
 
     const config = {
       headers: {
@@ -163,7 +162,7 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded }) => {
         );
       });
 
-      setLoading(false);
+      setFetching(false);
       setSearchResults(membersNotAdded);
     } catch (error) {
       displayToast({
@@ -173,13 +172,12 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded }) => {
         duration: 5000,
         position: "bottom-left",
       });
-      setLoading(false);
+      setFetching(false);
     }
   }, 800);
 
   useEffect(() => {
     setSearchResults([]);
-    setLoading(false);
     setSearchQuery("");
     setGroupChatData({
       chatDisplayPic: null,
@@ -189,13 +187,16 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded }) => {
     });
   }, []);
 
-  const unselectUser = (userId) => {
+  const unselectUser = (user) => {
+    if (!user) return;
     setGroupChatData({
       ...groupChatData,
-      users: users.filter((u) => u._id !== userId),
+      users: users.filter((u) => u._id !== user._id),
     });
-    setAddedMembers(addedMembers.filter((u) => u._id !== userId));
-    setSearchResults(searchResults);
+    // Remove user from added member list
+    setAddedMembers(addedMembers.filter((u) => u._id !== user._id));
+    // Add removed user to search result list
+    setSearchResults([user, ...searchResults]);
   };
 
   return (
@@ -221,7 +222,7 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded }) => {
               />
             }
             label={truncateString(user?.name?.split(" ")[0], 12, 8)}
-            onDelete={() => unselectUser(user?._id)}
+            onDelete={() => unselectUser(user)}
           />
         ))}
       </section>
@@ -242,9 +243,9 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded }) => {
         className="position-relative mx-auto mt-2 overflow-auto"
         style={{ flex: "1", marginBottom: "-10px" }}
       >
-        {loading && (
+        {fetching && (
           <LoadingIndicator
-            message={"Fetching Users..."}
+            message={`${adding ? "Adding Members..." : "Fetching Users..."}`}
             msgStyleClasses={"text-light h3"}
           />
         )}
@@ -255,21 +256,17 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded }) => {
             const userId = e.target.dataset.user;
             if (!userId) return;
 
-            if (users.find((u) => u._id === userId)) {
-              return displayToast({
-                message: "Member Already Added",
-                type: "warning",
-                duration: 1500,
-                position: "top-center",
-              });
-            }
+            if (!isMemberSelected) setIsMemberSelected(true);
             // Add selected user to tag list
             const selectedUser = searchResults.find((u) => u._id === userId);
             setGroupChatData({
               ...groupChatData,
               users: [...users, selectedUser],
             });
+            // Add selected user to added member list
             setAddedMembers([...addedMembers, selectedUser]);
+            // Remove selected user from search result list
+            setSearchResults(searchResults.filter((u) => u._id !== userId));
           }}
         >
           {searchResults.length > 0
@@ -281,9 +278,10 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded }) => {
                 />
               ))
             : searchQuery &&
-              !loading && (
+              !fetching && (
                 <p className="text-light text-center fs-5 mt-3 mx-5">
-                  No results found for '
+                  {isMemberSelected ? "No Other Users " : "No Results "}
+                  Found for '
                   <span className="text-info">
                     {truncateString(searchQuery, 25, 22)}
                   </span>
@@ -292,7 +290,7 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded }) => {
               )}
         </div>
       </section>
-      {/* Child confirmation dialog */}
+      {/* Child dialog */}
       <ChildDialog getChildDialogMethods={getChildDialogMethods} />
     </div>
   );

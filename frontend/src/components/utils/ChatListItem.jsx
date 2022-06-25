@@ -6,6 +6,7 @@ import {
   PictureAsPdf,
   VideoFile,
 } from "@mui/icons-material";
+import { IconButton } from "@mui/material";
 import React from "react";
 import { AppState } from "../../context/ContextProvider";
 import { getOneOnOneChatReceiver, truncateString } from "../../utils/appUtils";
@@ -60,7 +61,7 @@ const ChatListItem = ({ chat }) => {
     <div
       data-chat={_id}
       className={`chatListItem ${
-        selectedChat?._id === _id && "isSelected"
+        selectedChat?._id === _id ? "isSelected" : ""
       } user-select-none d-flex text-light justify-content-start align-items-center pointer`}
     >
       {/* Chat Display Pic */}
@@ -72,7 +73,7 @@ const ChatListItem = ({ chat }) => {
       >
         <img
           src={chatDisplayPic}
-          alt={_id}
+          alt={chatName}
           data-chat={_id}
           className={`img-fluid chatListAvatar rounded-circle`}
         />

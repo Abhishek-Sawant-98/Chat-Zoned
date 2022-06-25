@@ -43,7 +43,7 @@ header {
 .dialogField {
   width: clamp(250px, 70vw, 320px);
   img {
-    @include getImgDimensions(2.3);
+    @include getImgDimensions(2.5);
   }
 }
 .newGroup {

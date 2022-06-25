@@ -7,7 +7,9 @@ import axios from "../utils/axios";
 import AddMembersToGroup from "./dialogs/AddMembersToGroup";
 import NewGroupBody from "./dialogs/NewGroupBody";
 import ChatListItem from "./utils/ChatListItem";
+import ChildDialog from "./utils/ChildDialog";
 import getCustomTooltip from "./utils/CustomTooltip";
+import FullSizeImage from "./utils/FullSizeImage";
 import LoadingIndicator from "./utils/LoadingIndicator";
 import SearchInput from "./utils/SearchInput";
 
@@ -55,6 +57,14 @@ const ChatListView = () => {
       nolabel: "Cancel",
       yeslabel: "Next",
       action: null,
+    });
+  };
+
+  const displayFullSizeImage = (e) => {
+    setShowDialogActions(false);
+    setDialogBody(<FullSizeImage event={e} />);
+    displayDialog({
+      title: e.target?.alt || "Display Pic",
     });
   };
 
@@ -164,11 +174,15 @@ const ChatListView = () => {
             // 'Event delegation' (add only one event listener for
             // parent element instead of adding for each child element)
             onClick={(e) => {
-              const chatId = e.target.dataset.chat;
-              if (chatId)
-                setSelectedChat(
-                  filteredChats.find((chat) => chat._id === chatId)
-                );
+              const chatId = e.target?.dataset?.chat;
+              if (!chatId) return;
+
+              if (e.target?.className?.includes("chatListAvatar")) {
+                return displayFullSizeImage(e);
+              }
+              setSelectedChat(
+                filteredChats.find((chat) => chat._id === chatId)
+              );
             }}
           >
             {filteredChats.map((chat) => (

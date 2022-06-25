@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import CustomDialog from "./CustomDialog";
 
-const ChildDialog = ({ getChildDialogMethods }) => {
+const ChildDialog = ({
+  getChildDialogMethods,
+  showChildDialogActions = true,
+  showChildDialogClose = false,
+}) => {
   // Child Dialog config
   const [childDialogData, setChildDialogData] = useState({
     isOpen: false,
@@ -26,14 +30,14 @@ const ChildDialog = ({ getChildDialogMethods }) => {
       displayChildDialog,
       closeChildDialog,
     });
-  }, []);
+  }, [childDialogData]);
 
   return (
     <CustomDialog
       dialogData={childDialogData}
       handleDialogClose={closeChildDialog}
-      showDialogActions={true}
-      showDialogClose={false}
+      showDialogActions={showChildDialogActions}
+      showDialogClose={showChildDialogClose}
     >
       {childDialogBody}
     </CustomDialog>
