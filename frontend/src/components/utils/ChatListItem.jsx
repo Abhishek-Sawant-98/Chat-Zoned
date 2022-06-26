@@ -45,7 +45,7 @@ const ChatListItem = ({ chat }) => {
   let lastMsgFileType;
 
   if (lastMsgFile) {
-    lastMsgFileType = /.png|.jpg|.jpeg$/.test(lastMsgFile)
+    lastMsgFileType = /.png|.jpg|.jpeg|.svg$/.test(lastMsgFile)
       ? "image"
       : /.gif$/.test(lastMsgFile)
       ? "gif"
@@ -75,7 +75,7 @@ const ChatListItem = ({ chat }) => {
           src={chatDisplayPic}
           alt={chatName}
           data-chat={_id}
-          className={`img-fluid chatListAvatar rounded-circle`}
+          className={`img-fluid listItemAvatar chatListAvatar rounded-circle`}
         />
       </CustomTooltip>
       {/* Chat Data */}
@@ -97,7 +97,7 @@ const ChatListItem = ({ chat }) => {
               <>
                 {lastMsgFileType === "image" ? (
                   <span>
-                    <Image /> Image
+                    <Image /> Photo
                   </span>
                 ) : lastMsgFileType === "gif" ? (
                   <span>

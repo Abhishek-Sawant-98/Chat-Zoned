@@ -58,7 +58,7 @@ const fetchChats = asyncHandler(async (req, res) => {
     users: { $elemMatch: { $eq: loggedInUserId } },
   })
     .populate("users", "-password -notifications")
-    .populate("groupAdmin", "-password -notifications")
+    .populate("groupAdmins", "-password -notifications")
     .populate({
       path: "lastMessage",
       model: "Message",
@@ -114,13 +114,13 @@ const createGroupChat = asyncHandler(async (req, res) => {
     chatName,
     users,
     isGroupChat: true,
-    groupAdmin: loggedInUserId,
+    groupAdmins: [loggedInUserId],
     ...displayPicData,
   });
 
   const populatedGroup = await ChatModel.findById(createdGroup._id)
     .populate("users", "-password -notifications")
-    .populate("groupAdmin", "-password -notifications");
+    .populate("groupAdmins", "-password -notifications");
 
   res.status(201).json(populatedGroup);
 });
@@ -151,7 +151,7 @@ const deleteGroupDP = asyncHandler(async (req, res) => {
     { new: true }
   )
     .populate("users", "-password -notifications")
-    .populate("groupAdmin", "-password -notifications");
+    .populate("groupAdmins", "-password -notifications");
 
   if (!updatedGroup) {
     res.status(404);
@@ -186,7 +186,7 @@ const updateGroupDP = asyncHandler(async (req, res) => {
     { new: true }
   )
     .populate("users", "-password -notifications")
-    .populate("groupAdmin", "-password -notifications");
+    .populate("groupAdmins", "-password -notifications");
 
   if (!updatedGroup) {
     res.status(404);
@@ -212,7 +212,7 @@ const updateGroupName = asyncHandler(async (req, res) => {
     { new: true }
   )
     .populate("users", "-password -notifications")
-    .populate("groupAdmin", "-password -notifications");
+    .populate("groupAdmins", "-password -notifications");
 
   if (!updatedGroup) {
     res.status(404);
@@ -233,7 +233,7 @@ const removeUserFromGroup = asyncHandler(async (req, res) => {
 
   // Group admin check should be done in the frontend itself, to save time
 
-  // What happens when userToBeRemoved === groupAdmin
+  // What happens when userToBeRemoved === groupAdmins
   // What happens when a non-admin leaves a group when group length is only 3
   // What happens when an admin leaves a group
 
@@ -245,7 +245,7 @@ const removeUserFromGroup = asyncHandler(async (req, res) => {
     { new: true }
   )
     .populate("users", "-password -notifications")
-    .populate("groupAdmin", "-password -notifications");
+    .populate("groupAdmins", "-password -notifications");
 
   if (!updatedGroup) {
     res.status(404);
@@ -272,7 +272,7 @@ const addUsersToGroup = asyncHandler(async (req, res) => {
     { new: true }
   )
     .populate("users", "-password -notifications")
-    .populate("groupAdmin", "-password -notifications");
+    .populate("groupAdmins", "-password -notifications");
 
   if (!updatedGroup) {
     res.status(404);
@@ -288,14 +288,14 @@ const deleteGroupChat = asyncHandler(async (req, res) => {
 
   if (!chatId) {
     res.status(400);
-    throw new Error("Invalid chatId for deleting group");
+    throw new Error("Invalid chatId for Deleting Group");
   }
 
   // Group admin check should be done in the frontend itself, to save time
 
   const deletedGroup = await ChatModel.findByIdAndDelete(chatId)
     .populate("users", "-password -notifications")
-    .populate("groupAdmin", "-password -notifications");
+    .populate("groupAdmins", "-password -notifications");
 
   if (!deletedGroup) {
     res.status(404);
@@ -303,6 +303,58 @@ const deleteGroupChat = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json(deletedGroup);
+});
+
+const makeGroupAdmin = asyncHandler(async (req, res) => {
+  let { userId, chatId } = req.body;
+
+  if (!userId || !chatId) {
+    res.status(400);
+    throw new Error("Invalid request params for making group admin");
+  }
+
+  const updatedGroup = await ChatModel.findByIdAndUpdate(
+    chatId,
+    {
+      $push: { groupAdmins: userId },
+    },
+    { new: true }
+  )
+    .populate("users", "-password -notifications")
+    .populate("groupAdmins", "-password -notifications");
+
+  if (!updatedGroup) {
+    res.status(404);
+    throw new Error("Group not found");
+  }
+
+  res.status(200).json(updatedGroup);
+});
+
+const dismissAsAdmin = asyncHandler(async (req, res) => {
+  let { userId, chatId } = req.body;
+
+  if (!userId || !chatId) {
+    res.status(400);
+    throw new Error("Invalid request params for dismissing group admin");
+  }
+
+  const updatedGroup = await ChatModel.findByIdAndUpdate(
+    chatId,
+    {
+      $pull: { groupAdmins: userId },
+    },
+    { new: true }
+  )
+    .populate("users", "-password -notifications")
+    .populate("groupAdmins", "-password -notifications");
+
+  if (!updatedGroup) {
+    res.status(404);
+    throw new Error("Group Not Found");
+  }
+
+  res.status(200).json(updatedGroup);
 });
 
 module.exports = {
@@ -314,5 +366,7 @@ module.exports = {
   updateGroupName,
   removeUserFromGroup,
   addUsersToGroup,
+  makeGroupAdmin,
+  dismissAsAdmin,
   deleteGroupChat,
 };

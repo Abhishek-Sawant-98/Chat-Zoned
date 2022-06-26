@@ -52,7 +52,7 @@ const ChangePasswordBody = ({ getUpdatedState }) => {
             id="current_password"
             className={`${inputFieldClassName} rounded-end`}
             disabled={loading}
-            placeholder="Must be correct"
+            placeholder="Used While Signing In"
           />
           <PasswordVisibilityToggle
             disableIfLoading={disableIfLoading}
@@ -78,7 +78,7 @@ const ChangePasswordBody = ({ getUpdatedState }) => {
             id="new_password"
             className={`${inputFieldClassName} rounded-end`}
             disabled={loading}
-            placeholder="Different from current"
+            placeholder="Different from Current"
           />
           <PasswordVisibilityToggle
             disableIfLoading={disableIfLoading}
@@ -107,7 +107,7 @@ const ChangePasswordBody = ({ getUpdatedState }) => {
             id="confirm_new_password"
             className={`${inputFieldClassName} rounded-end`}
             disabled={loading}
-            placeholder="Exactly as above"
+            placeholder="Exactly as Above"
           />
           <PasswordVisibilityToggle
             disableIfLoading={disableIfLoading}

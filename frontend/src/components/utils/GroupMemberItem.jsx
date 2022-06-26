@@ -1,3 +1,6 @@
+import { KeyboardArrowDown } from "@mui/icons-material";
+import { Badge, IconButton } from "@mui/material";
+import { AppState } from "../../context/ContextProvider";
 import { truncateString } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 
@@ -15,17 +18,35 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const GroupMemberItem = ({ user, truncateValues }) => {
+  const { loggedInUser } = AppState();
   const { _id, name, email, profilePic } = user;
   const [max, index] = truncateValues;
+  const isNotLoggedInUser = _id !== loggedInUser?._id;
 
   return (
     <div
       data-user={_id}
-      className={`userListItem user-select-none d-flex text-light justify-content-start align-items-center pointer px-3`}
+      className={`groupMemberItem position-relative user-select-none d-flex text-light justify-content-start align-items-center pointer px-3`}
     >
+      {user?.isGroupAdmin && (
+        <span
+          data-user={_id}
+          className={`adminBadge position-absolute fw-light badge rounded-pill bg-success border border-secondary`}
+        >
+          Admin
+        </span>
+      )}
+      {isNotLoggedInUser && (
+        <span
+          data-user={_id}
+          className="memberSettingsIcon pointer text-light position-absolute rounded-circle"
+        >
+          <KeyboardArrowDown data-user={_id} />
+        </span>
+      )}
       <CustomTooltip
         data-user={_id}
-        title={`${name} (${email})`}
+        title={`${isNotLoggedInUser ? `${name} (${email})` : ""}`}
         placement="top-start"
         arrow
       >
@@ -33,17 +54,17 @@ const GroupMemberItem = ({ user, truncateValues }) => {
           src={profilePic}
           alt={_id}
           data-user={_id}
-          className={`img-fluid userListAvatar rounded-circle`}
+          className={`img-fluid listItemAvatar groupMemberAvatar rounded-circle`}
         />
       </CustomTooltip>
       <div
         data-user={_id}
-        className="userListData d-flex flex-column align-items-start px-2"
+        className="groupMemberData d-flex flex-column align-items-start px-2"
       >
-        <p data-user={_id} className="userListName fs-4 fw-bold text-info">
-          {truncateString(name, max, index)}
+        <p data-user={_id} className="groupMemberName fw-bold text-info">
+          {isNotLoggedInUser ? truncateString(name, max, index) : "You"}
         </p>
-        <p data-user={_id} className="userListEmail">
+        <p data-user={_id} className="groupMemberEmail">
           {truncateString(email, max, index)}
         </p>
       </div>

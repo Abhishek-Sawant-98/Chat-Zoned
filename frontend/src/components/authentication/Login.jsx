@@ -122,7 +122,7 @@ const Login = () => {
           id="login__email"
           disabled={loading}
           className={`${inputFieldClassName}`}
-          placeholder="Enter Email ID"
+          placeholder="Used While Signing Up"
         />
       </section>
       {/* Password input */}
@@ -140,7 +140,7 @@ const Login = () => {
             id="login__password"
             disabled={loading}
             className={`${inputFieldClassName} rounded-end`}
-            placeholder="Enter Password"
+            placeholder="Hope You Remember"
           />
           <PasswordVisibilityToggle
             disableIfLoading={disableIfLoading}

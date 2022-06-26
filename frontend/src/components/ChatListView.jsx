@@ -1,13 +1,10 @@
 import { Close, GroupAdd, Search } from "@mui/icons-material";
-import { CircularProgress, IconButton } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { AppState } from "../context/ContextProvider";
 import { debounce, getOneOnOneChatReceiver } from "../utils/appUtils";
 import axios from "../utils/axios";
 import AddMembersToGroup from "./dialogs/AddMembersToGroup";
-import NewGroupBody from "./dialogs/NewGroupBody";
 import ChatListItem from "./utils/ChatListItem";
-import ChildDialog from "./utils/ChildDialog";
 import getCustomTooltip from "./utils/CustomTooltip";
 import FullSizeImage from "./utils/FullSizeImage";
 import LoadingIndicator from "./utils/LoadingIndicator";
@@ -41,9 +38,6 @@ const ChatListView = () => {
     refresh,
     setRefresh,
   } = AppState();
-
-  const { disableIfLoading, formFieldClassName, inputFieldClassName } =
-    formClassNames;
 
   const [loading, setLoading] = useState(false);
   const [filteredChats, setFilteredChats] = useState(chats);
@@ -95,6 +89,7 @@ const ChatListView = () => {
         return chat;
       });
       setChats(mappedChats);
+      console.log("chats : ", mappedChats);
       setFilteredChats(mappedChats);
       setLoading(false);
     } catch (error) {

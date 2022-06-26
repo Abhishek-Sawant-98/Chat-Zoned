@@ -50,7 +50,9 @@ const GroupInfoBody = () => {
   const [uploading, setUploading] = useState(false);
   const [adding, setAdding] = useState(false);
   const [editGroupDpMenuAnchor, setEditGroupDpMenuAnchor] = useState(null);
-  const isUserGroupAdmin = loggedInUser?._id === groupData?.groupAdmin?._id;
+  const isUserGroupAdmin = groupData?.groupAdmins?.some(
+    (admin) => admin?._id === loggedInUser?._id
+  );
   const [showDialogActions, setShowDialogActions] = useState(true);
   const [showDialogClose, setShowDialogClose] = useState(false);
   const imgInput = useRef(null);
@@ -59,6 +61,7 @@ const GroupInfoBody = () => {
   // router.put("/group/remove", authorizeUser, removeUserFromGroup);
   // router.put("/group/add", authorizeUser, addUsersToGroup);
   // router.put("/group/delete", authorizeUser, deleteGroupChat);
+  // router.put("/group/make-admin", authorizeUser, makeGroupAdmin);
 
   useEffect(() => {}, [groupData]);
 
@@ -475,19 +478,6 @@ const GroupInfoBody = () => {
         {`Group : ${groupData?.users?.length} Members`}
       </section>
 
-      {/* Add Members (only for admins) */}
-      {isUserGroupAdmin && (
-        <section className={`dialogField text-center mb-2`}>
-          <button
-            className={`${btnClassName} btn-outline-success`}
-            onClick={openAddMembersDialog}
-          >
-            <PersonAdd className="text-light" style={{ marginLeft: "-20px" }} />
-            <span className="ms-2">Add Members</span>
-          </button>
-        </section>
-      )}
-
       {/* View Members */}
       <section className={`dialogField text-center mb-2`}>
         <button
@@ -501,6 +491,19 @@ const GroupInfoBody = () => {
           <span className="ms-2">View Members</span>
         </button>
       </section>
+
+      {/* Add Members (only for admins) */}
+      {isUserGroupAdmin && (
+        <section className={`dialogField text-center mb-2`}>
+          <button
+            className={`${btnClassName} btn-outline-success`}
+            onClick={openAddMembersDialog}
+          >
+            <PersonAdd className="text-light" style={{ marginLeft: "-20px" }} />
+            <span className="ms-2">Add Members</span>
+          </button>
+        </section>
+      )}
 
       {/* Exit Group */}
       <section className={`dialogField text-center mb-2`}>

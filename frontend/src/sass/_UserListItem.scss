@@ -1,16 +1,8 @@
 .userListItem {
-  margin-bottom: 5px;
-  border-radius: 20px;
-  background-color: #101010;
-  &:hover {
-    background-color: #222;
-  }
-  &:active {
-    background-color: #3d0049;
-  }
+  @include setListItemBaseStyles;
   .userListAvatar {
+    margin-left: -5px;
     @include getImgDimensions(0.42);
-    object-fit: cover;
   }
   .userListData {
     .userListName {

@@ -88,7 +88,7 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded, adding }) => {
       formData.append("chatName", chatName);
       formData.append("users", JSON.stringify(users.map((user) => user._id)));
 
-      await axios.post("/api/chat/group", formData, config);
+      const { data } = await axios.post("/api/chat/group", formData, config);
 
       displayToast({
         message: "Group Created Successfully",
@@ -98,6 +98,7 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded, adding }) => {
       });
 
       setLoading(false);
+      console.log("created group:", data);
       setRefresh(!refresh);
       return "createdGroup";
     } catch (error) {

@@ -1,10 +1,4 @@
 $bgColor: $selectedChatBgColor;
-// Box shadow variables
-$posOffset: 4px;
-$negOffset: -4px;
-$blurRadius: 4px;
-$shadowColor: #60c9f344;
-
 .chatListItem {
   margin-bottom: 5px;
   border-radius: 10px;
@@ -14,16 +8,7 @@ $shadowColor: #60c9f344;
     background-color: $bgColor;
   }
   .chatListAvatar {
-    display: inline-block;
-    transition: box-shadow 0.2s;
     @include getImgDimensions(0.494);
-    object-fit: cover;
-    &:hover {
-      box-shadow: $posOffset $posOffset $blurRadius $shadowColor,
-        $negOffset $negOffset $blurRadius $shadowColor,
-        $negOffset $posOffset $blurRadius $shadowColor,
-        $posOffset $negOffset $blurRadius $shadowColor;
-    }
   }
   .chatListData {
     margin: 5px 0px;

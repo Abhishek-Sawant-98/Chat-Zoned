@@ -1,0 +1,53 @@
+@mixin getImgDimensions($factor) {
+  width: $baseImgDimension * $factor;
+  height: $baseImgDimension * $factor;
+}
+
+@mixin setDefaultAndHoverBg($defaultBgColor, $hoverBgColor) {
+  background-color: $defaultBgColor;
+  &:hover {
+    background-color: $hoverBgColor;
+  }
+}
+
+@mixin setBoxShadow($offset: 4px, $blurRadius: 4px, $shadowColor: #474747) {
+  box-shadow: $offset $offset $blurRadius $shadowColor,
+    (-$offset) (-$offset) $blurRadius $shadowColor,
+    (-$offset) $offset $blurRadius $shadowColor,
+    $offset (-$offset) $blurRadius $shadowColor;
+}
+
+@mixin scrollbars(
+  $size: 7px,
+  $foregroundColor: #686868,
+  $backgroundColor: #1a1a1a
+) {
+  // (Chrome)
+  &::-webkit-scrollbar {
+    width: $size;
+    height: $size;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: $foregroundColor;
+    &:hover {
+      background: #aaa;
+    }
+  }
+  &::-webkit-scrollbar-track {
+    background: $backgroundColor;
+  }
+  // (Firefox)
+  scrollbar-color: $foregroundColor $backgroundColor;
+}
+
+@mixin setListItemBaseStyles {
+  margin-bottom: 5px;
+  border-radius: 10px;
+  background-color: #101010;
+  &:hover {
+    background-color: #222;
+  }
+  &:active {
+    background-color: #3d0049;
+  }
+}

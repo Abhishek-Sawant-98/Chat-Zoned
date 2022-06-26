@@ -50,7 +50,7 @@ const Register = () => {
       return displayToast({
         message: "Please Enter All the Fields",
         type: "warning",
-        duration: 5000,
+        duration: 3000,
         position: "bottom-center",
       });
     }
@@ -59,7 +59,7 @@ const Register = () => {
       return displayToast({
         message: "Name Must be Less than 25 characters",
         type: "warning",
-        duration: 5000,
+        duration: 3000,
         position: "bottom-center",
       });
     }
@@ -69,7 +69,7 @@ const Register = () => {
       return displayToast({
         message: "Please Enter a Valid Email ID",
         type: "warning",
-        duration: 5000,
+        duration: 3000,
         position: "bottom-center",
       });
     }
@@ -78,7 +78,7 @@ const Register = () => {
       return displayToast({
         message: "Passwords Do Not Match",
         type: "warning",
-        duration: 5000,
+        duration: 3000,
         position: "bottom-center",
       });
     }
@@ -117,7 +117,7 @@ const Register = () => {
         title: "Registration Failed",
         message: error.response?.data?.message || "Oops! Server Down",
         type: "error",
-        duration: 5000,
+        duration: 4000,
         position: "bottom-center",
       });
       setLoading(false);
@@ -146,7 +146,7 @@ const Register = () => {
       return displayToast({
         message: "Please Select an Image Smaller than 2 MB",
         type: "warning",
-        duration: 5000,
+        duration: 3000,
         position: "bottom-center",
       });
     }
@@ -236,7 +236,7 @@ const Register = () => {
             id="register__password"
             className={`${inputFieldClassName} rounded-end`}
             disabled={loading}
-            placeholder="Enter Password"
+            placeholder="Please Remember This"
           />
           <PasswordVisibilityToggle
             disableIfLoading={disableIfLoading}
@@ -263,7 +263,7 @@ const Register = () => {
             id="register__confirmpassword"
             className={`${inputFieldClassName} rounded-end`}
             disabled={loading}
-            placeholder="Confirm Password"
+            placeholder="Must Match the Above"
           />
           <PasswordVisibilityToggle
             disableIfLoading={disableIfLoading}

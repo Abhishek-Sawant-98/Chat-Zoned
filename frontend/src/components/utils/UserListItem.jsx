@@ -33,7 +33,7 @@ const UserListItem = ({ user, truncateValues }) => {
           src={profilePic}
           alt={_id}
           data-user={_id}
-          className={`img-fluid userListAvatar rounded-circle`}
+          className={`img-fluid listItemAvatar userListAvatar rounded-circle`}
         />
       </CustomTooltip>
       <div

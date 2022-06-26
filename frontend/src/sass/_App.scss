@@ -11,7 +11,7 @@ header {
   font-size: 22px;
 }
 .addGroupMembers {
-  height: 430px;
+  height: 65vh;
   & > * {
     width: clamp(250px, 70vw, 320px);
   }
@@ -27,6 +27,14 @@ header {
 .groupDialog {
   & > * {
     width: clamp(250px, 70vw, 320px);
+  }
+}
+.listItemAvatar {
+  display: inline-block;
+  transition: box-shadow 0.3s;
+  object-fit: cover;
+  &:hover {
+    @include setBoxShadow;
   }
 }
 .app__inputfield {
