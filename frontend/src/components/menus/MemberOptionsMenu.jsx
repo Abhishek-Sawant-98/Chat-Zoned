@@ -1,159 +1,255 @@
 import {
   AdminPanelSettings,
-  Delete,
+  GroupRemove,
   InfoOutlined,
-  Key,
   Message,
 } from "@mui/icons-material";
 import { ListItemIcon, MenuItem } from "@mui/material";
 import Menu, { menuIconProps, menuItemProps } from "../utils/Menu";
 import { AppState } from "../../context/ContextProvider";
 import axios from "../../utils/axios";
-import ChangePasswordBody from "../dialogs/ChangePasswordBody";
-import EditProfileBody from "../dialogs/EditProfileBody";
+import MenuItemText from "../utils/MenuItemText";
+import { truncateString } from "../../utils/appUtils";
+import ViewProfileBody from "../dialogs/ViewProfileBody";
 
-const MemberOptionsMenu = ({ anchor, setAnchor, groupData, member }) => {
+const MemberOptionsMenu = ({
+  anchor,
+  setAnchor,
+  clickedMember,
+  setShowDialogActions,
+  setShowDialogClose,
+  childDialogMethods,
+}) => {
   const {
     loggedInUser,
-    setLoggedInUser,
-    displayDialog,
     displayToast,
-    setDialogBody,
-    setShowDialogActions,
+    closeDialog,
     formClassNames,
+    setSelectedChat,
+    refresh,
+    setRefresh,
+    groupInfo,
+    setGroupInfo,
   } = AppState();
 
+  const { setChildDialogBody, displayChildDialog } = childDialogMethods;
   const { setLoading } = formClassNames;
-  const isGuestUser = loggedInUser?.email === "guest.user@gmail.com";
-
-  let editPasswordData;
-
-  const getUpdatedState = (updatedState) => {
-    editPasswordData = updatedState;
+  const isLoggedInUserGroupAdmin = groupInfo?.groupAdmins?.some(
+    (admin) => admin?._id === loggedInUser?._id
+  );
+  const clickedMemberName = truncateString(
+    clickedMember?.name?.split(" ")[0],
+    12,
+    9
+  );
+  const styledMemberName = (
+    <span style={{ color: "violet", fontSize: "22px" }}>
+      {clickedMemberName}
+    </span>
+  );
+  const updateView = (data) => {
+    setRefresh(!refresh);
+    setSelectedChat(data);
   };
 
-  const openLogoutConfirmDialog = () => {
+  // Create/Retreive chat when 'Message Member' is clicked
+  const openChat = async () => {
+    closeDialog(); // Close all dialogs by closing parent dialog
+    setLoading(true);
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+    };
+
+    try {
+      const { data } = await axios.post(
+        `/api/chat`,
+        { userId: clickedMember?._id },
+        config
+      );
+
+      setLoading(false);
+      updateView(data);
+    } catch (error) {
+      displayToast({
+        title: "Couldn't Create/Retrieve Chat",
+        message: error.response?.data?.message || "Oops! Server Down",
+        type: "error",
+        duration: 4000,
+        position: "bottom-center",
+      });
+      setLoading(false);
+    }
+  };
+
+  const openViewProfileDialog = () => {
+    setShowDialogActions(false);
+    setShowDialogClose(true);
+    setChildDialogBody(
+      <ViewProfileBody
+        memberProfilePic={clickedMember?.profilePic}
+        memberName={clickedMember?.name}
+        memberEmail={clickedMember?.email}
+      />
+    );
+    displayChildDialog({
+      title: "View Profile",
+    });
+  };
+
+  const makeGroupAdmin = async () => {
+    setLoading(true);
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+    };
+
+    try {
+      const { data } = await axios.put(
+        `/api/chat/group/make-admin`,
+        { userId: clickedMember?._id, chatId: groupInfo?._id },
+        config
+      );
+
+      displayToast({
+        message: `${clickedMemberName} is now a Group Admin`,
+        type: "success",
+        duration: 4000,
+        position: "bottom-center",
+      });
+      setGroupInfo(data);
+      updateView(data);
+      setLoading(false);
+    } catch (error) {
+      displayToast({
+        title: "Make Group Admin Failed",
+        message: error.response?.data?.message || "Oops! Server Down",
+        type: "error",
+        duration: 4000,
+        position: "bottom-center",
+      });
+      setLoading(false);
+    }
+  };
+
+  const dismissAsAdmin = async () => {
+    setLoading(true);
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+    };
+
+    try {
+      const { data } = await axios.put(
+        `/api/chat/group/dismiss-admin`,
+        { userId: clickedMember?._id, chatId: groupInfo?._id },
+        config
+      );
+
+      displayToast({
+        message: `${clickedMemberName} is no longer a Group Admin`,
+        type: "info",
+        duration: 4000,
+        position: "bottom-center",
+      });
+      setLoading(false);
+      setGroupInfo(data);
+      updateView(data);
+    } catch (error) {
+      displayToast({
+        title: "Dismiss As Group Admin Failed",
+        message: error.response?.data?.message || "Oops! Server Down",
+        type: "error",
+        duration: 4000,
+        position: "bottom-center",
+      });
+      setLoading(false);
+    }
+  };
+
+  const removeFromGroup = async () => {
+    setLoading(true);
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+    };
+
+    try {
+      const { data } = await axios.put(
+        `/api/chat/group/remove`,
+        {
+          userToBeRemoved: clickedMember?._id,
+          isGroupAdmin: clickedMember?.isGroupAdmin,
+          chatId: groupInfo?._id,
+        },
+        config
+      );
+
+      displayToast({
+        message: `${clickedMemberName} removed from Group`,
+        type: "info",
+        duration: 4000,
+        position: "bottom-center",
+      });
+      setLoading(false);
+      setGroupInfo(data);
+      updateView(data);
+      return "memberRemoved";
+    } catch (error) {
+      displayToast({
+        title: "Make Group Admin Failed",
+        message: error.response?.data?.message || "Oops! Server Down",
+        type: "error",
+        duration: 4000,
+        position: "bottom-center",
+      });
+      setLoading(false);
+      return "memberRemoved";
+    }
+  };
+
+  // Confirmation dialogs
+  const openDismissAsAdminConfirmDialog = () => {
     setShowDialogActions(true);
-    setDialogBody(<>Are you sure you want to log out?</>);
-    displayDialog({
-      title: "Logout Confirmation",
+    setShowDialogClose(false);
+    setChildDialogBody(
+      <>Are you sure you want to dismiss {styledMemberName} as group admin?</>
+    );
+    displayChildDialog({
+      title: "Dismiss As Admin",
       nolabel: "NO",
       yeslabel: "YES",
-      loadingYeslabel: "Logging Out...",
-      action: () => {
-        sessionStorage.removeItem("loggedInUser");
-        setLoggedInUser(null);
-        displayToast({
-          message: "Logged Out",
-          type: "info",
-          duration: 2000,
-          position: "bottom-center",
-        });
-        return "loggingOut";
-      },
-    });
-  };
-
-  const openEditProfileDialog = () => {
-    setShowDialogActions(false);
-    setDialogBody(<EditProfileBody />);
-    displayDialog({
-      title: isGuestUser ? "View Profile" : "Edit Profile",
-    });
-  };
-
-  const openEditPasswordDialog = () => {
-    setShowDialogActions(true);
-    setDialogBody(<ChangePasswordBody getUpdatedState={getUpdatedState} />);
-    displayDialog({
-      title: "Change Password",
-      nolabel: "CANCEL",
-      yeslabel: "SAVE",
       loadingYeslabel: "Saving...",
-      action: async () => {
-        const { currentPassword, newPassword, confirmNewPassword } =
-          editPasswordData;
-
-        if (!currentPassword || !newPassword || !confirmNewPassword) {
-          return displayToast({
-            message: "Please Enter All the Fields",
-            type: "warning",
-            duration: 5000,
-            position: "top-center",
-          });
-        }
-        if (currentPassword === newPassword) {
-          return displayToast({
-            message: "New Password Must Differ from Current Password",
-            type: "warning",
-            duration: 5000,
-            position: "top-center",
-          });
-        }
-        if (newPassword !== confirmNewPassword) {
-          return displayToast({
-            message: "New Password Must Match Confirm New Password",
-            type: "warning",
-            duration: 5000,
-            position: "top-center",
-          });
-        }
-
-        setLoading(true);
-
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${loggedInUser.token}`,
-          },
-        };
-
-        try {
-          await axios.put(
-            "/api/user/update/password",
-            { currentPassword, newPassword },
-            config
-          );
-          displayToast({
-            message:
-              "Password Updated Successfully. Please Login Again with Updated Password.",
-            type: "success",
-            duration: 5000,
-            position: "bottom-center",
-          });
-
-          setLoading(false);
-          sessionStorage.removeItem("loggedInUser");
-          setLoggedInUser(null);
-          return "pwdUpdated";
-        } catch (error) {
-          displayToast({
-            title: "Password Update Failed",
-            message: error.response?.data?.message || "Oops! Server Down",
-            type: "error",
-            duration: 5000,
-            position: "top-center",
-          });
-          setLoading(false);
-        }
-      },
+      action: dismissAsAdmin,
     });
   };
 
-  const openChat = () => {};
-
-  const openViewProfileDialog = () => {};
-
-  const makeGroupAdmin = () => {};
-
-  const dismissAsAdmin = () => {};
-
-  const removeFromGroup = () => {};
-
-  // Message x
-  // View x
-  // Make group admin / dismiss as admin (only admin)
-  // remove x (only admin)
+  const openRemoveFromGroupConfirmDialog = () => {
+    setShowDialogActions(true);
+    setShowDialogClose(false);
+    setChildDialogBody(
+      <>Are you sure you want to remove {styledMemberName} from this group?</>
+    );
+    displayChildDialog({
+      title: "Remove From Group",
+      nolabel: "NO",
+      yeslabel: "YES",
+      loadingYeslabel: "Saving...",
+      action: removeFromGroup,
+    });
+  };
 
   return (
     <Menu
@@ -162,33 +258,53 @@ const MemberOptionsMenu = ({ anchor, setAnchor, groupData, member }) => {
       transformOrigin={{ vertical: "top", horizontal: "right" }}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
     >
+      {/* Message X */}
       <MenuItem sx={menuItemProps} onClick={openChat}>
         <ListItemIcon sx={menuIconProps}>
           <Message />
         </ListItemIcon>
-        Message {`${"x"}`}
+        <MenuItemText>{`Message ${
+          clickedMemberName || "Member"
+        }`}</MenuItemText>
       </MenuItem>
+      {/* View X */}
       <MenuItem sx={menuItemProps} onClick={openViewProfileDialog}>
         <ListItemIcon sx={menuIconProps}>
           <InfoOutlined />
         </ListItemIcon>
-        View {`${"x"}`}
+        <MenuItemText>{`View ${clickedMemberName || "Member"}`}</MenuItemText>
       </MenuItem>
-      <MenuItem
-        sx={menuItemProps}
-        onClick={true ? makeGroupAdmin : dismissAsAdmin}
-      >
-        <ListItemIcon sx={menuIconProps}>
-          <AdminPanelSettings />
-        </ListItemIcon>
-        {true ? "Make Group Admin" : "Dismiss as Admin"}
-      </MenuItem>
-      <MenuItem sx={menuItemProps} onClick={removeFromGroup}>
-        <ListItemIcon sx={menuIconProps}>
-          <Delete />
-        </ListItemIcon>
-        Remove {`${"x"}`}
-      </MenuItem>
+      {/* Make Group Admin / Dismiss as Admin */}
+      {isLoggedInUserGroupAdmin && (
+        <MenuItem
+          sx={menuItemProps}
+          onClick={
+            clickedMember?.isGroupAdmin
+              ? openDismissAsAdminConfirmDialog
+              : makeGroupAdmin
+          }
+        >
+          <ListItemIcon sx={menuIconProps}>
+            <AdminPanelSettings />
+          </ListItemIcon>
+          <MenuItemText>
+            {clickedMember?.isGroupAdmin
+              ? "Dismiss as Admin"
+              : "Make Group Admin"}
+          </MenuItemText>
+        </MenuItem>
+      )}
+      {/* Remove X */}
+      {isLoggedInUserGroupAdmin && (
+        <MenuItem sx={menuItemProps} onClick={openRemoveFromGroupConfirmDialog}>
+          <ListItemIcon sx={menuIconProps}>
+            <GroupRemove />
+          </ListItemIcon>
+          <MenuItemText>{`Remove ${
+            clickedMemberName || "Member"
+          }`}</MenuItemText>
+        </MenuItem>
+      )}
     </Menu>
   );
 };

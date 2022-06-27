@@ -37,6 +37,7 @@ const ChatListView = () => {
     setChats,
     refresh,
     setRefresh,
+    setGroupInfo,
   } = AppState();
 
   const [loading, setLoading] = useState(false);
@@ -175,9 +176,11 @@ const ChatListView = () => {
               if (e.target?.className?.includes("chatListAvatar")) {
                 return displayFullSizeImage(e);
               }
-              setSelectedChat(
-                filteredChats.find((chat) => chat._id === chatId)
+              const clickedChat = filteredChats.find(
+                (chat) => chat._id === chatId
               );
+              setSelectedChat(clickedChat);
+              if (clickedChat?.isGroupChat) setGroupInfo(clickedChat);
             }}
           >
             {filteredChats.map((chat) => (

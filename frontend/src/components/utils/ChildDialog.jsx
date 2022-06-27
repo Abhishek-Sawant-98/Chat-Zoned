@@ -20,8 +20,8 @@ const ChildDialog = ({
   const displayChildDialog = (options) => {
     setChildDialogData({ ...options, isOpen: true });
   };
-  const closeChildDialog = () => {
-    setChildDialogData({ ...childDialogData, isOpen: false });
+  const closeChildDialog = (data) => {
+    setChildDialogData({ ...data, isOpen: false });
   };
 
   useEffect(() => {

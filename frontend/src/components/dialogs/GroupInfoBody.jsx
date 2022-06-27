@@ -38,35 +38,29 @@ const GroupInfoBody = () => {
     displayToast,
     refresh,
     setRefresh,
-    selectedChat,
     setSelectedChat,
     childDialogMethods,
     getChildDialogMethods,
+    groupInfo,
+    setGroupInfo,
   } = AppState();
+
   const { loading, setLoading, disableIfLoading } = formClassNames;
   const { setChildDialogBody, displayChildDialog } = childDialogMethods;
-  const [groupData, setGroupData] = useState(selectedChat);
-  const { chatDisplayPic, chatName, users } = groupData;
+  const { chatDisplayPic, chatName } = groupInfo;
   const [uploading, setUploading] = useState(false);
   const [adding, setAdding] = useState(false);
   const [editGroupDpMenuAnchor, setEditGroupDpMenuAnchor] = useState(null);
-  const isUserGroupAdmin = groupData?.groupAdmins?.some(
+  const isUserGroupAdmin = groupInfo?.groupAdmins?.some(
     (admin) => admin?._id === loggedInUser?._id
   );
   const [showDialogActions, setShowDialogActions] = useState(true);
   const [showDialogClose, setShowDialogClose] = useState(false);
   const imgInput = useRef(null);
-  const btnClassName = "w-100 btn text-light fs-5 rounded-pill";
-
-  // router.put("/group/remove", authorizeUser, removeUserFromGroup);
-  // router.put("/group/add", authorizeUser, addUsersToGroup);
-  // router.put("/group/delete", authorizeUser, deleteGroupChat);
-  // router.put("/group/make-admin", authorizeUser, makeGroupAdmin);
-
-  useEffect(() => {}, [groupData]);
+  const btnClassName = "w-100 btn text-light fs-5";
 
   const updateView = (data) => {
-    setGroupData(data);
+    setGroupInfo(data);
     setRefresh(!refresh); // To update chatlist view
     setSelectedChat(data); // To update messages view
   };
@@ -106,7 +100,7 @@ const GroupInfoBody = () => {
     try {
       const { data } = await axios.put(
         "/api/chat/group/update-name",
-        { groupName: editedName, chatId: groupData?._id },
+        { groupName: editedName, chatId: groupInfo?._id },
         config
       );
 
@@ -158,9 +152,9 @@ const GroupInfoBody = () => {
 
     const formData = new FormData();
     formData.append("displayPic", image);
-    formData.append("currentDP", groupData?.chatDisplayPic);
-    formData.append("cloudinary_id", groupData?.cloudinary_id);
-    formData.append("chatId", groupData?._id);
+    formData.append("currentDP", groupInfo?.chatDisplayPic);
+    formData.append("cloudinary_id", groupInfo?.cloudinary_id);
+    formData.append("chatId", groupInfo?._id);
     try {
       const { data } = await axios.put(
         "/api/chat/group/update-dp",
@@ -204,9 +198,9 @@ const GroupInfoBody = () => {
       const { data } = await axios.put(
         "/api/chat/group/delete-dp",
         {
-          currentDP: groupData?.chatDisplayPic,
-          cloudinary_id: groupData?.cloudinary_id,
-          chatId: groupData?._id,
+          currentDP: groupInfo?.chatDisplayPic,
+          cloudinary_id: groupInfo?.cloudinary_id,
+          chatId: groupInfo?._id,
         },
         config
       );
@@ -306,7 +300,7 @@ const GroupInfoBody = () => {
         "/api/chat/group/add",
         {
           usersToBeAdded: JSON.stringify(usersToBeAdded),
-          chatId: groupData?._id,
+          chatId: groupInfo?._id,
         },
         config
       );
@@ -341,7 +335,7 @@ const GroupInfoBody = () => {
     setShowDialogClose(false);
     setChildDialogBody(
       <AddMembersToGroup
-        groupInfo={groupData}
+        groupInfo={groupInfo}
         getUsersToBeAdded={getUsersToBeAdded}
         adding={adding}
       />
@@ -356,11 +350,12 @@ const GroupInfoBody = () => {
   };
 
   const openViewMembersDialog = () => {
+    const count = groupInfo?.users?.length;
     setShowDialogActions(false);
     setShowDialogClose(true);
-    setChildDialogBody(<ViewGroupMembers groupData={groupData} />);
+    setChildDialogBody(<ViewGroupMembers />);
     displayChildDialog({
-      title: `${groupData?.users?.length} Members`,
+      title: `${count} Member${count > 1 ? "s" : ""}`,
     });
   };
 
@@ -396,10 +391,10 @@ const GroupInfoBody = () => {
             <img
               className="img-fluid d-flex mx-auto border border-2 border-primary rounded-circle pointer"
               id="groupInfo__displayPic"
-              src={groupData?.chatDisplayPic || "GroupDp"}
+              src={groupInfo?.chatDisplayPic || "GroupDp"}
               style={{ width: "120px", height: "120px" }}
               onClick={displayFullSizeImage}
-              alt={groupData?.chatName}
+              alt={groupInfo?.chatName}
             />
           </CustomTooltip>
 
@@ -473,9 +468,11 @@ const GroupInfoBody = () => {
       {/* No of members */}
       <section
         className={`dialogField text-center mb-3`}
-        style={{ marginTop: "-10px" }}
+        style={{ marginTop: "-10px", borderRadius: "10px" }}
       >
-        {`Group : ${groupData?.users?.length} Members`}
+        {`Group : ${groupInfo?.users?.length} Member${
+          groupInfo?.users?.length > 1 ? "s" : ""
+        }`}
       </section>
 
       {/* View Members */}

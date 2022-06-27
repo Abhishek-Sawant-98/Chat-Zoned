@@ -1,5 +1,5 @@
 .groupMemberItem {
-  @include setListItemBaseStyles;
+  @include setListItemBaseStyles($bgActive: #222);
   .groupMemberAvatar {
     margin-left: -5px;
     @include getImgDimensions(0.42);

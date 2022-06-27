@@ -31,18 +31,15 @@ const ContextProvider = ({ children }) => {
     setToastData({ ...toastData, isOpen: false });
   };
 
-  // Alert dialog config
+  // Custom dialog config
   const [dialogData, setDialogData] = useState({
     isOpen: false,
     title: "Alert Dialog",
-    content: "Dialog Content",
     nolabel: "NO",
     yeslabel: "YES",
     loadingYeslabel: "Please Wait...",
     action: () => {},
   });
-
-  // Custom Dialog config
   const [dialogBody, setDialogBody] = useState(<></>);
   const [showDialogActions, setShowDialogActions] = useState(true);
 
@@ -54,6 +51,9 @@ const ContextProvider = ({ children }) => {
   };
   const setDialogAction = (action) => {
     setDialogData({ ...dialogData, action });
+  };
+  const setDialogTitle = (title) => {
+    setDialogData({ ...dialogData, title });
   };
 
   // Child dialog config
@@ -82,6 +82,9 @@ const ContextProvider = ({ children }) => {
     btnResetClassName: `app__btnReset ${disableIfLoading} btn btn-outline-secondary text-light fs-4 rounded-pill`,
   };
 
+  // Group Info config
+  const [groupInfo, setGroupInfo] = useState(selectedChat);
+
   return (
     <AppContext.Provider
       value={{
@@ -100,6 +103,7 @@ const ContextProvider = ({ children }) => {
         displayDialog,
         closeDialog,
         setDialogAction,
+        setDialogTitle,
         dialogBody,
         setDialogBody,
         showDialogActions,
@@ -107,6 +111,8 @@ const ContextProvider = ({ children }) => {
         childDialogMethods,
         getChildDialogMethods,
         formClassNames,
+        groupInfo,
+        setGroupInfo,
       }}
     >
       {children}

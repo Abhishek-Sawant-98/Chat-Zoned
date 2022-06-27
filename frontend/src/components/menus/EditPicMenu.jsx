@@ -1,6 +1,7 @@
 import { Delete, Upload } from "@mui/icons-material";
 import { ListItemIcon, MenuItem } from "@mui/material";
 import Menu, { menuIconProps, menuItemProps } from "../utils/Menu";
+import MenuItemText from "../utils/MenuItemText";
 
 const EditPicMenu = ({
   anchor,
@@ -20,14 +21,14 @@ const EditPicMenu = ({
         <ListItemIcon sx={menuIconProps}>
           <Upload />
         </ListItemIcon>
-        Upload Photo
+        <MenuItemText>Upload Photo</MenuItemText>
       </MenuItem>
       {deletePhotoCondition && (
         <MenuItem sx={menuItemProps} onClick={openDeletePhotoConfirmDialog}>
           <ListItemIcon sx={menuIconProps}>
             <Delete />
           </ListItemIcon>
-          Delete Photo
+          <MenuItemText>Delete Photo</MenuItemText>
         </MenuItem>
       )}
     </Menu>

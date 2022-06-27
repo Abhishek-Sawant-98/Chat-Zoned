@@ -40,14 +40,18 @@
   scrollbar-color: $foregroundColor $backgroundColor;
 }
 
-@mixin setListItemBaseStyles {
+@mixin setListItemBaseStyles(
+  $bgDefault: #101010,
+  $bgHover: #222,
+  $bgActive: #3d0049
+) {
   margin-bottom: 5px;
   border-radius: 10px;
-  background-color: #101010;
+  background-color: $bgDefault;
   &:hover {
-    background-color: #222;
+    background-color: $bgHover;
   }
   &:active {
-    background-color: #3d0049;
+    background-color: $bgActive;
   }
 }

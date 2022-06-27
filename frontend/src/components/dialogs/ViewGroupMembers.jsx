@@ -1,39 +1,64 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { debounce } from "../../utils/appUtils";
 import SearchInput from "../utils/SearchInput";
 import GroupMemberItem from "../utils/GroupMemberItem";
 import { AppState } from "../../context/ContextProvider";
+import MemberOptionsMenu from "../menus/MemberOptionsMenu";
+import ChildDialog from "../utils/ChildDialog";
 
-const ViewGroupMembers = ({ groupData }) => {
-  const { loggedInUser } = AppState();
-  const { users, groupAdmins } = groupData;
+const ViewGroupMembers = () => {
+  const { loggedInUser, childDialogMethods, getChildDialogMethods, groupInfo } =
+    AppState();
+  const [showDialogActions, setShowDialogActions] = useState(true);
+  const [showDialogClose, setShowDialogClose] = useState(false);
+  const { users, groupAdmins } = groupInfo;
+  const [clickedMember, setClickedMember] = useState(null);
+  const [memberOptionsMenuAnchor, setMemberOptionsMenuAnchor] = useState(null);
+
   // LoggedInUser and Group Admins should be at the top
-  const sortedMembers = [
-    loggedInUser,
-    ...groupAdmins?.filter((a) => a?._id !== loggedInUser?._id),
-    ...users?.filter(
-      (u) =>
-        u?._id !== loggedInUser?._id &&
-        groupAdmins?.some((a) => a?._id !== u?._id)
-    ),
-  ];
+  const sortMembers = () => {
+    return [
+      loggedInUser,
+      ...groupAdmins?.filter((a) => a?._id !== loggedInUser?._id),
+      ...users?.filter(
+        (u) =>
+          u?._id !== loggedInUser?._id &&
+          groupAdmins?.every((a) => a?._id !== u?._id)
+      ),
+    ].map((member) => {
+      return {
+        ...member,
+        isGroupAdmin: groupAdmins?.some((a) => a?._id === member?._id),
+      };
+    });
+  };
+
+  // Update the member list whenever groupInfo is updated
+  useEffect(() => {
+    setFilteredMembers(sortMembers());
+  }, [groupInfo]);
+
   const filterMemberInput = useRef(null);
-  const [filteredMembers, setFilteredMembers] = useState(sortedMembers);
+  const [filteredMembers, setFilteredMembers] = useState(sortMembers());
 
   // Debouncing filterMembers method to limit the no. of fn calls
   const filterMembers = debounce((e) => {
     const memberNameInput = e.target?.value?.toLowerCase().trim();
     if (!memberNameInput) {
-      return setFilteredMembers(sortedMembers);
+      return setFilteredMembers(sortMembers());
     }
     setFilteredMembers(
-      users?.filter(
+      filteredMembers?.filter(
         (user) =>
           user?.name?.toLowerCase().includes(memberNameInput) ||
           user?.email?.toLowerCase().includes(memberNameInput)
       )
     );
   }, 600);
+
+  const openMemberOptionsMenu = (e) => {
+    setMemberOptionsMenuAnchor(e.target);
+  };
 
   return (
     <div
@@ -47,7 +72,7 @@ const ViewGroupMembers = ({ groupData }) => {
           searchHandler={filterMembers}
           autoFocus={false}
           placeholder="Search Member"
-          clearInput={() => setFilteredMembers(sortedMembers)}
+          clearInput={() => setFilteredMembers(sortMembers())}
         />
       </section>
       {/* Member list */}
@@ -57,29 +82,25 @@ const ViewGroupMembers = ({ groupData }) => {
             // 'Event delegation' (add only one event listener for
             // parent element instead of adding for each child element)
             onClick={(e) => {
-              const userId = e.target.dataset.user;
+              const userId = e.target?.dataset?.user;
               if (userId) {
-                console.log("member clicked");
-                // Message x 
-                // View x
-                // Make group admin / dismiss as admin (only admin)
-                // remove x (only admin)
+                // Don't display member options menu for loggedInUser
+                if (loggedInUser?._id === userId) return;
 
+                setClickedMember(
+                  filteredMembers?.find((m) => m?._id === userId)
+                );
+                openMemberOptionsMenu(e);
               }
             }}
           >
-            {filteredMembers.map((member) => {
-              const isGroupAdmin = groupAdmins?.some(
-                (admin) => admin?._id === member?._id
-              );
-              return (
-                <GroupMemberItem
-                  key={member._id}
-                  user={{ ...member, isGroupAdmin }}
-                  truncateValues={[21, 18]}
-                />
-              );
-            })}
+            {filteredMembers.map((member) => (
+              <GroupMemberItem
+                key={member._id}
+                user={member}
+                truncateValues={[21, 18]}
+              />
+            ))}
           </div>
         ) : (
           <span className="d-inline-block w-100 text-center text-light h5 mt-4 mx-auto">
@@ -87,6 +108,20 @@ const ViewGroupMembers = ({ groupData }) => {
           </span>
         )}
       </section>
+      <MemberOptionsMenu
+        anchor={memberOptionsMenuAnchor}
+        setAnchor={setMemberOptionsMenuAnchor}
+        clickedMember={clickedMember}
+        setShowDialogActions={setShowDialogActions}
+        setShowDialogClose={setShowDialogClose}
+        childDialogMethods={childDialogMethods}
+      />
+      {/* Child dialog */}
+      <ChildDialog
+        getChildDialogMethods={getChildDialogMethods}
+        showChildDialogActions={showDialogActions}
+        showChildDialogClose={showDialogClose}
+      />
     </div>
   );
 };

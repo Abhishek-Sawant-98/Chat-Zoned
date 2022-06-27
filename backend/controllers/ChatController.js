@@ -223,25 +223,25 @@ const updateGroupName = asyncHandler(async (req, res) => {
 });
 
 const removeUserFromGroup = asyncHandler(async (req, res) => {
-  const { userToBeRemoved, chatId } = req.body;
-  // const loggedInUser = req.user?._id;
+  const { userToBeRemoved, isGroupAdmin, chatId } = req.body;
 
   if (!userToBeRemoved || !chatId) {
     res.status(400);
     throw new Error("Invalid request params for remove user from group");
   }
-
-  // Group admin check should be done in the frontend itself, to save time
-
   // What happens when userToBeRemoved === groupAdmins
   // What happens when a non-admin leaves a group when group length is only 3
   // What happens when an admin leaves a group
 
+  const updateCriteria = isGroupAdmin
+    ? {
+        $pull: { users: userToBeRemoved, groupAdmins: userToBeRemoved },
+      }
+    : { $pull: { users: userToBeRemoved } };
+
   const updatedGroup = await ChatModel.findByIdAndUpdate(
     chatId,
-    {
-      $pull: { users: userToBeRemoved },
-    },
+    updateCriteria,
     { new: true }
   )
     .populate("users", "-password -notifications")
@@ -261,9 +261,8 @@ const addUsersToGroup = asyncHandler(async (req, res) => {
 
   if (!usersToBeAdded?.length || !chatId) {
     res.status(400);
-    throw new Error("Invalid request params for adding user to group");
+    throw new Error("Invalid request params for adding user/s to group");
   }
-  // Group admin check should be done in the frontend itself, to save time
   const updatedGroup = await ChatModel.findByIdAndUpdate(
     chatId,
     {
@@ -290,9 +289,6 @@ const deleteGroupChat = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Invalid chatId for Deleting Group");
   }
-
-  // Group admin check should be done in the frontend itself, to save time
-
   const deletedGroup = await ChatModel.findByIdAndDelete(chatId)
     .populate("users", "-password -notifications")
     .populate("groupAdmins", "-password -notifications");

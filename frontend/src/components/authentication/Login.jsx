@@ -122,7 +122,7 @@ const Login = () => {
           id="login__email"
           disabled={loading}
           className={`${inputFieldClassName}`}
-          placeholder="Used While Signing Up"
+          placeholder="Used While Registering"
         />
       </section>
       {/* Password input */}

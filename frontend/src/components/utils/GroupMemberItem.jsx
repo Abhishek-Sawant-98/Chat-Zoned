@@ -21,32 +21,34 @@ const GroupMemberItem = ({ user, truncateValues }) => {
   const { loggedInUser } = AppState();
   const { _id, name, email, profilePic } = user;
   const [max, index] = truncateValues;
-  const isNotLoggedInUser = _id !== loggedInUser?._id;
+  const isLoggedInUser = _id === loggedInUser?._id;
 
   return (
     <div
       data-user={_id}
-      className={`groupMemberItem position-relative user-select-none d-flex text-light justify-content-start align-items-center pointer px-3`}
+      className={`groupMemberItem position-relative user-select-none d-flex text-light justify-content-start align-items-center px-3 ${
+        !isLoggedInUser && "pointer"
+      }`}
     >
       {user?.isGroupAdmin && (
         <span
-          data-user={_id}
-          className={`adminBadge position-absolute fw-light badge rounded-pill bg-success border border-secondary`}
+          className={`adminBadge position-absolute fw-light badge rounded-3 bg-success`}
+          style={{ cursor: "auto" }}
         >
           Admin
         </span>
       )}
-      {isNotLoggedInUser && (
+      {!isLoggedInUser && (
         <span
           data-user={_id}
-          className="memberSettingsIcon pointer text-light position-absolute rounded-circle"
+          className="memberSettingsIcon text-light position-absolute rounded-circle"
         >
           <KeyboardArrowDown data-user={_id} />
         </span>
       )}
       <CustomTooltip
         data-user={_id}
-        title={`${isNotLoggedInUser ? `${name} (${email})` : ""}`}
+        title={`${isLoggedInUser ? "" : `${name} (${email})`}`}
         placement="top-start"
         arrow
       >
@@ -62,7 +64,7 @@ const GroupMemberItem = ({ user, truncateValues }) => {
         className="groupMemberData d-flex flex-column align-items-start px-2"
       >
         <p data-user={_id} className="groupMemberName fw-bold text-info">
-          {isNotLoggedInUser ? truncateString(name, max, index) : "You"}
+          {isLoggedInUser ? "You" : truncateString(name, max, index)}
         </p>
         <p data-user={_id} className="groupMemberEmail">
           {truncateString(email, max, index)}

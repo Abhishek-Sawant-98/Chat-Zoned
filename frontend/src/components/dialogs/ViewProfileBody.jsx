@@ -14,12 +14,21 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const ViewProfileBody = () => {
+const ViewProfileBody = ({ memberProfilePic, memberName, memberEmail }) => {
   const { loggedInUser, selectedChat } = AppState();
-  const { name, email, profilePic } = getOneOnOneChatReceiver(
-    loggedInUser,
-    selectedChat.users
-  );
+  const isGroupInfoDialogOpen = selectedChat?.isGroupChat;
+  let name, email, profilePic;
+
+  if (isGroupInfoDialogOpen) {
+    name = memberName;
+    email = memberEmail;
+    profilePic = memberProfilePic;
+  } else {
+    const receiver = getOneOnOneChatReceiver(loggedInUser, selectedChat?.users);
+    name = receiver?.name;
+    email = receiver?.email;
+    profilePic = receiver?.profilePic;
+  }
 
   return (
     <>

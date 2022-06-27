@@ -3,6 +3,7 @@ import { ListItemIcon, MenuItem } from "@mui/material";
 import Menu, { menuIconProps, menuItemProps } from "../utils/Menu";
 import { useState } from "react";
 import { AppState } from "../../context/ContextProvider";
+import MenuItemText from "../utils/MenuItemText";
 
 const NotificationsMenu = ({ anchor, setAnchor }) => {
   const { loggedInUser, setLoggedInUser } = AppState();
@@ -20,10 +21,12 @@ const NotificationsMenu = ({ anchor, setAnchor }) => {
             key={n._id}
             sx={menuItemProps}
             onClick={() => {}}
-          >{`1 message from ${n.sender}`}</MenuItem>
+          ></MenuItem>
         ))
       ) : (
-        <MenuItem sx={menuItemProps}>No notifications</MenuItem>
+        <MenuItem sx={menuItemProps}>
+          <MenuItemText>No notifications</MenuItemText>
+        </MenuItem>
       )}
     </Menu>
   );

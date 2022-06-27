@@ -5,6 +5,7 @@ import { AppState } from "../../context/ContextProvider";
 import axios from "../../utils/axios";
 import ChangePasswordBody from "../dialogs/ChangePasswordBody";
 import EditProfileBody from "../dialogs/EditProfileBody";
+import MenuItemText from "../utils/MenuItemText";
 
 const ProfileSettingsMenu = ({ anchor, setAnchor }) => {
   const {
@@ -145,21 +146,21 @@ const ProfileSettingsMenu = ({ anchor, setAnchor }) => {
         <ListItemIcon sx={menuIconProps}>
           {isGuestUser ? <Person /> : <ManageAccounts />}
         </ListItemIcon>
-        {isGuestUser ? "View" : "Edit"} Profile
+        <MenuItemText>{isGuestUser ? "View" : "Edit"} Profile</MenuItemText>
       </MenuItem>
       {!isGuestUser && (
         <MenuItem sx={menuItemProps} onClick={openEditPasswordDialog}>
           <ListItemIcon sx={menuIconProps}>
             <Key />
           </ListItemIcon>
-          Change Password
+          <MenuItemText>Change Password</MenuItemText>
         </MenuItem>
       )}
       <MenuItem sx={menuItemProps} onClick={openLogoutConfirmDialog}>
         <ListItemIcon sx={menuIconProps}>
           <Logout />
         </ListItemIcon>
-        Logout
+        <MenuItemText>Logout</MenuItemText>
       </MenuItem>
     </Menu>
   );

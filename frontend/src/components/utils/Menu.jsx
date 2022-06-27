@@ -8,7 +8,6 @@ export const menuPaperProps = {
     filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
     borderRadius: 2,
     backgroundColor: "#404040",
-    color: "#f0f0f0",
     mt: 1,
   },
 };

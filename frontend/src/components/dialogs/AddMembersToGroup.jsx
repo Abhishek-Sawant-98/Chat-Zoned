@@ -29,8 +29,8 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded, adding }) => {
   const [fetching, setFetching] = useState(false);
   const [isMemberSelected, setIsMemberSelected] = useState(false);
 
-  // 'groupData' prop is passed while adding members to group
-  // from 'group info' dialog
+  // 'groupInfo' prop is passed while adding members to group
+  // from 'group info' dialog, NOT while 'creating a group'
   const [addedMembers, setAddedMembers] = useState(groupInfo?.users || []);
 
   const searchUserInput = useRef(null);

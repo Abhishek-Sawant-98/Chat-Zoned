@@ -11,17 +11,17 @@ import SearchInput from "./SearchInput";
 const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const { formClassNames, loggedInUser, displayToast, setSelectedChat } =
-    AppState();
+  const {
+    formClassNames,
+    loggedInUser,
+    displayToast,
+    setSelectedChat,
+    refresh,
+    setRefresh,
+  } = AppState();
   const searchUserInput = useRef(null);
 
-  const {
-    loading,
-    setLoading,
-    disableIfLoading,
-    formFieldClassName,
-    inputFieldClassName,
-  } = formClassNames;
+  const { loading, setLoading } = formClassNames;
 
   useEffect(() => {
     if (isDrawerOpen) {
@@ -83,14 +83,15 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
       const { data } = await axios.post(`/api/chat`, { userId }, config);
 
       setLoading(false);
+      setRefresh(!refresh);
       setSelectedChat(data);
     } catch (error) {
       displayToast({
-        title: "Create/Retrieve Chat Failed",
+        title: "Couldn't Create/Retrieve Chat",
         message: error.response?.data?.message || "Oops! Server Down",
         type: "error",
-        duration: 5000,
-        position: "bottom",
+        duration: 4000,
+        position: "bottom-center",
       });
       setLoading(false);
     }

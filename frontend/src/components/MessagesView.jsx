@@ -76,7 +76,7 @@ const MessagesView = () => {
         message: error.response?.data?.message || "Oops! Server Down",
         type: "error",
         duration: 5000,
-        position: "bottom",
+        position: "bottom-center",
       });
       setLoading(false);
     }
