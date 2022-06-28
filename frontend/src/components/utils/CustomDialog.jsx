@@ -32,13 +32,7 @@ const CustomDialog = ({
   showDialogActions,
   showDialogClose,
 }) => {
-  const {
-    formClassNames,
-    setSelectedChat,
-    closeDialog,
-    setDialogTitle,
-    groupInfo,
-  } = AppState();
+  const { formClassNames, setSelectedChat, closeDialog } = AppState();
   const { isOpen, title, nolabel, yeslabel, loadingYeslabel, action } =
     dialogData;
   const { loading, disableIfLoading } = formClassNames;
@@ -56,7 +50,7 @@ const CustomDialog = ({
       handleDialogClose();
       setSelectedChat(null);
       navigate("/");
-    } else if (result === "memberRemoved") {
+    } else if (result === "membersUpdated") {
       handleDialogClose();
     }
   };

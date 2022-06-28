@@ -52,6 +52,8 @@ const MemberOptionsMenu = ({
     setSelectedChat(data);
   };
 
+  // router.delete("/group/delete", authorizeUser, deleteGroupChat);
+
   // Create/Retreive chat when 'Message Member' is clicked
   const openChat = async () => {
     closeDialog(); // Close all dialogs by closing parent dialog
@@ -111,7 +113,7 @@ const MemberOptionsMenu = ({
     };
 
     try {
-      const { data } = await axios.put(
+      const { data } = await axios.post(
         `/api/chat/group/make-admin`,
         { userId: clickedMember?._id, chatId: groupInfo?._id },
         config
@@ -164,6 +166,7 @@ const MemberOptionsMenu = ({
       setLoading(false);
       setGroupInfo(data);
       updateView(data);
+      return "membersUpdated";
     } catch (error) {
       displayToast({
         title: "Dismiss As Group Admin Failed",
@@ -173,6 +176,7 @@ const MemberOptionsMenu = ({
         position: "bottom-center",
       });
       setLoading(false);
+      return "membersUpdated";
     }
   };
 
@@ -206,7 +210,7 @@ const MemberOptionsMenu = ({
       setLoading(false);
       setGroupInfo(data);
       updateView(data);
-      return "memberRemoved";
+      return "membersUpdated";
     } catch (error) {
       displayToast({
         title: "Make Group Admin Failed",
@@ -216,7 +220,7 @@ const MemberOptionsMenu = ({
         position: "bottom-center",
       });
       setLoading(false);
-      return "memberRemoved";
+      return "membersUpdated";
     }
   };
 

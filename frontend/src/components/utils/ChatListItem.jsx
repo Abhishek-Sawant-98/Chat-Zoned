@@ -88,10 +88,18 @@ const ChatListItem = ({ chat }) => {
           {truncateString(chatName, 23, 20)}
         </p>
         {/* Last Message Data */}
-        {lastMessage && (
+        {(lastMessage || lastMessage === null) && (
           <p data-chat={_id} className="chatListLastMessage">
             <span data-chat={_id} className="chatList text-warning">
-              {`${truncateString(lastMessage.sender?.name || "", 12, 8)}: `}
+              {`${
+                lastMessage === null
+                  ? ""
+                  : truncateString(
+                      lastMessage?.sender?.name?.split(" ")[0],
+                      12,
+                      8
+                    ) + " : "
+              }`}
             </span>
             {lastMsgFile ? (
               <>
@@ -122,7 +130,11 @@ const ChatListItem = ({ chat }) => {
                 )}
               </>
             ) : (
-              <>{truncateString(lastMessage?.content || "", 20, 17)}</>
+              <>
+                {lastMessage === null
+                  ? " Last Message was deleted"
+                  : truncateString(lastMessage?.content || "", 20, 17)}
+              </>
             )}
           </p>
         )}

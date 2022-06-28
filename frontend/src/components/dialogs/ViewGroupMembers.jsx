@@ -65,6 +65,10 @@ const ViewGroupMembers = () => {
       className="addGroupMembers d-flex flex-column"
       style={{ height: "75vh" }}
     >
+      {/* Member Count */}
+      <p className="h3 text-center text-light" style={{ marginTop: "-10px" }}>
+        {groupInfo?.users?.length} Members
+      </p>
       {/* Search Bar */}
       <section className="searchChat" style={{ marginTop: "-15px" }}>
         <SearchInput

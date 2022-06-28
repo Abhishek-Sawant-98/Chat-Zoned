@@ -27,7 +27,7 @@ router.put(
   updateUserProfilePic
 );
 router.put("/delete/profile-pic", authorizeUser, deleteUserProfilePic);
-router.put("/add/notification", authorizeUser, addNotification);
+router.post("/add/notification", authorizeUser, addNotification);
 router.put("/delete/notification", authorizeUser, deleteNotification);
 
 // router.get("/:file", fetchFile);

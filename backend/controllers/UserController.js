@@ -91,7 +91,7 @@ const authenticateUser = asyncHandler(async (req, res) => {
       {
         path: "chat",
         model: "Chat",
-        select: "-groupAdmin -cloudinary_id",
+        select: "-groupAdmins -cloudinary_id",
       },
     ],
   });
@@ -164,7 +164,7 @@ const updateUserName = asyncHandler(async (req, res) => {
         {
           path: "chat",
           model: "Chat",
-          select: "-groupAdmin -cloudinary_id",
+          select: "-groupAdmins -cloudinary_id",
         },
       ],
     });
@@ -256,7 +256,7 @@ const updateUserProfilePic = asyncHandler(async (req, res) => {
         {
           path: "chat",
           model: "Chat",
-          select: "-groupAdmin -cloudinary_id",
+          select: "-groupAdmins -cloudinary_id",
         },
       ],
     });
@@ -308,7 +308,7 @@ const deleteUserProfilePic = asyncHandler(async (req, res) => {
         {
           path: "chat",
           model: "Chat",
-          select: "-groupAdmin -cloudinary_id",
+          select: "-groupAdmins -cloudinary_id",
         },
       ],
     });
@@ -363,7 +363,7 @@ const addNotification = asyncHandler(async (req, res) => {
         {
           path: "chat",
           model: "Chat",
-          select: "-groupAdmin -cloudinary_id",
+          select: "-groupAdmins -cloudinary_id",
         },
       ],
     });
@@ -418,7 +418,7 @@ const deleteNotification = asyncHandler(async (req, res) => {
         {
           path: "chat",
           model: "Chat",
-          select: "-groupAdmin -cloudinary_id",
+          select: "-groupAdmins -cloudinary_id",
         },
       ],
     });

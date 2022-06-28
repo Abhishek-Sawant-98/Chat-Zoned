@@ -116,7 +116,7 @@ const updateMessage = asyncHandler(async (req, res) => {
     if (file_id) {
       // Attachment already exists but deleted by user while updating
       console.log("Attachment deleted by user");
-      deleteExistingAttachment(fileUrl, file_id);
+      await deleteExistingAttachment(fileUrl, file_id);
     }
     // Attachment neither already exists nor deleted by user
     attachmentData = {
@@ -128,7 +128,7 @@ const updateMessage = asyncHandler(async (req, res) => {
   ) {
     // Updated attachment is of type : image/gif
     console.log("Updated attachment is of type : image/gif");
-    if (file_id) deleteExistingAttachment(fileUrl, file_id);
+    if (file_id) await deleteExistingAttachment(fileUrl, file_id);
 
     const uploadResponse = await cloudinary.uploader.upload(
       updatedAttachment.path
@@ -142,7 +142,7 @@ const updateMessage = asyncHandler(async (req, res) => {
   } else {
     // Updated attachment is of non-image type
     console.log("Updated attachment is of non-image type");
-    if (file_id) deleteExistingAttachment(fileUrl, file_id);
+    if (file_id) await deleteExistingAttachment(fileUrl, file_id);
 
     attachmentData = {
       fileUrl: updatedAttachment.filename,
@@ -166,7 +166,7 @@ const updateMessage = asyncHandler(async (req, res) => {
     .populate({
       path: "chat",
       model: "Chat",
-      select: "-groupAdmin -cloudinary_id",
+      select: "-groupAdmins -cloudinary_id",
     });
 
   if (!updatedMessage) {
@@ -195,66 +195,69 @@ const updateMessage = asyncHandler(async (req, res) => {
   res.status(200).json(updatedMessage);
 });
 
-const deleteMessage = asyncHandler(async (req, res) => {
-  const { messageId } = req.body;
+const deleteMessages = asyncHandler(async (req, res) => {
+  let { messageIds } = req.body;
+  messageIds = JSON.parse(messageIds);
 
-  if (!messageId) {
+  if (!messageIds?.length) {
     res.status(400);
     throw new Error("Invalid messageId for deleting a message");
   }
 
-  const existingMessage = await MessageModel.findById(messageId);
+  messageIds.forEach(async (messageId) => {
+    const existingMessage = await MessageModel.findById(messageId);
 
-  if (!existingMessage) {
-    res.status(404);
-    throw new Error("Message to be deleted not found");
-  }
-
-  const { file_id, fileUrl } = existingMessage;
-
-  if (file_id) deleteExistingAttachment(fileUrl, file_id);
-
-  const deletedMessage = await MessageModel.findByIdAndDelete(messageId)
-    .populate({
-      path: "sender",
-      model: "User",
-      select: "name email",
-    })
-    .populate({
-      path: "chat",
-      model: "Chat",
-      select: "-groupAdmin -cloudinary_id",
-    });
-
-  // If the deleted message is the last message of the current chat
-  if (messageId === deletedMessage.chat.lastMessage) {
-    // Retrive the previous message
-    const latestMessages = await MessageModel.find({
-      chat: deletedMessage.chat._id,
-    }).sort({ createdAt: "desc" }); // (latest to oldest)
-
-    if (latestMessages.length === 0) {
+    if (!existingMessage) {
       res.status(404);
-      throw new Error("Latest messages not found");
+      throw new Error("Message to be deleted not found");
     }
-    const previousMessage = latestMessages[0]; // Since lastMessage was deleted
+    const { file_id, fileUrl } = existingMessage;
 
-    // Update the lastMessage of the current chat with the previous message
-    const updatedChat = await ChatModel.findByIdAndUpdate(
-      deletedMessage.chat._id,
-      {
-        lastMessage: previousMessage._id,
-      },
-      { new: true }
-    );
+    if (file_id) await deleteExistingAttachment(fileUrl, file_id);
 
-    if (!updatedChat) {
-      res.status(404);
-      throw new Error("Chat not found while updating lastMessage");
+    const deletedMessage = await MessageModel.findByIdAndDelete(messageId)
+      .populate({
+        path: "sender",
+        model: "User",
+        select: "name email",
+      })
+      .populate({
+        path: "chat",
+        model: "Chat",
+      });
+
+    // If deleted message is the last message of current chat
+    if (
+      JSON.stringify(messageId) ===
+      JSON.stringify(deletedMessage.chat.lastMessage)
+    ) {
+      // Retrive the previous message
+      const latestMessages = await MessageModel.find({
+        chat: deletedMessage.chat._id,
+      }).sort({ createdAt: "desc" }); // (latest to oldest)
+
+      // If there's no previous message, don't update lastMessage
+      if (latestMessages.length === 0) return;
+
+      const previousMessage = latestMessages[0]; // Since lastMessage was deleted
+
+      // Update the lastMessage of current chat with previous message
+      const updatedChat = await ChatModel.findByIdAndUpdate(
+        deletedMessage.chat._id,
+        {
+          lastMessage: previousMessage._id,
+        },
+        { new: true }
+      );
+
+      if (!updatedChat) {
+        res.status(404);
+        throw new Error("Chat not found while updating lastMessage");
+      }
     }
-  }
+  });
 
-  res.status(200).json(deletedMessage);
+  res.status(200).json({ status: "Messages Deleted Successfully" });
 });
 
-module.exports = { fetchMessages, sendMessage, updateMessage, deleteMessage };
+module.exports = { fetchMessages, sendMessage, updateMessage, deleteMessages };

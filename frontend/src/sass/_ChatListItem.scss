@@ -2,7 +2,7 @@ $bgColor: $selectedChatBgColor;
 .chatListItem {
   margin-bottom: 5px;
   border-radius: 10px;
-  padding: 12px 13px;
+  padding: 1px 13px;
   @include setDefaultAndHoverBg(#101010, #1e1e1e);
   &:active {
     background-color: $bgColor;

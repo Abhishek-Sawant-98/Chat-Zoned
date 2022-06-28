@@ -183,9 +183,11 @@ const ChatListView = () => {
               if (clickedChat?.isGroupChat) setGroupInfo(clickedChat);
             }}
           >
-            {filteredChats.map((chat) => (
-              <ChatListItem key={chat._id} chat={chat} />
-            ))}
+            {filteredChats
+              .filter((chat) => chat.lastMessage !== undefined)
+              .map((chat) => (
+                <ChatListItem key={chat._id} chat={chat} />
+              ))}
           </div>
         ) : (
           <span className="d-inline-block w-100 text-light h4 mt-5 mx-auto">

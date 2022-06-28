@@ -65,6 +65,11 @@ const GroupInfoBody = () => {
     setSelectedChat(data); // To update messages view
   };
 
+  // router.delete("/group/delete-dp", authorizeUser, deleteGroupDP);
+  // router.delete("/group/remove", authorizeUser, removeUserFromGroup);
+  // router.delete("/group/delete", authorizeUser, deleteGroupChat);
+  // router.delete("/group/dismiss-admin", authorizeUser, dismissAsAdmin);
+
   // Click a button/icon upon 'Enter' or 'Space' keydown
   const clickOnKeydown = (e) => {
     if (e.key === " " || e.key === "Enter") {
@@ -196,7 +201,7 @@ const GroupInfoBody = () => {
 
     try {
       const { data } = await axios.put(
-        "/api/chat/group/delete-dp",
+        `/api/chat/group/delete-dp`,
         {
           currentDP: groupInfo?.chatDisplayPic,
           cloudinary_id: groupInfo?.cloudinary_id,
@@ -227,7 +232,45 @@ const GroupInfoBody = () => {
   };
 
   const exitGroup = async () => {};
+
   const deleteGroup = async () => {};
+
+  const openExitGroupConfirmDialog = () => {
+    setShowDialogActions(true);
+    setShowDialogClose(false);
+    setChildDialogBody(
+      <>
+        This group will be removed from your chats. Are you sure you want to
+        exit this group?
+      </>
+    );
+    displayChildDialog({
+      title: "Exit Group",
+      nolabel: "NO",
+      yeslabel: "YES",
+      loadingYeslabel: "Exiting...",
+      action: exitGroup,
+    });
+  };
+
+  const openDeleteGroupConfirmDialog = () => {
+    setShowDialogActions(true);
+    setShowDialogClose(false);
+    setChildDialogBody(
+      <>
+        All messages and files related to this group will be deleted and this
+        group will be removed from the chats of ALL MEMBERS. Are you sure you
+        want to delete this group?
+      </>
+    );
+    displayChildDialog({
+      title: "Delete Group",
+      nolabel: "NO",
+      yeslabel: "YES",
+      loadingYeslabel: "Deleting...",
+      action: deleteGroup,
+    });
+  };
 
   // Open edit name dialog
   const openEditGroupNameDialog = () => {
@@ -296,7 +339,7 @@ const GroupInfoBody = () => {
     };
 
     try {
-      const { data } = await axios.put(
+      const { data } = await axios.post(
         "/api/chat/group/add",
         {
           usersToBeAdded: JSON.stringify(usersToBeAdded),
@@ -350,12 +393,11 @@ const GroupInfoBody = () => {
   };
 
   const openViewMembersDialog = () => {
-    const count = groupInfo?.users?.length;
     setShowDialogActions(false);
     setShowDialogClose(true);
     setChildDialogBody(<ViewGroupMembers />);
     displayChildDialog({
-      title: `${count} Member${count > 1 ? "s" : ""}`,
+      title: ``,
     });
   };
 
@@ -506,7 +548,23 @@ const GroupInfoBody = () => {
       <section className={`dialogField text-center mb-2`}>
         <button
           className={`${btnClassName} btn-outline-danger`}
-          onClick={exitGroup}
+          onClick={() => {
+            if (
+              isUserGroupAdmin &&
+              groupInfo?.groupAdmins?.length === 1 &&
+              groupInfo?.users?.length !== 1
+            ) {
+              return displayToast({
+                message: `Every group must have atleast 1 admin. Since 
+                you're the only group admin, you won't be allowed
+                to exit until you make someone else as the admin.`,
+                type: "warning",
+                duration: 10000,
+                position: "top-center",
+              });
+            }
+            openExitGroupConfirmDialog();
+          }}
         >
           <Logout className="text-light" style={{ marginLeft: "-30px" }} />
           <span className="ms-2">Exit Group</span>
@@ -518,7 +576,7 @@ const GroupInfoBody = () => {
         <section className={`dialogField text-center mb-2`}>
           <button
             className={`${btnClassName} btn-outline-danger`}
-            onClick={deleteGroup}
+            onClick={openDeleteGroupConfirmDialog}
           >
             <Delete className="text-light" style={{ marginLeft: "-20px" }} />
             <span className="ms-2">Delete Group</span>

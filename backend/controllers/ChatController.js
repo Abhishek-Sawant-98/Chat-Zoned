@@ -229,10 +229,6 @@ const removeUserFromGroup = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Invalid request params for remove user from group");
   }
-  // What happens when userToBeRemoved === groupAdmins
-  // What happens when a non-admin leaves a group when group length is only 3
-  // What happens when an admin leaves a group
-
   const updateCriteria = isGroupAdmin
     ? {
         $pull: { users: userToBeRemoved, groupAdmins: userToBeRemoved },
@@ -283,7 +279,6 @@ const addUsersToGroup = asyncHandler(async (req, res) => {
 
 const deleteGroupChat = asyncHandler(async (req, res) => {
   const { chatId } = req.body;
-  // const loggedInUser = req.user?._id;
 
   if (!chatId) {
     res.status(400);

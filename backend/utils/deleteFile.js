@@ -7,7 +7,7 @@ const deleteFile = promisify(fs.unlink);
 
 // Delete the existing file from its respective location
 const deleteExistingAttachment = async (fileUrl, file_id) => {
-  fileUrl.startsWith("https")
+  fileUrl.startsWith("https://res.cloudinary.com")
     ? await cloudinary.uploader.destroy(file_id)
     : await deleteFile(file_id);
 };
