@@ -29,16 +29,16 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error("User Already Exists");
   }
 
-  let uploadResponse, profilePicDetails;
+  let profilePicDetails;
   // Save only the selected profile pic to cloudinary (don't save if not selected by user)
   if (profilePic) {
-    uploadResponse = await cloudinary.uploader.upload(profilePic.path);
-    await deleteFile(profilePic.path); // Delete file from server after upload to cloudinary
-
+    // Upload to cloudinary and then delete from server
+    const uploadResponse = await cloudinary.uploader.upload(profilePic.path);
     profilePicDetails = {
       cloudinary_id: uploadResponse.public_id,
       profilePic: uploadResponse.secure_url,
     };
+    deleteFile(profilePic.path);
   }
 
   // Using this condition as cloudinary_id and profilePic have default values, if not specified
@@ -227,13 +227,12 @@ const updateUserProfilePic = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Invalid request params for update user profile pic");
   }
-
   // Delete the existing profile pic only if it's not the default one
   if (!currentProfilePic.endsWith("user_dqzjdz.png")) {
-    await cloudinary.uploader.destroy(cloudinary_id);
+    cloudinary.uploader.destroy(cloudinary_id);
   }
   const uploadResponse = await cloudinary.uploader.upload(newProfilePic.path);
-  await deleteFile(newProfilePic.path); // Delete file from server after upload to cloudinary
+  deleteFile(newProfilePic.path);
 
   const updatedUser = await UserModel.findByIdAndUpdate(
     loggedInUser,
@@ -284,9 +283,8 @@ const deleteUserProfilePic = asyncHandler(async (req, res) => {
     throw new Error("Cannot delete the default user profile pic");
   }
 
-  await cloudinary.uploader.destroy(cloudinary_id);
-
-  const updatedUser = await UserModel.findByIdAndUpdate(
+  const deletePromise = cloudinary.uploader.destroy(cloudinary_id);
+  const updatePromise = UserModel.findByIdAndUpdate(
     loggedInUser,
     {
       cloudinary_id: "",
@@ -312,12 +310,13 @@ const deleteUserProfilePic = asyncHandler(async (req, res) => {
         },
       ],
     });
+  // Parallel execution of independent promises using Promise.all()
+  const [, updatedUser] = await Promise.all([deletePromise, updatePromise]);
 
   if (!updatedUser) {
     res.status(404);
     throw new Error("User not found");
   }
-
   res.status(200).json(updatedUser);
 });
 
