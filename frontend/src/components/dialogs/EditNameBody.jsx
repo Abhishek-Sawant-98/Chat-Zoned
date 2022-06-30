@@ -1,8 +1,14 @@
+import { useEffect, useState } from "react";
 import { AppState } from "../../context/ContextProvider";
 
-const EditNameBody = ({ placeholder }) => {
-  const { formClassNames, groupInfo, setGroupInfo } = AppState();
+const EditNameBody = ({ getUpdatedName, placeholder }) => {
+  const { formClassNames, groupInfo } = AppState();
   const { loading, formFieldClassName, inputFieldClassName } = formClassNames;
+  const [name, setName] = useState(groupInfo?.chatName);
+
+  useEffect(() => {
+    getUpdatedName(name);
+  }, [name]);
 
   return (
     <section
@@ -11,10 +17,8 @@ const EditNameBody = ({ placeholder }) => {
     >
       <input
         type="text"
-        value={groupInfo?.chatName}
-        onChange={(e) =>
-          setGroupInfo({ ...groupInfo, chatName: e.target.value })
-        }
+        value={name}
+        onChange={(e) => setName(e.target.value)}
         name="editname"
         autoFocus
         className={`${inputFieldClassName} mt-1`}

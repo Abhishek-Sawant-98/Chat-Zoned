@@ -78,8 +78,14 @@ const GroupInfoBody = ({ messages }) => {
     }
   };
 
+  // To retreive added members from `AddMembersToGroup` dialog
+  let updatedName = "";
+  const getUpdatedName = (updatedValue) => {
+    updatedName = updatedValue;
+  };
+
   const updateGroupName = async () => {
-    if (!groupName) {
+    if (!updatedName) {
       return displayToast({
         message: "Please Enter Valid Group Name",
         type: "warning",
@@ -99,7 +105,7 @@ const GroupInfoBody = ({ messages }) => {
     try {
       const { data } = await axios.put(
         "/api/chat/group/update-name",
-        { groupName, chatId: groupInfo?._id },
+        { groupName: updatedName, chatId: groupInfo?._id },
         config
       );
 
@@ -370,7 +376,12 @@ const GroupInfoBody = ({ messages }) => {
   const openEditGroupNameDialog = () => {
     setShowDialogActions(true);
     setShowDialogClose(false);
-    setChildDialogBody(<EditNameBody placeholder="Enter New Group Name" />);
+    setChildDialogBody(
+      <EditNameBody
+        getUpdatedName={getUpdatedName}
+        placeholder="Enter New Group Name"
+      />
+    );
     displayChildDialog({
       title: "Edit Group Name",
       nolabel: "CANCEL",
@@ -394,6 +405,12 @@ const GroupInfoBody = ({ messages }) => {
     });
   };
 
+  // To retreive added members from `AddMembersToGroup` dialog
+  let addedMembers = [];
+  const getAddedMembers = (updatedMembers) => {
+    addedMembers = updatedMembers;
+  };
+
   const addMembersToGroup = async () => {
     if (!isUserGroupAdmin) {
       return displayToast({
@@ -403,7 +420,7 @@ const GroupInfoBody = ({ messages }) => {
         position: "top-center",
       });
     }
-    if (!groupMembers?.length) {
+    if (!addedMembers?.length) {
       return displayToast({
         message: "Please Select Atleast 1 Member to Add",
         type: "warning",
@@ -425,7 +442,7 @@ const GroupInfoBody = ({ messages }) => {
       const { data } = await axios.post(
         "/api/chat/group/add",
         {
-          usersToBeAdded: JSON.stringify(groupMembers),
+          usersToBeAdded: JSON.stringify(addedMembers),
           chatId: groupInfo?._id,
         },
         config
@@ -459,7 +476,9 @@ const GroupInfoBody = ({ messages }) => {
   const openAddMembersDialog = () => {
     setShowDialogActions(true);
     setShowDialogClose(false);
-    setChildDialogBody(<AddMembersToGroup adding={adding} />);
+    setChildDialogBody(
+      <AddMembersToGroup getAddedMembers={getAddedMembers} adding={adding} />
+    );
     displayChildDialog({
       title: "Add Group Members",
       nolabel: "Cancel",
@@ -497,8 +516,8 @@ const GroupInfoBody = ({ messages }) => {
       {loading && uploading ? (
         <div className="d-flex flex-column justify-content-center align-items-center">
           <CircularProgress
-            size={75}
-            style={{ margin: "30px 0px", color: "lightblue" }}
+            size={60}
+            style={{ margin: "20px 0px", color: "lightblue" }}
           />
           <span style={{ marginBottom: "45px" }} className="text-light h1">
             {" Updating Photo..."}

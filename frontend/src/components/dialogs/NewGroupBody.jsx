@@ -211,7 +211,7 @@ const NewGroupBody = ({ closeChildDialog }) => {
           placeholder="Eg: The Avengers"
         />
       </section>
-      <DialogActions style={{ margin: "15px -15px -15px 0px" }}>
+      <DialogActions style={{ margin: "15px -15px -15px -20px" }}>
         <Button
           sx={btnHoverStyle}
           disabled={loading}
@@ -237,7 +237,7 @@ const NewGroupBody = ({ closeChildDialog }) => {
           {loading ? (
             <>
               <CircularProgress size={25} style={{ marginRight: "12px" }} />
-              <span style={{ marginRight: "22px" }}>Creating Group...</span>
+              <span style={{ marginRight: "22px" }}>Creating...</span>
             </>
           ) : (
             <>Create Group</>

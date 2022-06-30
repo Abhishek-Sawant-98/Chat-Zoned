@@ -10,7 +10,7 @@ import SearchInput from "../utils/SearchInput";
 import NewGroupBody from "./NewGroupBody";
 import ChildDialog from "../utils/ChildDialog";
 
-const AddMembersToGroup = ({ forCreateGroup, adding }) => {
+const AddMembersToGroup = ({ getAddedMembers, forCreateGroup, adding }) => {
   const {
     formClassNames,
     loggedInUser,
@@ -27,7 +27,7 @@ const AddMembersToGroup = ({ forCreateGroup, adding }) => {
   const groupMembers = groupInfo?.users;
   const [fetching, setFetching] = useState(false);
   const [isMemberSelected, setIsMemberSelected] = useState(false);
-  const [addedMembers, setAddedMembers] = useState(groupMembers || []);
+  const [addedMembers, setAddedMembers] = useState([]);
 
   const searchUserInput = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,9 +56,19 @@ const AddMembersToGroup = ({ forCreateGroup, adding }) => {
   };
 
   useEffect(() => {
+    setSearchResults([]);
+    setSearchQuery("");
+  }, []);
+
+  useEffect(() => {
     // For create group: [Next >>] button
     if (forCreateGroup) setDialogAction(openNewGroupDialog);
   }, [groupInfo]);
+
+  useEffect(() => {
+    // For add more group members
+    if (!forCreateGroup) getAddedMembers([...addedMembers]);
+  }, [addedMembers]);
 
   const searchUsers = debounce(async (e) => {
     const query = e.target?.value?.trim();
@@ -79,7 +89,7 @@ const AddMembersToGroup = ({ forCreateGroup, adding }) => {
 
       // Remove all the already added members from search results
       let membersNotAdded = [...data];
-      addedMembers.forEach((addedMember) => {
+      groupMembers.forEach((addedMember) => {
         membersNotAdded = membersNotAdded.filter(
           (m) => m._id !== addedMember._id
         );
@@ -98,11 +108,6 @@ const AddMembersToGroup = ({ forCreateGroup, adding }) => {
       setFetching(false);
     }
   }, 800);
-
-  useEffect(() => {
-    setSearchResults([]);
-    setSearchQuery("");
-  }, []);
 
   const unselectUser = (user) => {
     if (!user) return;

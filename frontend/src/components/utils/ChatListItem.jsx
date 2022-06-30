@@ -102,39 +102,39 @@ const ChatListItem = ({ chat }) => {
               }`}
             </span>
             {lastMsgFile ? (
-              <>
+              <span data-chat={_id}>
                 {lastMsgFileType === "image" ? (
-                  <span>
+                  <span data-chat={_id}>
                     <Image className="fileIcon" /> Photo
                   </span>
                 ) : lastMsgFileType === "gif" ? (
-                  <span>
+                  <span data-chat={_id}>
                     <GifBox className="fileIcon" /> Gif
                   </span>
                 ) : lastMsgFileType === "video" ? (
-                  <span>
+                  <span data-chat={_id}>
                     <VideoFile className="fileIcon" /> Video
                   </span>
                 ) : lastMsgFileType === "audio" ? (
-                  <span>
+                  <span data-chat={_id}>
                     <AudioFile className="fileIcon" /> Audio
                   </span>
                 ) : lastMsgFileType === "pdf" ? (
-                  <span>
+                  <span data-chat={_id}>
                     <PictureAsPdf className="fileIcon" /> Pdf
                   </span>
                 ) : (
-                  <span>
+                  <span data-chat={_id}>
                     <Article className="fileIcon" /> File
                   </span>
                 )}
-              </>
+              </span>
             ) : (
-              <>
+              <span data-chat={_id}>
                 {lastMessage === null
                   ? " Last Message was deleted"
                   : truncateString(lastMessage?.content || "", 20, 17)}
-              </>
+              </span>
             )}
           </p>
         )}
