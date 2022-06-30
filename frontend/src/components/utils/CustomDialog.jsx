@@ -40,7 +40,7 @@ const CustomDialog = ({
 
   const handleYes = async () => {
     const result = await action();
-    if (result === "profileUpdated") {
+    if (result === "profileUpdated" || result === "membersUpdated") {
       handleDialogClose();
     } else if (result === "createdGroup") {
       handleDialogClose();
@@ -50,8 +50,6 @@ const CustomDialog = ({
       handleDialogClose();
       setSelectedChat(null);
       navigate("/");
-    } else if (result === "membersUpdated") {
-      handleDialogClose();
     }
   };
 

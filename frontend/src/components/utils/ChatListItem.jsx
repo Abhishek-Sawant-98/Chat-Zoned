@@ -90,7 +90,7 @@ const ChatListItem = ({ chat }) => {
         {/* Last Message Data */}
         {(lastMessage || lastMessage === null) && (
           <p data-chat={_id} className="chatListLastMessage">
-            <span data-chat={_id} className="chatList text-warning">
+            <span data-chat={_id} className="lastMsgSender text-warning">
               {`${
                 lastMessage === null
                   ? ""
@@ -98,34 +98,34 @@ const ChatListItem = ({ chat }) => {
                       lastMessage?.sender?.name?.split(" ")[0],
                       12,
                       8
-                    ) + " : "
+                    ) + ": "
               }`}
             </span>
             {lastMsgFile ? (
               <>
                 {lastMsgFileType === "image" ? (
                   <span>
-                    <Image /> Photo
+                    <Image className="fileIcon" /> Photo
                   </span>
                 ) : lastMsgFileType === "gif" ? (
                   <span>
-                    <GifBox /> Gif
+                    <GifBox className="fileIcon" /> Gif
                   </span>
                 ) : lastMsgFileType === "video" ? (
                   <span>
-                    <VideoFile /> Video
+                    <VideoFile className="fileIcon" /> Video
                   </span>
                 ) : lastMsgFileType === "audio" ? (
                   <span>
-                    <AudioFile /> Audio
+                    <AudioFile className="fileIcon" /> Audio
                   </span>
                 ) : lastMsgFileType === "pdf" ? (
                   <span>
-                    <PictureAsPdf /> Pdf
+                    <PictureAsPdf className="fileIcon" /> Pdf
                   </span>
                 ) : (
                   <span>
-                    <Article /> File
+                    <Article className="fileIcon" /> File
                   </span>
                 )}
               </>

@@ -52,8 +52,6 @@ const MemberOptionsMenu = ({
     setSelectedChat(data);
   };
 
-  // router.delete("/group/delete", authorizeUser, deleteGroupChat);
-
   // Create/Retreive chat when 'Message Member' is clicked
   const openChat = async () => {
     closeDialog(); // Close all dialogs by closing parent dialog
@@ -213,7 +211,7 @@ const MemberOptionsMenu = ({
       return "membersUpdated";
     } catch (error) {
       displayToast({
-        title: "Make Group Admin Failed",
+        title: "Remove From Group Failed",
         message: error.response?.data?.message || "Oops! Server Down",
         type: "error",
         duration: 4000,

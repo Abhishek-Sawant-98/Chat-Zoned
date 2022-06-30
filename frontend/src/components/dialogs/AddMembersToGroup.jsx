@@ -3,18 +3,14 @@ import { AppState } from "../../context/ContextProvider";
 import {} from "@mui/icons-material";
 import { Avatar, Chip } from "@mui/material";
 import axios from "../../utils/axios";
-import {
-  debounce,
-  DEFAULT_GROUP_DP,
-  truncateString,
-} from "../../utils/appUtils";
+import { debounce, truncateString } from "../../utils/appUtils";
 import UserListItem from "../utils/UserListItem";
 import LoadingIndicator from "../utils/LoadingIndicator";
 import SearchInput from "../utils/SearchInput";
 import NewGroupBody from "./NewGroupBody";
 import ChildDialog from "../utils/ChildDialog";
 
-const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded, adding }) => {
+const AddMembersToGroup = ({ forCreateGroup, adding }) => {
   const {
     formClassNames,
     loggedInUser,
@@ -24,101 +20,26 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded, adding }) => {
     setDialogAction,
     childDialogMethods,
     getChildDialogMethods,
+    groupInfo,
+    setGroupInfo,
   } = AppState();
   const { setLoading } = formClassNames;
+  const groupMembers = groupInfo?.users;
   const [fetching, setFetching] = useState(false);
   const [isMemberSelected, setIsMemberSelected] = useState(false);
-
-  // 'groupInfo' prop is passed while adding members to group
-  // from 'group info' dialog, NOT while 'creating a group'
-  const [addedMembers, setAddedMembers] = useState(groupInfo?.users || []);
+  const [addedMembers, setAddedMembers] = useState(groupMembers || []);
 
   const searchUserInput = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [groupChatData, setGroupChatData] = useState({
-    chatDisplayPic: null,
-    chatDisplayPicUrl: DEFAULT_GROUP_DP,
-    chatName: "",
-    users: [],
-  });
-  const { users } = groupChatData;
-  const { setChildDialogBody, displayChildDialog } = childDialogMethods;
+  const { setChildDialogBody, displayChildDialog, closeChildDialog } =
+    childDialogMethods;
+  const [showDialogActions, setShowDialogActions] = useState(true);
+  const [showDialogClose, setShowDialogClose] = useState(false);
 
-  useEffect(() => {
-    // Update usersToBeAdded in parent dialog
-    if (groupInfo) {
-      getUsersToBeAdded([...users]);
-    } else {
-      setDialogAction(openNewGroupDialog);
-    }
-  }, [groupChatData]);
-
-  // Create group chat
-  const createGroupChat = async () => {
-    const { chatDisplayPic, chatName, users } = groupChatData;
-
-    if (!chatName) {
-      return displayToast({
-        message: "Please Enter a Group Name",
-        type: "warning",
-        duration: 3000,
-        position: "top-center",
-      });
-    }
-    if (users.length < 2) {
-      return displayToast({
-        message: "Please Add Atleast 2 Members",
-        type: "warning",
-        duration: 3000,
-        position: "top-center",
-      });
-    }
-
-    setLoading(true);
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
-    try {
-      const formData = new FormData();
-      formData.append("displayPic", chatDisplayPic);
-      formData.append("chatName", chatName);
-      formData.append("users", JSON.stringify(users.map((user) => user._id)));
-
-      const { data } = await axios.post("/api/chat/group", formData, config);
-
-      displayToast({
-        message: "Group Created Successfully",
-        type: "success",
-        duration: 2000,
-        position: "bottom-center",
-      });
-
-      setLoading(false);
-      console.log("created group:", data);
-      setRefresh(!refresh);
-      return "createdGroup";
-    } catch (error) {
-      displayToast({
-        title: "Couldn't Create Group",
-        message: error.response?.data?.message || "Oops! Server Down",
-        type: "error",
-        duration: 5000,
-        position: "top-center",
-      });
-      setLoading(false);
-    }
-  };
-
-  const getUpdatedGroupData = (updatedData) => {
-    setGroupChatData(updatedData);
-  };
-
+  // For 'create group chat'
   const openNewGroupDialog = () => {
-    if (users.length < 2) {
+    if (addedMembers?.length < 2) {
       return displayToast({
         message: "Please Add Atleast 2 Members",
         type: "warning",
@@ -126,17 +47,18 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded, adding }) => {
         position: "top-center",
       });
     }
-    setChildDialogBody(
-      <NewGroupBody data={groupChatData} getData={getUpdatedGroupData} />
-    );
+    setShowDialogActions(false);
+    setShowDialogClose(false);
+    setChildDialogBody(<NewGroupBody closeChildDialog={closeChildDialog} />);
     displayChildDialog({
       title: "Create New Group",
-      nolabel: "Back",
-      yeslabel: "Create Group",
-      loadingYeslabel: "Creating Group...",
-      action: createGroupChat,
     });
   };
+
+  useEffect(() => {
+    // For create group: [Next >>] button
+    if (forCreateGroup) setDialogAction(openNewGroupDialog);
+  }, [groupInfo]);
 
   const searchUsers = debounce(async (e) => {
     const query = e.target?.value?.trim();
@@ -180,19 +102,13 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded, adding }) => {
   useEffect(() => {
     setSearchResults([]);
     setSearchQuery("");
-    setGroupChatData({
-      chatDisplayPic: null,
-      chatDisplayPicUrl: DEFAULT_GROUP_DP,
-      chatName: "",
-      users: [],
-    });
   }, []);
 
   const unselectUser = (user) => {
     if (!user) return;
-    setGroupChatData({
-      ...groupChatData,
-      users: users.filter((u) => u._id !== user._id),
+    setGroupInfo({
+      ...groupInfo,
+      users: groupMembers.filter((u) => u._id !== user._id),
     });
     // Remove user from added member list
     setAddedMembers(addedMembers.filter((u) => u._id !== user._id));
@@ -211,7 +127,7 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded, adding }) => {
           backgroundColor: "#303030",
         }}
       >
-        {users?.map((user) => (
+        {addedMembers?.map((user) => (
           <Chip
             key={user?._id}
             className="userChip text-light bg-success rounded-pill fs-6"
@@ -260,9 +176,9 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded, adding }) => {
             if (!isMemberSelected) setIsMemberSelected(true);
             // Add selected user to tag list
             const selectedUser = searchResults.find((u) => u._id === userId);
-            setGroupChatData({
-              ...groupChatData,
-              users: [...users, selectedUser],
+            setGroupInfo({
+              ...groupInfo,
+              users: [...groupMembers, selectedUser],
             });
             // Add selected user to added member list
             setAddedMembers([...addedMembers, selectedUser]);
@@ -292,7 +208,11 @@ const AddMembersToGroup = ({ groupInfo, getUsersToBeAdded, adding }) => {
         </div>
       </section>
       {/* Child dialog */}
-      <ChildDialog getChildDialogMethods={getChildDialogMethods} />
+      <ChildDialog
+        getChildDialogMethods={getChildDialogMethods}
+        showChildDialogActions={showDialogActions}
+        showChildDialogClose={showDialogClose}
+      />
     </div>
   );
 };

@@ -35,6 +35,7 @@ const MessagesView = () => {
     setShowDialogActions,
     setDialogBody,
     displayDialog,
+    setGroupInfo,
   } = AppState();
 
   const {
@@ -49,7 +50,7 @@ const MessagesView = () => {
   const [messages, setMessages] = useState([]);
 
   const chatName = selectedChat?.isGroupChat
-    ? selectedChat.chatName
+    ? selectedChat?.chatName
     : getOneOnOneChatReceiver(loggedInUser, selectedChat?.users)?.name;
 
   const fetchMessages = async () => {
@@ -63,7 +64,7 @@ const MessagesView = () => {
 
     try {
       const { data } = await axios.get(
-        `/api/message/${selectedChat._id}`,
+        `/api/message/${selectedChat?._id}`,
         config
       );
 
@@ -92,8 +93,9 @@ const MessagesView = () => {
 
   const openGroupInfoDialog = () => {
     // Open group info dialog
+    setGroupInfo(selectedChat);
     setShowDialogActions(false);
-    setDialogBody(<GroupInfoBody />);
+    setDialogBody(<GroupInfoBody messages={messages} />);
     displayDialog({
       title: "Group Info",
     });

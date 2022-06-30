@@ -11,24 +11,24 @@ const ViewGroupMembers = () => {
     AppState();
   const [showDialogActions, setShowDialogActions] = useState(true);
   const [showDialogClose, setShowDialogClose] = useState(false);
-  const { users, groupAdmins } = groupInfo;
+  const groupMembers = groupInfo?.users;
+  const admins = groupInfo?.groupAdmins;
   const [clickedMember, setClickedMember] = useState(null);
   const [memberOptionsMenuAnchor, setMemberOptionsMenuAnchor] = useState(null);
-
   // LoggedInUser and Group Admins should be at the top
   const sortMembers = () => {
     return [
       loggedInUser,
-      ...groupAdmins?.filter((a) => a?._id !== loggedInUser?._id),
-      ...users?.filter(
+      ...admins?.filter((a) => a?._id !== loggedInUser?._id),
+      ...groupMembers?.filter(
         (u) =>
           u?._id !== loggedInUser?._id &&
-          groupAdmins?.every((a) => a?._id !== u?._id)
+          admins?.every((a) => a?._id !== u?._id)
       ),
     ].map((member) => {
       return {
         ...member,
-        isGroupAdmin: groupAdmins?.some((a) => a?._id === member?._id),
+        isGroupAdmin: admins?.some((a) => a?._id === member?._id),
       };
     });
   };
@@ -67,7 +67,7 @@ const ViewGroupMembers = () => {
     >
       {/* Member Count */}
       <p className="h3 text-center text-light" style={{ marginTop: "-10px" }}>
-        {groupInfo?.users?.length} Members
+        {`${groupMembers?.length} Member${groupMembers?.length > 1 ? "s" : ""}`}
       </p>
       {/* Search Bar */}
       <section className="searchChat" style={{ marginTop: "-15px" }}>

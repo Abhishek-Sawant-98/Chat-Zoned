@@ -1,7 +1,11 @@
 import { Close, GroupAdd, Search } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
 import { AppState } from "../context/ContextProvider";
-import { debounce, getOneOnOneChatReceiver } from "../utils/appUtils";
+import {
+  debounce,
+  DEFAULT_GROUP_DP,
+  getOneOnOneChatReceiver,
+} from "../utils/appUtils";
 import axios from "../utils/axios";
 import AddMembersToGroup from "./dialogs/AddMembersToGroup";
 import ChatListItem from "./utils/ChatListItem";
@@ -45,8 +49,14 @@ const ChatListView = () => {
   const searchChatInput = useRef();
 
   const openCreateGroupChatDialog = () => {
+    setGroupInfo({
+      chatDisplayPic: null,
+      chatDisplayPicUrl: DEFAULT_GROUP_DP,
+      chatName: "",
+      users: [],
+    });
     setShowDialogActions(true);
-    setDialogBody(<AddMembersToGroup />);
+    setDialogBody(<AddMembersToGroup forCreateGroup={true} />);
     displayDialog({
       title: "Add Group Members",
       nolabel: "Cancel",

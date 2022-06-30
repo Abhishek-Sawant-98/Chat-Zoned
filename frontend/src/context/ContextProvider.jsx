@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import { defaultGroupDisplayPic } from "../utils/appUtils";
+import { DEFAULT_GROUP_DP } from "../utils/appUtils";
 
 const AppContext = createContext();
 
@@ -9,6 +9,12 @@ const ContextProvider = ({ children }) => {
   const [chats, setChats] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [refresh, setRefresh] = useState(false);
+  const [groupInfo, setGroupInfo] = useState({
+    chatDisplayPic: null,
+    chatDisplayPicUrl: DEFAULT_GROUP_DP,
+    chatName: "",
+    users: [],
+  });
 
   // Toast config
   const [toastData, setToastData] = useState({
@@ -49,8 +55,8 @@ const ContextProvider = ({ children }) => {
   const closeDialog = () => {
     setDialogData({ ...dialogData, isOpen: false });
   };
-  const setDialogAction = (action) => {
-    setDialogData({ ...dialogData, action });
+  const setDialogAction = (dialogAction) => {
+    setDialogData({ ...dialogData, action: dialogAction });
   };
   const setDialogTitle = (title) => {
     setDialogData({ ...dialogData, title });
@@ -81,9 +87,6 @@ const ContextProvider = ({ children }) => {
     btnSubmitClassName: `btn btn-primary ${disableIfLoading} d-flex justify-content-center align-items-center col-8 fs-4 rounded-pill`,
     btnResetClassName: `app__btnReset ${disableIfLoading} btn btn-outline-secondary text-light fs-4 rounded-pill`,
   };
-
-  // Group Info config
-  const [groupInfo, setGroupInfo] = useState(selectedChat);
 
   return (
     <AppContext.Provider

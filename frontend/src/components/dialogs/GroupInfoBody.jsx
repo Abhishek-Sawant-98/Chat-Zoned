@@ -31,7 +31,7 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const GroupInfoBody = () => {
+const GroupInfoBody = ({ messages }) => {
   const {
     formClassNames,
     loggedInUser,
@@ -43,15 +43,21 @@ const GroupInfoBody = () => {
     getChildDialogMethods,
     groupInfo,
     setGroupInfo,
+    closeDialog,
   } = AppState();
 
   const { loading, setLoading, disableIfLoading } = formClassNames;
   const { setChildDialogBody, displayChildDialog } = childDialogMethods;
-  const { chatDisplayPic, chatName } = groupInfo;
+
+  const groupDP = groupInfo?.chatDisplayPic;
+  const groupName = groupInfo?.chatName;
+  const groupMembers = groupInfo?.users;
+  const admins = groupInfo?.groupAdmins;
+
   const [uploading, setUploading] = useState(false);
   const [adding, setAdding] = useState(false);
   const [editGroupDpMenuAnchor, setEditGroupDpMenuAnchor] = useState(null);
-  const isUserGroupAdmin = groupInfo?.groupAdmins?.some(
+  const isUserGroupAdmin = admins?.some(
     (admin) => admin?._id === loggedInUser?._id
   );
   const [showDialogActions, setShowDialogActions] = useState(true);
@@ -65,11 +71,6 @@ const GroupInfoBody = () => {
     setSelectedChat(data); // To update messages view
   };
 
-  // router.delete("/group/delete-dp", authorizeUser, deleteGroupDP);
-  // router.delete("/group/remove", authorizeUser, removeUserFromGroup);
-  // router.delete("/group/delete", authorizeUser, deleteGroupChat);
-  // router.delete("/group/dismiss-admin", authorizeUser, dismissAsAdmin);
-
   // Click a button/icon upon 'Enter' or 'Space' keydown
   const clickOnKeydown = (e) => {
     if (e.key === " " || e.key === "Enter") {
@@ -77,15 +78,8 @@ const GroupInfoBody = () => {
     }
   };
 
-  // Edited Name config
-  let editedName;
-
-  const getUpdatedName = (updatedName) => {
-    editedName = updatedName;
-  };
-
   const updateGroupName = async () => {
-    if (!editedName) {
+    if (!groupName) {
       return displayToast({
         message: "Please Enter Valid Group Name",
         type: "warning",
@@ -105,7 +99,7 @@ const GroupInfoBody = () => {
     try {
       const { data } = await axios.put(
         "/api/chat/group/update-name",
-        { groupName: editedName, chatId: groupInfo?._id },
+        { groupName, chatId: groupInfo?._id },
         config
       );
 
@@ -157,7 +151,7 @@ const GroupInfoBody = () => {
 
     const formData = new FormData();
     formData.append("displayPic", image);
-    formData.append("currentDP", groupInfo?.chatDisplayPic);
+    formData.append("currentDP", groupDP);
     formData.append("cloudinary_id", groupInfo?.cloudinary_id);
     formData.append("chatId", groupInfo?._id);
     try {
@@ -203,7 +197,7 @@ const GroupInfoBody = () => {
       const { data } = await axios.put(
         `/api/chat/group/delete-dp`,
         {
-          currentDP: groupInfo?.chatDisplayPic,
+          currentDP: groupDP,
           cloudinary_id: groupInfo?.cloudinary_id,
           chatId: groupInfo?._id,
         },
@@ -231,17 +225,117 @@ const GroupInfoBody = () => {
     }
   };
 
-  const exitGroup = async () => {};
+  const exitGroup = async () => {
+    if (groupMembers?.length === 1) {
+      return deleteGroup();
+    }
 
-  const deleteGroup = async () => {};
+    setLoading(true);
 
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+    };
+
+    try {
+      const { data } = await axios.put(
+        `/api/chat/group/remove`,
+        {
+          userToBeRemoved: loggedInUser?._id,
+          isGroupAdmin: isUserGroupAdmin,
+          chatId: groupInfo?._id,
+        },
+        config
+      );
+
+      displayToast({
+        message: `Exited From '${data?.chatName}' Group`,
+        type: "info",
+        duration: 4000,
+        position: "bottom-center",
+      });
+      setLoading(false);
+      setRefresh(!refresh);
+      setSelectedChat(null);
+      closeDialog();
+    } catch (error) {
+      displayToast({
+        title: "Couldn't Exit Group",
+        message: error.response?.data?.message || "Oops! Server Down",
+        type: "error",
+        duration: 4000,
+        position: "bottom-center",
+      });
+      setLoading(false);
+      return "membersUpdated";
+    }
+  };
+
+  const deleteGroup = async () => {
+    setLoading(true);
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+    };
+
+    try {
+      const deleteGroupPromise = axios.put(
+        `/api/chat/group/delete`,
+        {
+          chatId: groupInfo?._id,
+        },
+        config
+      );
+      const deleteMessagesPromise = axios.put(
+        `/api/message/delete`,
+        {
+          messageIds: JSON.stringify(messages?.map((m) => m._id)),
+          isDeleteGroupRequest: true,
+        },
+        config
+      );
+
+      // Parallel execution of independent promises
+      await Promise.all([deleteGroupPromise, deleteMessagesPromise]);
+
+      displayToast({
+        message: "Group Deleted Successfully",
+        type: "success",
+        duration: 3000,
+        position: "bottom-center",
+      });
+      setLoading(false);
+      setRefresh(!refresh);
+      setSelectedChat(null);
+      closeDialog();
+    } catch (error) {
+      displayToast({
+        title: "Couldn't Delete Group",
+        message: error.response?.data?.message || "Oops! Server Down",
+        type: "error",
+        duration: 4000,
+        position: "top-center",
+      });
+      setLoading(false);
+    }
+  };
+
+  // Open confirm dialogs
   const openExitGroupConfirmDialog = () => {
     setShowDialogActions(true);
     setShowDialogClose(false);
     setChildDialogBody(
       <>
-        This group will be removed from your chats. Are you sure you want to
-        exit this group?
+        {groupMembers?.length === 1
+          ? `Since you're the only group member, this group will be 
+            DELETED if you exit. Are you sure you want to exit?`
+          : `This group will be removed from your chats. 
+             Are you sure you want to exit this group?`}
       </>
     );
     displayChildDialog({
@@ -276,13 +370,7 @@ const GroupInfoBody = () => {
   const openEditGroupNameDialog = () => {
     setShowDialogActions(true);
     setShowDialogClose(false);
-    setChildDialogBody(
-      <EditNameBody
-        originalName={chatName}
-        getUpdatedName={getUpdatedName}
-        placeholder="Enter New Group Name"
-      />
-    );
+    setChildDialogBody(<EditNameBody placeholder="Enter New Group Name" />);
     displayChildDialog({
       title: "Edit Group Name",
       nolabel: "CANCEL",
@@ -306,11 +394,6 @@ const GroupInfoBody = () => {
     });
   };
 
-  let usersToBeAdded;
-  const getUsersToBeAdded = (addedUsers) => {
-    usersToBeAdded = addedUsers;
-  };
-
   const addMembersToGroup = async () => {
     if (!isUserGroupAdmin) {
       return displayToast({
@@ -320,7 +403,7 @@ const GroupInfoBody = () => {
         position: "top-center",
       });
     }
-    if (!usersToBeAdded?.length) {
+    if (!groupMembers?.length) {
       return displayToast({
         message: "Please Select Atleast 1 Member to Add",
         type: "warning",
@@ -342,7 +425,7 @@ const GroupInfoBody = () => {
       const { data } = await axios.post(
         "/api/chat/group/add",
         {
-          usersToBeAdded: JSON.stringify(usersToBeAdded),
+          usersToBeAdded: JSON.stringify(groupMembers),
           chatId: groupInfo?._id,
         },
         config
@@ -376,13 +459,7 @@ const GroupInfoBody = () => {
   const openAddMembersDialog = () => {
     setShowDialogActions(true);
     setShowDialogClose(false);
-    setChildDialogBody(
-      <AddMembersToGroup
-        groupInfo={groupInfo}
-        getUsersToBeAdded={getUsersToBeAdded}
-        adding={adding}
-      />
-    );
+    setChildDialogBody(<AddMembersToGroup adding={adding} />);
     displayChildDialog({
       title: "Add Group Members",
       nolabel: "Cancel",
@@ -433,10 +510,10 @@ const GroupInfoBody = () => {
             <img
               className="img-fluid d-flex mx-auto border border-2 border-primary rounded-circle pointer"
               id="groupInfo__displayPic"
-              src={groupInfo?.chatDisplayPic || "GroupDp"}
+              src={groupDP || "GroupDp"}
               style={{ width: "120px", height: "120px" }}
               onClick={displayFullSizeImage}
-              alt={groupInfo?.chatName}
+              alt={groupName}
             />
           </CustomTooltip>
 
@@ -457,7 +534,7 @@ const GroupInfoBody = () => {
             setAnchor={setEditGroupDpMenuAnchor}
             selectProfilePic={() => imgInput.current.click()}
             openDeletePhotoConfirmDialog={openDeletePhotoConfirmDialog}
-            deletePhotoCondition={!chatDisplayPic?.endsWith("group_mbuvht.png")}
+            deletePhotoCondition={!groupDP?.endsWith("group_mbuvht.png")}
           />
           <input
             type="file"
@@ -476,7 +553,7 @@ const GroupInfoBody = () => {
       <section className={`dialogField text-center mb-3`}>
         <div className="input-group" style={{ marginTop: "-10px" }}>
           <CustomTooltip
-            title={chatName?.length > 24 ? chatName : ""}
+            title={groupName?.length > 24 ? groupName : ""}
             placement="top"
             arrow
           >
@@ -484,7 +561,7 @@ const GroupInfoBody = () => {
               className="w-100 fw-bold mx-4 text-info"
               style={{ fontSize: "30px", lineHeight: "30px" }}
             >
-              {truncateString(chatName, 25, 21)}
+              {truncateString(groupName, 25, 21)}
             </div>
           </CustomTooltip>
           <CustomTooltip title="Edit Group Name" placement="top" arrow>
@@ -512,8 +589,8 @@ const GroupInfoBody = () => {
         className={`dialogField text-center mb-3`}
         style={{ marginTop: "-10px", borderRadius: "10px" }}
       >
-        {`Group : ${groupInfo?.users?.length} Member${
-          groupInfo?.users?.length > 1 ? "s" : ""
+        {`Group : ${groupMembers?.length} Member${
+          groupMembers?.length > 1 ? "s" : ""
         }`}
       </section>
 
@@ -551,8 +628,8 @@ const GroupInfoBody = () => {
           onClick={() => {
             if (
               isUserGroupAdmin &&
-              groupInfo?.groupAdmins?.length === 1 &&
-              groupInfo?.users?.length !== 1
+              admins?.length === 1 &&
+              groupMembers?.length !== 1
             ) {
               return displayToast({
                 message: `Every group must have atleast 1 admin. Since 

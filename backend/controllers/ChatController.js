@@ -103,11 +103,11 @@ const createGroupChat = asyncHandler(async (req, res) => {
     };
   } else {
     const uploadResponse = await cloudinary.uploader.upload(displayPic.path);
-    await deleteFile(displayPic.path); // Delete file from server after upload to cloudinary
     displayPicData = {
       cloudinary_id: uploadResponse.public_id,
       chatDisplayPic: uploadResponse.secure_url,
     };
+    deleteFile(displayPic.path);
   }
 
   const createdGroup = await ChatModel.create({
@@ -139,9 +139,8 @@ const deleteGroupDP = asyncHandler(async (req, res) => {
     throw new Error("Cannot Delete the Default Group DP");
   }
 
-  await cloudinary.uploader.destroy(cloudinary_id);
-
-  const updatedGroup = await ChatModel.findByIdAndUpdate(
+  const deletePromise = cloudinary.uploader.destroy(cloudinary_id);
+  const updatePromise = ChatModel.findByIdAndUpdate(
     chatId,
     {
       cloudinary_id: "",
@@ -153,11 +152,13 @@ const deleteGroupDP = asyncHandler(async (req, res) => {
     .populate("users", "-password -notifications")
     .populate("groupAdmins", "-password -notifications");
 
+  // Parallel execution of independent promises using Promise.all()
+  const [updatedGroup] = await Promise.all([updatePromise, deletePromise]);
+
   if (!updatedGroup) {
     res.status(404);
     throw new Error("Group not found");
   }
-
   res.status(200).json(updatedGroup);
 });
 
@@ -170,14 +171,16 @@ const updateGroupDP = asyncHandler(async (req, res) => {
     throw new Error("Invalid request params for update group dp");
   }
 
+  const uploadPromise = cloudinary.uploader.upload(displayPic.path);
   // Delete the existing dp only if it's not the default dp
-  if (!currentDP.endsWith("group_mbuvht.png")) {
-    await cloudinary.uploader.destroy(cloudinary_id);
-  }
-  const uploadResponse = await cloudinary.uploader.upload(displayPic.path);
-  await deleteFile(displayPic.path); // Delete file from server after upload to cloudinary
+  const destroyPromise = !currentDP.endsWith("group_mbuvht.png")
+    ? cloudinary.uploader.destroy(cloudinary_id)
+    : Promise.resolve();
 
-  const updatedGroup = await ChatModel.findByIdAndUpdate(
+  const [uploadResponse] = await Promise.all([uploadPromise, destroyPromise]);
+
+  const deletePromise = deleteFile(displayPic.path);
+  const updatePromise = ChatModel.findByIdAndUpdate(
     chatId,
     {
       cloudinary_id: uploadResponse.public_id,
@@ -187,6 +190,8 @@ const updateGroupDP = asyncHandler(async (req, res) => {
   )
     .populate("users", "-password -notifications")
     .populate("groupAdmins", "-password -notifications");
+
+  const [updatedGroup] = await Promise.all([updatePromise, deletePromise]);
 
   if (!updatedGroup) {
     res.status(404);
@@ -284,16 +289,13 @@ const deleteGroupChat = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Invalid chatId for Deleting Group");
   }
-  const deletedGroup = await ChatModel.findByIdAndDelete(chatId)
-    .populate("users", "-password -notifications")
-    .populate("groupAdmins", "-password -notifications");
+  const deletedGroup = await ChatModel.findByIdAndDelete(chatId);
 
   if (!deletedGroup) {
     res.status(404);
     throw new Error("Group not found");
   }
-
-  res.status(200).json(deletedGroup);
+  res.status(200).json({ status: "Group Deleted Successfully" });
 });
 
 const makeGroupAdmin = asyncHandler(async (req, res) => {
