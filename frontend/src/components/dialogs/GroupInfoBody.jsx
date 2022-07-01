@@ -122,7 +122,7 @@ const GroupInfoBody = ({ messages }) => {
     } catch (error) {
       displayToast({
         title: "Couldn't Update Group Name",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 4000,
         position: "top-center",
@@ -179,7 +179,7 @@ const GroupInfoBody = ({ messages }) => {
     } catch (error) {
       displayToast({
         title: "Couldn't Update Group DP",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 4000,
         position: "top-center",
@@ -222,7 +222,7 @@ const GroupInfoBody = ({ messages }) => {
     } catch (error) {
       displayToast({
         title: "Couldn't Delete Group DP",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 4000,
         position: "top-center",
@@ -269,7 +269,7 @@ const GroupInfoBody = ({ messages }) => {
     } catch (error) {
       displayToast({
         title: "Couldn't Exit Group",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 4000,
         position: "bottom-center",
@@ -322,7 +322,7 @@ const GroupInfoBody = ({ messages }) => {
     } catch (error) {
       displayToast({
         title: "Couldn't Delete Group",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 4000,
         position: "top-center",
@@ -462,7 +462,7 @@ const GroupInfoBody = ({ messages }) => {
     } catch (error) {
       displayToast({
         title: "Couldn't Add Members to Group",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 4000,
         position: "top-center",

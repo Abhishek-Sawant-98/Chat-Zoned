@@ -133,7 +133,7 @@ const ChatListItem = ({ chat }) => {
               <span data-chat={_id}>
                 {lastMessage === null
                   ? " Last Message was deleted"
-                  : truncateString(lastMessage?.content || "", 20, 17)}
+                  : truncateString(lastMessage?.content || "", 27, 24)}
               </span>
             )}
           </p>

@@ -100,7 +100,7 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup, adding }) => {
     } catch (error) {
       displayToast({
         title: "Couldn't Fetch Users",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 5000,
         position: "bottom-left",

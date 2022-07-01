@@ -3,6 +3,7 @@ const MessageModel = require("../models/MessageModel");
 const ChatModel = require("../models/chatModel");
 const { deleteFile, deleteExistingAttachment } = require("../utils/deleteFile");
 const cloudinary = require("../config/cloudinary");
+const path = require("path");
 
 const fetchMessages = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
@@ -11,7 +12,6 @@ const fetchMessages = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Invalid chatId for fetching messages");
   }
-
   const messages = await MessageModel.find({ chat: chatId })
     .populate({
       path: "sender",
@@ -19,7 +19,9 @@ const fetchMessages = asyncHandler(async (req, res) => {
       select: "-password -notifications",
     })
     .sort({ createdAt: "asc" }); // (oldest to latest)
-  res.status(200).json(messages);
+  res
+    .status(200)
+    .json({ messages, baseUrl: path.join(__dirname, "../messageFiles/") });
 });
 
 const sendMessage = asyncHandler(async (req, res) => {

@@ -108,7 +108,7 @@ const NewGroupBody = ({ closeChildDialog }) => {
     } catch (error) {
       displayToast({
         title: "Couldn't Create Group",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 5000,
         position: "top-center",

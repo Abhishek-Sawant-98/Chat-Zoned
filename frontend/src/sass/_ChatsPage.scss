@@ -34,14 +34,56 @@
       border-radius: 10px;
       margin-bottom: 5px;
     }
-    .messageBody {
-      height: 100%;
+    .messagesBody {
+      height: 86%;
       background-color: #9fb1cf30;
       border-radius: 15px;
       .btnGoBack {
       }
       .messages {
-        height: 100%;
+        height: 80%;
+        overflow: auto;
+        & > div {
+          @include scrollbars(4px);
+        }
+        .msgListBottom {
+          &::before {
+            content: "";
+          }
+        }
+      }
+      .msgInputDiv {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        .attachFile {
+          border-radius: 7px 0px 0px 7px;
+        }
+        .msgInput {
+          border-radius: 0px;
+          width: 100%;
+          font-size: 18px;
+          max-height: 100px;
+          cursor: text;
+          text-align: start;
+          caret-color: #6a9bf0;
+          line-height: 26px;
+          outline: none;
+          overflow-x: hidden;
+          overflow-y: auto;
+          word-break: break-all;
+          @include scrollbars(5px);
+          &:empty::before {
+            content: "Enter a Message...";
+            color: grey;
+          }
+        }
+        .sendButton {
+          border-radius: 0px 7px 7px 0px;
+        }
+        .disabledSend {
+          border-radius: 0px 7px 7px 0px;
+        }
       }
     }
   }

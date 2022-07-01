@@ -80,7 +80,7 @@ const Login = () => {
     } catch (error) {
       displayToast({
         title: "Login Failed",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 5000,
         position: "bottom-center",

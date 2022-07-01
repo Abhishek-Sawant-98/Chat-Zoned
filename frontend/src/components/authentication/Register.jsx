@@ -115,7 +115,7 @@ const Register = () => {
     } catch (error) {
       displayToast({
         title: "Registration Failed",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 4000,
         position: "bottom-center",

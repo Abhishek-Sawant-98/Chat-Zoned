@@ -117,7 +117,7 @@ const EditProfileBody = () => {
     } catch (error) {
       displayToast({
         title: "Name Update Failed",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 5000,
         position: "top-center",
@@ -174,7 +174,7 @@ const EditProfileBody = () => {
     } catch (error) {
       displayToast({
         title: "ProfilePic Update Failed",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 5000,
         position: "top-center",
@@ -216,7 +216,7 @@ const EditProfileBody = () => {
     } catch (error) {
       displayToast({
         title: "ProfilePic Deletion Failed",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 5000,
         position: "top-center",

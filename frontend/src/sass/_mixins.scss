@@ -20,7 +20,7 @@
 @mixin scrollbars(
   $size: 7px,
   $foregroundColor: #686868,
-  $backgroundColor: #1a1a1a
+  $backgroundColor: transparent
 ) {
   // (Chrome)
   &::-webkit-scrollbar {

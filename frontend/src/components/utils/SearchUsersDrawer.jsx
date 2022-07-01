@@ -58,7 +58,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
     } catch (error) {
       displayToast({
         title: "Couldn't Fetch Users",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 5000,
         position: "bottom-left",
@@ -88,7 +88,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
     } catch (error) {
       displayToast({
         title: "Couldn't Create/Retrieve Chat",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 4000,
         position: "bottom-center",

@@ -76,7 +76,7 @@ const MemberOptionsMenu = ({
     } catch (error) {
       displayToast({
         title: "Couldn't Create/Retrieve Chat",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 4000,
         position: "bottom-center",
@@ -129,7 +129,7 @@ const MemberOptionsMenu = ({
     } catch (error) {
       displayToast({
         title: "Make Group Admin Failed",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 4000,
         position: "bottom-center",
@@ -168,7 +168,7 @@ const MemberOptionsMenu = ({
     } catch (error) {
       displayToast({
         title: "Dismiss As Group Admin Failed",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 4000,
         position: "bottom-center",
@@ -212,7 +212,7 @@ const MemberOptionsMenu = ({
     } catch (error) {
       displayToast({
         title: "Remove From Group Failed",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 4000,
         position: "bottom-center",

@@ -124,7 +124,7 @@ const ProfileSettingsMenu = ({ anchor, setAnchor }) => {
         } catch (error) {
           displayToast({
             title: "Password Update Failed",
-            message: error.response?.data?.message || "Oops! Server Down",
+            message: error.response?.data?.message || error.message,
             type: "error",
             duration: 5000,
             position: "top-center",

@@ -106,7 +106,7 @@ const ChatListView = () => {
     } catch (error) {
       displayToast({
         title: "Couldn't Fetch Chats",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 5000,
         position: "bottom-center",
@@ -134,7 +134,7 @@ const ChatListView = () => {
 
   return (
     <div
-      className={`chatpageDiv chatpageView chatListView col-md-5 col-lg-4 ms-md-2 p-2 text-light ${
+      className={`chatpageDiv chatpageView chatListView col-md-5 col-lg-4 mx-1 p-2 text-light ${
         selectedChat ? "d-none d-md-flex" : "d-flex"
       } flex-column user-select-none`}
     >

@@ -2,13 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import { Avatar, IconButton } from "@mui/material";
 import { AppState } from "../context/ContextProvider";
 import { getOneOnOneChatReceiver, truncateString } from "../utils/appUtils";
-import { ArrowBack, Close } from "@mui/icons-material";
+import {
+  ArrowBack,
+  AttachFile,
+  Close,
+  Search,
+  Send,
+} from "@mui/icons-material";
 import getCustomTooltip from "./utils/CustomTooltip";
 import animationData from "../animations/letsChatGif.json";
 import LottieAnimation from "./utils/LottieAnimation";
 import axios from "../utils/axios";
 import ViewProfileBody from "./dialogs/ViewProfileBody";
 import GroupInfoBody from "./dialogs/GroupInfoBody";
+import LoadingIndicator from "./utils/LoadingIndicator";
 
 const arrowStyles = {
   color: "#777",
@@ -20,6 +27,14 @@ const tooltipStyles = {
   fontSize: 16,
   backgroundColor: "#777",
 };
+const iconStyles = {
+  margin: "4px 0px",
+  padding: "5px",
+  color: "#999999",
+  ":hover": {
+    backgroundColor: "#aaaaaa20",
+  },
+};
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const MessagesView = () => {
@@ -27,6 +42,7 @@ const MessagesView = () => {
 
   const {
     refresh,
+    setRefresh,
     formClassNames,
     selectedChat,
     loggedInUser,
@@ -38,16 +54,22 @@ const MessagesView = () => {
     setGroupInfo,
   } = AppState();
 
-  const {
-    loading,
-    setLoading,
-    disableIfLoading,
-    formFieldClassName,
-    inputFieldClassName,
-  } = formClassNames;
+  const { loading, setLoading, disableIfLoading } = formClassNames;
 
-  const closeChat = () => setSelectedChat(null);
+  const closeChat = () => {
+    setSelectedChat(null);
+    resetMsgInput();
+  };
+  const [sending, setSending] = useState(false);
+  const [enableMsgSend, setEnableMsgSend] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [newMsgData, setNewMsgData] = useState({
+    attachment: null,
+    attachmentPreviewUrl: "",
+  });
+  const msgListBottom = useRef(null);
+  const msgFileInput = useRef(null);
+  const msgContent = useRef(null);
 
   const chatName = selectedChat?.isGroupChat
     ? selectedChat?.chatName
@@ -67,14 +89,23 @@ const MessagesView = () => {
         `/api/message/${selectedChat?._id}`,
         config
       );
-
-      setMessages(data);
+      setMessages(
+        data.messages?.map((m) => {
+          return {
+            ...m,
+            fileUrl: !m.fileUrl
+              ? null
+              : m.fileUrl.startsWith("https://res.cloudinary.com")
+              ? m.fileUrl
+              : `${data.baseUrl}${m.fileUrl}`,
+          };
+        })
+      );
       setLoading(false);
-      console.log("Messages : ", data);
     } catch (error) {
       displayToast({
         title: "Couldn't Fetch Messages",
-        message: error.response?.data?.message || "Oops! Server Down",
+        message: error.response?.data?.message || error.message,
         type: "error",
         duration: 5000,
         position: "bottom-center",
@@ -82,6 +113,81 @@ const MessagesView = () => {
       setLoading(false);
     }
   };
+
+  const sendMessage = async () => {
+    console.log("sending message");
+    resetMsgInput();
+    if (!newMsgData.attachment || msgContent.current?.innerText) return;
+
+    setSending(true);
+    const config = {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+    };
+
+    try {
+      const formData = new FormData();
+      formData.append("attachment", newMsgData.attachment);
+      formData.append("content", newMsgData.content);
+      formData.append("chatId", selectedChat?._id);
+      await axios.post(`/api/message`, formData, config);
+
+      setSending(false);
+      setRefresh(!refresh);
+    } catch (error) {
+      displayToast({
+        title: "Couldn't Send Messages",
+        message: error.response?.data?.message || error.message,
+        type: "error",
+        duration: 5000,
+        position: "bottom-center",
+      });
+      setSending(false);
+    }
+  };
+
+  const handleMsgFileInputChange = (e) => {
+    const msgFile = e.target.files[0];
+    if (!msgFile) return;
+
+    if (msgFile.size >= 3145728) {
+      msgFileInput.current.value = "";
+      return displayToast({
+        message: "Please Select a File Smaller than 3 MB",
+        type: "warning",
+        duration: 4000,
+        position: "top-center",
+      });
+    }
+    setNewMsgData({
+      ...newMsgData,
+      attachment: msgFile,
+      attachmentPreviewUrl: URL.createObjectURL(msgFile),
+    });
+  };
+
+  const resetMsgInput = () => {
+    setNewMsgData({
+      attachment: null,
+      attachmentPreviewUrl: "",
+    });
+    msgContent.current.innerHTML = "";
+    msgFileInput.current.value = "";
+  };
+
+  const scrollToBottom = () => {
+    msgListBottom.current?.scrollIntoView({ behaviour: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    if (selectedChat) fetchMessages();
+  }, [selectedChat, refresh]);
 
   const openViewProfileDialog = () => {
     setShowDialogActions(false);
@@ -101,17 +207,9 @@ const MessagesView = () => {
     });
   };
 
-  useEffect(() => {
-    if (selectedChat) fetchMessages();
-  }, [selectedChat]);
-
-  useEffect(() => {
-    // if (selectedChat) fetchMessages();
-  }, [refresh]);
-
   return (
     <div
-      className={`chatpageDiv chatpageView messagesView col text-light ms-2 ms-md-0 ${
+      className={`chatpageDiv chatpageView messagesView col text-light mx-0 mx-md-1 ${
         selectedChat ? "d-flex" : "d-none d-md-flex"
       } flex-column p-2 user-select-none`}
     >
@@ -144,7 +242,7 @@ const MessagesView = () => {
                     backgroundColor: "#aaaaaa20",
                   },
                 }}
-                className="pointer ms-2 ms-md-4"
+                className="pointer ms-1 ms-md-4"
                 onClick={
                   selectedChat?.isGroupChat
                     ? openGroupInfoDialog
@@ -187,31 +285,97 @@ const MessagesView = () => {
               </IconButton>
             </CustomTooltip>
           </section>
-          <section className="messageBody m-1 p-2">
-            <div className="d-flex flex-column justify-content-around">
-              {/* Messages list */}
-              <div className="messages">messages</div>
+          <section className="messagesBody m-1 p-2 position-relative">
+            {/* Messages list */}
+            <div className="messages d-flex flex-column justify-content-end">
+              {loading ? (
+                <>
+                  <LoadingIndicator
+                    message={"Fetching Messages..."}
+                    msgStyleClasses={"text-light h3"}
+                  />
+                </>
+              ) : (
+                <div className="overflow-auto">
+                  {messages.map((m) => (
+                    <div
+                      key={m._id}
+                      className={`d-flex justify-content-${
+                        m.sender._id === loggedInUser._id ? "end" : "start"
+                      }`}
+                    >
+                      <span
+                        className={`d-inline-block border mx-4 mx-md-5 my-1`}
+                      >
+                        {m.content}
+                      </span>
+                    </div>
+                  ))}
+                  <div className="msgListBottom" ref={msgListBottom}></div>
+                </div>
+              )}
+            </div>
 
-              {/* New Message Input */}
-              <div className="input-group mt-5">
-                {/* <span
-            className={`input-group-text ${disableIfLoading} bg-black bg-gradient border-secondary text-light rounded-pill rounded-end border-end-0`}
-          >
-            <Search className="ms-1" />
-          </span> */}
-                {/* <input
-              type="text"
-              onChange={null}
-              autoFocus
-              placeholder="Type a message..."
-              id="newMsgInput"
-              className={`${inputFieldClassName.replace(
-                "text-center",
-                "text-start"
-              )} border-start-0 rounded-start d-inline-block`}
-              style={{ cursor: "auto", fontSize: "17px" }}
-            /> */}
-              </div>
+            {/* New Message Input */}
+            <div className="msgInputDiv d-flex position-absolute">
+              <span
+                className={`d-inline-block attachFile ${disableIfLoading} pointer bg-dark`}
+              >
+                <CustomTooltip
+                  title="Attach File"
+                  placement="bottom-start"
+                  arrow
+                >
+                  <IconButton
+                    onClick={() => {
+                      msgFileInput.current?.click();
+                    }}
+                    className={`d-flex ms-2`}
+                    sx={{ ...iconStyles, transform: "rotateZ(45deg)" }}
+                  >
+                    <AttachFile style={{ fontSize: 20 }} />
+                  </IconButton>
+                </CustomTooltip>
+                {/* File input */}
+                <input
+                  type="file"
+                  accept="*"
+                  onChange={handleMsgFileInputChange}
+                  name="attachment"
+                  id="attachMsgFile"
+                  ref={msgFileInput}
+                  className={`d-none`}
+                  disabled={loading}
+                />
+              </span>
+              {/* Content/text input */}
+              <div
+                onInput={(e) => {
+                  const input = e.target.textContent;
+                  setEnableMsgSend(Boolean(input));
+                }}
+                ref={msgContent}
+                className={`msgInput ${
+                  !enableMsgSend ? "disabledSend" : ""
+                } d-flex bg-dark px-3 py-1 justify-content-start`}
+                contentEditable={true}
+              ></div>
+              {/* Send button */}
+              <span
+                className={`d-inline-block sendButton ${disableIfLoading} pointer bg-dark`}
+              >
+                {enableMsgSend ? (
+                  <IconButton
+                    onClick={sendMessage}
+                    className={`d-flex mx-2 mx-md-3`}
+                    sx={iconStyles}
+                  >
+                    <Send style={{ fontSize: 20 }} />
+                  </IconButton>
+                ) : (
+                  <></>
+                )}
+              </span>
             </div>
           </section>
         </>
