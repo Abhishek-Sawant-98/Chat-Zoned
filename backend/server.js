@@ -5,7 +5,8 @@ const connectToMongoDB = require("./config/db");
 const UserRoutes = require("./routes/UserRoutes");
 const ChatRoutes = require("./routes/ChatRoutes");
 const MessageRoutes = require("./routes/MessageRoutes");
-const socketio = require("socket.io");
+const path = require("path");
+// const socketio = require("socket.io");
 const {
   notFoundHandler,
   appErrorHandler,
@@ -32,49 +33,60 @@ app.use(appErrorHandler);
 
 const PORT = process.env.PORT || 5000;
 
+// ------------------ Deployment ----------------------- //
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend/build")));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
+  });
+}
+
+// ------------------ Deployment ----------------------- //
+
 const server = app.listen(PORT, () =>
   console.log(`📍 Server started at port ${PORT}`)
 );
 
-const io = socketio(server, {
-  pingTimeout: 90000,
-  cors: {
-    origin: "http://localhost:3000",
-  },
-});
+// const io = socketio(server, {
+//   pingTimeout: 90000,
+//   cors: {
+//     origin: "http://localhost:3000",
+//   },
+// });
 
-io.on("connection", (socket) => {
-  console.log("Connected to socket.io");
+// io.on("connection", (socket) => {
+//   console.log("Connected to socket.io");
 
-  // Socket event listeners
-  socket.on("init user", (user) => {
-    socket.join(user._id);
-    socket.emit(`user connected`);
-  });
+//   // Socket event listeners
+//   socket.on("init user", (user) => {
+//     socket.join(user._id);
+//     socket.emit(`user connected`);
+//   });
 
-  socket.on("join chat", (chat) => {
-    socket.join(chat._id);
-    console.log(`User joined chat : ${chat._id}`);
-  });
+//   socket.on("join chat", (chat) => {
+//     socket.join(chat._id);
+//     console.log(`User joined chat : ${chat._id}`);
+//   });
 
-  socket.on("new message sent", (newMessage) => {
-    const chat = newMessage.chat;
+//   socket.on("new message sent", (newMessage) => {
+//     const chat = newMessage.chat;
 
-    if (!chat)
-      return console.log(`Chat not found for new message : ${newMessage._id}`);
+//     if (!chat)
+//       return console.log(`Chat not found for new message : ${newMessage._id}`);
 
-    chat.users.forEach((user) => {
-      // Emit 'newMessage' in the sockets of all other users except the sender of newMessage
-      if (user._id === newMessage.sender._id) return;
+//     chat.users.forEach((user) => {
+//       // Emit 'newMessage' in the sockets of all other users except the sender of newMessage
+//       if (user._id === newMessage.sender._id) return;
 
-      socket
-        .to(user._id)
-        .emit("new message received", { userId: user._id, ...newMessage });
-    });
-  });
+//       socket
+//         .to(user._id)
+//         .emit("new message received", { userId: user._id, ...newMessage });
+//     });
+//   });
 
-  socket.off("init user", (user) => {
-    console.log("User socket disconnected");
-    socket.leave(user._id);
-  });
-});
+//   socket.off("init user", (user) => {
+//     console.log("User socket disconnected");
+//     socket.leave(user._id);
+//   });
+// });
