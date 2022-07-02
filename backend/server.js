@@ -11,6 +11,7 @@ const {
   notFoundHandler,
   appErrorHandler,
 } = require("./middleware/ErrorMiddleware");
+const { resolveSrv } = require("dns/promises");
 
 dotenv.config();
 connectToMongoDB();
@@ -27,22 +28,20 @@ app.use("/api/user", UserRoutes);
 app.use("/api/chat", ChatRoutes);
 app.use("/api/message", MessageRoutes);
 
-// Error middlewares
-app.all("*", notFoundHandler);
-app.use(appErrorHandler);
-
 const PORT = process.env.PORT || 5000;
 
 // ------------------ Deployment ----------------------- //
-
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/build")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
-  });
+  app.get("*", (req, res) =>
+    res.sendFile(path.join(__dirname, "../frontend/build/index.html"))
+  );
 }
-
 // ------------------ Deployment ----------------------- //
+
+// Error middlewares
+app.all("*", notFoundHandler);
+app.use(appErrorHandler);
 
 const server = app.listen(PORT, () =>
   console.log(`📍 Server started at port ${PORT}`)
