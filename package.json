@@ -1,6 +1,10 @@
 {
   "name": "mern-chat-app",
   "version": "1.0.0",
+  "engines": {
+    "node": "16.13.0",
+    "npm": "8.1.0"
+  },
   "description": "A MERN stack based chat application",
   "main": "server.js",
   "type": "commonjs",
