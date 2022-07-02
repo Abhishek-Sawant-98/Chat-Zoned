@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const ChatModel = require("../models/chatModel");
+const ChatModel = require("../models/ChatModel");
 const cloudinary = require("../config/cloudinary");
 const { deleteFile } = require("../utils/deleteFile");
 
