@@ -66,7 +66,7 @@ const ViewGroupMembers = () => {
       style={{ height: "75vh" }}
     >
       {/* Member Count */}
-      <p className="h3 text-center text-light" style={{ marginTop: "-10px" }}>
+      <p className="h3 text-center text-light" style={{ marginTop: "5px" }}>
         {`${groupMembers?.length} Member${groupMembers?.length > 1 ? "s" : ""}`}
       </p>
       {/* Search Bar */}

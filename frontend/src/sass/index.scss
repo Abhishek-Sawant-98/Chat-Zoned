@@ -9,12 +9,14 @@
 @import url($appFontUrl);
 
 body {
-  font-family: "Mirza";
   background-size: 100% 100%;
   background-attachment: fixed;
   background-image: url($appBgUrl);
   // -ms-overflow-style: none; // Hide scrollbar in ie/edge
   // scrollbar-width: none; // Hide scrollbar in firefox
+  & * {
+    font-family: "Trebuchet MS";
+  }
   .pointer {
     cursor: pointer;
   }

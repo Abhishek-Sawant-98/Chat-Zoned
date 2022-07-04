@@ -18,7 +18,6 @@ header {
   .userChip {
     height: 40px;
     margin: 2px;
-    font-family: "Mirza";
     .userChipAvatar {
       @include getImgDimensions(0.3);
     }

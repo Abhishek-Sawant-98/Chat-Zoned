@@ -15,7 +15,6 @@ export const menuPaperProps = {
 export const menuItemProps = {
   ":hover": { backgroundColor: "#505050" },
   color: "#e0e0e0",
-  fontFamily: "Mirza",
   fontSize: "19px",
 };
 

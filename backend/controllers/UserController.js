@@ -5,16 +5,7 @@ const { deleteFile } = require("../utils/deleteFile");
 const generateToken = require("../utils/generateToken");
 const path = require("path");
 
-// const fetchFile = asyncHandler(async (req, res) => {
-//   const filepath = path.join(__dirname, "../messageFiles", fileUrl);
-//   console.log("In get file request...", filepath);
-//   res.status(200).sendFile(filepath);
-// });
-
 const registerUser = asyncHandler(async (req, res) => {
-  // return res.sendFile(
-  //   path.join(__dirname, "../messageFiles", req.file?.filename)
-  // );
   const profilePic = req.file;
   const { name, email, password } = req.body;
 
