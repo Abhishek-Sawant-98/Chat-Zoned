@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { AppState } from "../../context/ContextProvider";
 
-const EditNameBody = ({ getUpdatedName, placeholder }) => {
-  const { formClassNames, groupInfo } = AppState();
+const EditNameBody = ({ originalName, getUpdatedName, placeholder }) => {
+  const { formClassNames } = AppState();
   const { loading, formFieldClassName, inputFieldClassName } = formClassNames;
-  const [name, setName] = useState(groupInfo?.chatName);
+  const [name, setName] = useState(originalName);
 
   useEffect(() => {
     getUpdatedName(name);

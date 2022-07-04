@@ -23,9 +23,14 @@ const AppToast = () => {
         onClose={handleToastClose}
       >
         {title && (
-          <AlertTitle className="fw-bold user-select-none">{title}</AlertTitle>
+          <AlertTitle
+            style={{ fontFamily: "Mirza", fontSize: "20px", marginTop: "-8px" }}
+            className="fw-bold user-select-none"
+          >
+            {title}
+          </AlertTitle>
         )}
-        {message}
+        <div style={{ fontSize: "17px", marginTop: "-4px" }}>{message}</div>
       </Alert>
     </Snackbar>
   );

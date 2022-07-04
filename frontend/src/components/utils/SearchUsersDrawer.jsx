@@ -116,7 +116,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
       >
         <div className="d-flex justify-content-center">
           <span
-            className="text-center h2 user-select-none text-light"
+            className="text-center h2 mt-1 user-select-none text-light"
             style={{ marginTop: "0px" }}
           >
             Search Users

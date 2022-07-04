@@ -66,7 +66,11 @@ const GroupMemberItem = ({ user, truncateValues }) => {
         <p data-user={_id} className="groupMemberName fw-bold text-info">
           {isLoggedInUser ? "You" : truncateString(name, max, index)}
         </p>
-        <p data-user={_id} className="groupMemberEmail">
+        <p
+          data-user={_id}
+          style={{ textShadow: "0px 4px 4px #444" }}
+          className="groupMemberEmail"
+        >
           {truncateString(email, max, index)}
         </p>
       </div>

@@ -54,13 +54,14 @@ const MessagesView = () => {
     setGroupInfo,
   } = AppState();
 
-  const { loading, setLoading, disableIfLoading } = formClassNames;
+  const { disableIfLoading } = formClassNames;
 
   const closeChat = () => {
     setSelectedChat(null);
     resetMsgInput();
   };
   const [sending, setSending] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [enableMsgSend, setEnableMsgSend] = useState(false);
   const [messages, setMessages] = useState([]);
   const [newMsgData, setNewMsgData] = useState({
@@ -263,7 +264,7 @@ const MessagesView = () => {
               </IconButton>
             </CustomTooltip>
 
-            <span className="ms-2 ms-md-3 text-info" title={chatName}>
+            <span className="ms-3 mt-1 text-info" title={chatName}>
               {truncateString(chatName, 22, 17)}
             </span>
 
@@ -330,13 +331,13 @@ const MessagesView = () => {
                     onClick={() => {
                       msgFileInput.current?.click();
                     }}
-                    className={`d-flex ms-2`}
+                    className={`d-flex ms-2 my-1`}
                     sx={{ ...iconStyles, transform: "rotateZ(45deg)" }}
                   >
-                    <AttachFile style={{ fontSize: 20 }} />
+                    <AttachFile style={{ fontSize: 22 }} />
                   </IconButton>
                 </CustomTooltip>
-                {/* File input */}
+                {/* Attachment File input */}
                 <input
                   type="file"
                   accept="*"
@@ -357,7 +358,7 @@ const MessagesView = () => {
                 ref={msgContent}
                 className={`msgInput ${
                   !enableMsgSend ? "disabledSend" : ""
-                } d-flex bg-dark px-3 py-1 justify-content-start`}
+                } d-flex bg-dark px-3 py-2 justify-content-start`}
                 contentEditable={true}
               ></div>
               {/* Send button */}
@@ -367,7 +368,7 @@ const MessagesView = () => {
                 {enableMsgSend ? (
                   <IconButton
                     onClick={sendMessage}
-                    className={`d-flex mx-2 mx-md-3`}
+                    className={`d-flex my-1 mx-2 mx-md-3`}
                     sx={iconStyles}
                   >
                     <Send style={{ fontSize: 20 }} />
@@ -381,7 +382,7 @@ const MessagesView = () => {
         </>
       ) : (
         <div className="d-flex flex-column justify-content-start align-items-center h-100">
-          <h2 className="mx-3">
+          <h2 className="mx-3 mt-1">
             Hello{" "}
             <span
               className="fw-bold"
@@ -391,7 +392,7 @@ const MessagesView = () => {
           </h2>
           <LottieAnimation
             ref={letsChatGif}
-            className={"d-inline-block mt-4"}
+            className={"d-inline-block mt-3"}
             style={{ marginBottom: "50px", height: "50%" }}
             animationData={animationData}
           />

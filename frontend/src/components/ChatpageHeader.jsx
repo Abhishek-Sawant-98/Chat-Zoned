@@ -22,8 +22,7 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const ChatpageHeader = () => {
-  const { loggedInUser, formClassNames } = AppState();
-  const { loading } = formClassNames;
+  const { loggedInUser } = AppState();
   const appGif = useRef();
 
   const [notificationsMenuAnchor, setNotificationsMenuAnchor] = useState(null);
@@ -73,7 +72,7 @@ const ChatpageHeader = () => {
           style={{ width: "35px", height: "35px" }}
           animationData={animationData}
         />
-        <span style={{ color: "orange" }} className="fs-3 fw-bold">
+        <span style={{ color: "orange" }} className="fs-3 fw-bold mt-1">
           CHAT ZONED
         </span>
       </div>

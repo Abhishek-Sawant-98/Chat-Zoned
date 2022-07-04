@@ -2,7 +2,6 @@ import { Edit } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
 import axios from "../../utils/axios";
 import { AppState } from "../../context/ContextProvider";
-import CustomDialog from "../utils/CustomDialog";
 import EditNameBody from "./EditNameBody";
 import { CircularProgress, IconButton } from "@mui/material";
 import EditPicMenu from "../menus/EditPicMenu";
@@ -69,60 +68,6 @@ const EditProfileBody = () => {
   const clickOnKeydown = (e) => {
     if (e.key === " " || e.key === "Enter") {
       e.target.click();
-    }
-  };
-
-  // Edited Name config
-  let editedName;
-
-  const getUpdatedName = (updatedName) => {
-    editedName = updatedName;
-  };
-
-  const updateProfileName = async () => {
-    if (!editedName) {
-      return displayToast({
-        message: "Please Enter a Valid Name",
-        type: "warning",
-        duration: 3000,
-        position: "top-center",
-      });
-    }
-    setLoading(true);
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser?.token}`,
-      },
-    };
-
-    try {
-      const { data } = await axios.put(
-        "/api/user/update/name",
-        { newUserName: editedName },
-        config
-      );
-
-      displayToast({
-        message: "Name Updated Successfully.",
-        type: "success",
-        duration: 3000,
-        position: "bottom-center",
-      });
-
-      setLoading(false);
-      persistUpdatedUser({ ...data, token: loggedInUser.token });
-      return "profileUpdated";
-    } catch (error) {
-      displayToast({
-        title: "Name Update Failed",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 5000,
-        position: "top-center",
-      });
-      setLoading(false);
     }
   };
 
@@ -216,6 +161,60 @@ const EditProfileBody = () => {
     } catch (error) {
       displayToast({
         title: "ProfilePic Deletion Failed",
+        message: error.response?.data?.message || error.message,
+        type: "error",
+        duration: 5000,
+        position: "top-center",
+      });
+      setLoading(false);
+    }
+  };
+
+  // Edited Name config
+  let editedName;
+
+  const getUpdatedName = (updatedName) => {
+    editedName = updatedName;
+  };
+
+  const updateProfileName = async () => {
+    if (!editedName) {
+      return displayToast({
+        message: "Please Enter a Valid Name",
+        type: "warning",
+        duration: 3000,
+        position: "top-center",
+      });
+    }
+    setLoading(true);
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loggedInUser?.token}`,
+      },
+    };
+
+    try {
+      const { data } = await axios.put(
+        "/api/user/update/name",
+        { newUserName: editedName },
+        config
+      );
+
+      displayToast({
+        message: "Name Updated Successfully.",
+        type: "success",
+        duration: 3000,
+        position: "bottom-center",
+      });
+
+      setLoading(false);
+      persistUpdatedUser({ ...data, token: loggedInUser.token });
+      return "profileUpdated";
+    } catch (error) {
+      displayToast({
+        title: "Name Update Failed",
         message: error.response?.data?.message || error.message,
         type: "error",
         duration: 5000,

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { AppState } from "../../context/ContextProvider";
 import {
   Delete,
@@ -36,8 +36,6 @@ const GroupInfoBody = ({ messages }) => {
     formClassNames,
     loggedInUser,
     displayToast,
-    refresh,
-    setRefresh,
     setSelectedChat,
     childDialogMethods,
     getChildDialogMethods,
@@ -67,7 +65,6 @@ const GroupInfoBody = ({ messages }) => {
 
   const updateView = (data) => {
     setGroupInfo(data);
-    setRefresh(!refresh); // To update chatlist view
     setSelectedChat(data); // To update messages view
   };
 
@@ -263,7 +260,6 @@ const GroupInfoBody = ({ messages }) => {
         position: "bottom-center",
       });
       setLoading(false);
-      setRefresh(!refresh);
       setSelectedChat(null);
       closeDialog();
     } catch (error) {
@@ -316,7 +312,6 @@ const GroupInfoBody = ({ messages }) => {
         position: "bottom-center",
       });
       setLoading(false);
-      setRefresh(!refresh);
       setSelectedChat(null);
       closeDialog();
     } catch (error) {
@@ -378,6 +373,7 @@ const GroupInfoBody = ({ messages }) => {
     setShowDialogClose(false);
     setChildDialogBody(
       <EditNameBody
+        originalName={groupInfo?.chatName}
         getUpdatedName={getUpdatedName}
         placeholder="Enter New Group Name"
       />

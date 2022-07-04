@@ -14,6 +14,7 @@ const SearchInput = forwardRef((props, inputRef) => {
 
   return (
     <section className={`${formFieldClassName} pt-3 pb-2 mx-1`}>
+      {/* Input box */}
       <div className="input-group">
         <span
           className={`input-group-text ${disableIfLoading} bg-black bg-gradient border-secondary text-light rounded-pill rounded-end`}
@@ -34,6 +35,7 @@ const SearchInput = forwardRef((props, inputRef) => {
             .replace("pill", "0")} border-start-0 border-end-0 d-inline-block`}
           style={{ cursor: "auto", fontSize: "18px" }}
         />
+        {/* Clear icon button */}
         <span
           className={`input-group-text ${disableIfLoading} bg-black bg-gradient border-secondary text-light rounded-pill rounded-start border-start-0`}
         >
