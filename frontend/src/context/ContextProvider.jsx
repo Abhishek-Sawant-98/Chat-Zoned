@@ -6,7 +6,6 @@ const AppContext = createContext();
 const ContextProvider = ({ children }) => {
   // User and chat config
   const [loggedInUser, setLoggedInUser] = useState(null);
-  const [chats, setChats] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [refresh, setRefresh] = useState(false);
   const [groupInfo, setGroupInfo] = useState({
@@ -93,8 +92,6 @@ const ContextProvider = ({ children }) => {
       value={{
         loggedInUser,
         setLoggedInUser,
-        chats,
-        setChats,
         selectedChat,
         setSelectedChat,
         refresh,

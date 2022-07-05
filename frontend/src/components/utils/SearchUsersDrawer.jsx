@@ -1,11 +1,11 @@
-import { ChevronLeft, Close, Search } from "@mui/icons-material";
-import { CircularProgress, Drawer, IconButton } from "@mui/material";
+import { ChevronLeft } from "@mui/icons-material";
+import { Drawer, IconButton } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { AppState } from "../../context/ContextProvider";
 import axios from "../../utils/axios";
 import { debounce, truncateString } from "../../utils/appUtils";
 import UserListItem from "./UserListItem";
-import LoadingIndicator from "./LoadingIndicator";
+import LoadingListItem from "./LoadingListItem";
 import SearchInput from "./SearchInput";
 
 const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
@@ -153,12 +153,6 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
           className="position-relative mx-1 my-2 h-100"
           style={{ overflowY: "auto", overflowX: "hidden" }}
         >
-          {loading && (
-            <LoadingIndicator
-              message={"Fetching Users..."}
-              msgStyleClasses={"text-light h2"}
-            />
-          )}
           <div
             // 'Event delegation' (add only one event listener for
             // parent element instead of adding for each child element)
@@ -167,7 +161,9 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
               if (userId) createOrRetrieveChat(userId);
             }}
           >
-            {searchResults.length > 0 ? (
+            {loading ? (
+              <LoadingListItem dpRadius={"42px"} count={6} />
+            ) : searchResults.length > 0 ? (
               searchResults.map((user) => (
                 <UserListItem
                   key={user._id}

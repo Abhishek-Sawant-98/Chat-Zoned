@@ -23,11 +23,11 @@ const MemberOptionsMenu = ({
   const {
     loggedInUser,
     displayToast,
+    refresh,
+    setRefresh,
     closeDialog,
     formClassNames,
     setSelectedChat,
-    refresh,
-    setRefresh,
     groupInfo,
     setGroupInfo,
   } = AppState();

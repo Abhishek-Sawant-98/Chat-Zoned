@@ -1,0 +1,24 @@
+.loadingListItem {
+  position: relative;
+  height: 70px;
+  margin: auto;
+  & > * {
+    position: absolute;
+    background-color: #fff;
+    border-radius: 10px;
+  }
+  .loadingDp {
+    top: 10px;
+    left: 15px;
+  }
+  .loadingTitle {
+    height: 13px;
+    top: 20px;
+    left: 80px;
+  }
+  .loadingDesc {
+    height: 10px;
+    top: 40px;
+    left: 80px;
+  }
+}

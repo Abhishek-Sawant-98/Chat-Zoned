@@ -1,10 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { AppState } from "../../context/ContextProvider";
-import {
-  Edit,
-  KeyboardDoubleArrowLeft,
-  KeyboardDoubleArrowRight,
-} from "@mui/icons-material";
+import { Edit, KeyboardDoubleArrowLeft } from "@mui/icons-material";
 import getCustomTooltip from "../utils/CustomTooltip";
 import { DEFAULT_GROUP_DP } from "../../utils/appUtils";
 import EditPicMenu from "../menus/EditPicMenu";
@@ -45,8 +41,8 @@ const NewGroupBody = ({ closeChildDialog }) => {
     formLabelClassName,
   } = formClassNames;
 
-  const [editGroupDpMenuAnchor, setEditGroupDpMenuAnchor] = useState(null);
   const { chatDisplayPicUrl, chatName } = groupInfo;
+  const [editGroupDpMenuAnchor, setEditGroupDpMenuAnchor] = useState(null);
   const imgInput = useRef();
 
   // Click a button/icon upon 'Enter' or 'Space' keydown

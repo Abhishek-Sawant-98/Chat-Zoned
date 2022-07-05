@@ -37,12 +37,10 @@ const iconStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const MessagesView = () => {
+const MessagesView = ({ fetchMsgs, setFetchMsgs }) => {
   const letsChatGif = useRef(null);
 
   const {
-    refresh,
-    setRefresh,
     formClassNames,
     selectedChat,
     loggedInUser,
@@ -103,6 +101,7 @@ const MessagesView = () => {
         })
       );
       setLoading(false);
+      if (fetchMsgs) setFetchMsgs(false);
     } catch (error) {
       displayToast({
         title: "Couldn't Fetch Messages",
@@ -112,6 +111,7 @@ const MessagesView = () => {
         position: "bottom-center",
       });
       setLoading(false);
+      if (fetchMsgs) setFetchMsgs(false);
     }
   };
 
@@ -136,7 +136,7 @@ const MessagesView = () => {
       await axios.post(`/api/message`, formData, config);
 
       setSending(false);
-      setRefresh(!refresh);
+      fetchMessages();
     } catch (error) {
       displayToast({
         title: "Couldn't Send Messages",
@@ -187,8 +187,8 @@ const MessagesView = () => {
   }, [messages]);
 
   useEffect(() => {
-    if (selectedChat) fetchMessages();
-  }, [selectedChat, refresh]);
+    if (fetchMsgs) fetchMessages();
+  }, [fetchMsgs]);
 
   const openViewProfileDialog = () => {
     setShowDialogActions(false);

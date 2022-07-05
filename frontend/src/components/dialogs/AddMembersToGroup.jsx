@@ -5,27 +5,24 @@ import { Avatar, Chip } from "@mui/material";
 import axios from "../../utils/axios";
 import { debounce, truncateString } from "../../utils/appUtils";
 import UserListItem from "../utils/UserListItem";
-import LoadingIndicator from "../utils/LoadingIndicator";
 import SearchInput from "../utils/SearchInput";
 import NewGroupBody from "./NewGroupBody";
 import ChildDialog from "../utils/ChildDialog";
+import LoadingListItem from "../utils/LoadingListItem";
 
-const AddMembersToGroup = ({ getAddedMembers, forCreateGroup, adding }) => {
+const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
   const {
-    formClassNames,
     loggedInUser,
     displayToast,
-    refresh,
-    setRefresh,
     setDialogAction,
     childDialogMethods,
     getChildDialogMethods,
     groupInfo,
     setGroupInfo,
   } = AppState();
-  const { setLoading } = formClassNames;
-  const groupMembers = groupInfo?.users;
+  const [groupData, setGroupData] = useState(groupInfo);
   const [fetching, setFetching] = useState(false);
+  const groupMembers = groupData?.users;
   const [isMemberSelected, setIsMemberSelected] = useState(false);
   const [addedMembers, setAddedMembers] = useState([]);
 
@@ -36,6 +33,10 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup, adding }) => {
     childDialogMethods;
   const [showDialogActions, setShowDialogActions] = useState(true);
   const [showDialogClose, setShowDialogClose] = useState(false);
+
+  useEffect(() => {
+    setGroupData(groupInfo);
+  }, [groupInfo]);
 
   // For 'create group chat'
   const openNewGroupDialog = () => {
@@ -49,6 +50,7 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup, adding }) => {
     }
     setShowDialogActions(false);
     setShowDialogClose(false);
+    setGroupInfo(groupData);
     setChildDialogBody(<NewGroupBody closeChildDialog={closeChildDialog} />);
     displayChildDialog({
       title: "Create New Group",
@@ -63,7 +65,7 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup, adding }) => {
   useEffect(() => {
     // For create group: [Next >>] button
     if (forCreateGroup) setDialogAction(openNewGroupDialog);
-  }, [groupInfo]);
+  }, [groupData]);
 
   useEffect(() => {
     // For add more group members
@@ -111,8 +113,8 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup, adding }) => {
 
   const unselectUser = (user) => {
     if (!user) return;
-    setGroupInfo({
-      ...groupInfo,
+    setGroupData({
+      ...groupData,
       users: groupMembers.filter((u) => u._id !== user._id),
     });
     // Remove user from added member list
@@ -165,12 +167,6 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup, adding }) => {
         className="position-relative mx-auto mt-2 overflow-auto"
         style={{ flex: "1", marginBottom: "-10px" }}
       >
-        {fetching && (
-          <LoadingIndicator
-            message={`${adding ? "Adding Members..." : "Fetching Users..."}`}
-            msgStyleClasses={"text-light h3"}
-          />
-        )}
         <div
           // 'Event delegation' (add only one event listener for
           // parent element instead of adding for each child element)
@@ -181,8 +177,8 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup, adding }) => {
             if (!isMemberSelected) setIsMemberSelected(true);
             // Add selected user to tag list
             const selectedUser = searchResults.find((u) => u._id === userId);
-            setGroupInfo({
-              ...groupInfo,
+            setGroupData({
+              ...groupData,
               users: [...groupMembers, selectedUser],
             });
             // Add selected user to added member list
@@ -191,25 +187,29 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup, adding }) => {
             setSearchResults(searchResults.filter((u) => u._id !== userId));
           }}
         >
-          {searchResults.length > 0
-            ? searchResults.map((user) => (
-                <UserListItem
-                  key={user._id}
-                  user={user}
-                  truncateValues={[21, 18]}
-                />
-              ))
-            : searchQuery &&
-              !fetching && (
-                <p className="text-light text-center fs-5 mt-3 mx-5">
-                  {isMemberSelected ? "No Other Users " : "No Results "}
-                  Found for '
-                  <span className="text-info">
-                    {truncateString(searchQuery, 25, 22)}
-                  </span>
-                  '
-                </p>
-              )}
+          {fetching ? (
+            <LoadingListItem dpRadius={"43px"} count={4} />
+          ) : searchResults.length > 0 ? (
+            searchResults.map((user) => (
+              <UserListItem
+                key={user._id}
+                user={user}
+                truncateValues={[21, 18]}
+              />
+            ))
+          ) : (
+            searchQuery &&
+            !fetching && (
+              <p className="text-light text-center fs-5 mt-3 mx-5">
+                {isMemberSelected ? "No Other Users " : "No Results "}
+                Found for '
+                <span className="text-info">
+                  {truncateString(searchQuery, 25, 22)}
+                </span>
+                '
+              </p>
+            )
+          )}
         </div>
       </section>
       {/* Child dialog */}

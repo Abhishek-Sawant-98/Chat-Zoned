@@ -27,6 +27,7 @@ const ChatsPage = () => {
   }, []);
 
   useEffect(() => {}, [selectedChat]);
+  const [fetchMsgs, setFetchMsgs] = useState(false);
 
   return (
     <>
@@ -37,10 +38,10 @@ const ChatsPage = () => {
 
           <section className={`row g-1`}>
             {/* Chat List component */}
-            <ChatListView />
+            <ChatListView setFetchMsgs={setFetchMsgs} />
 
             {/* Chat Messages component */}
-            <MessagesView />
+            <MessagesView fetchMsgs={fetchMsgs} setFetchMsgs={setFetchMsgs} />
           </section>
 
           {/* Alert dialog */}

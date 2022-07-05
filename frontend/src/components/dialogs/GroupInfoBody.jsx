@@ -36,6 +36,8 @@ const GroupInfoBody = ({ messages }) => {
     formClassNames,
     loggedInUser,
     displayToast,
+    refresh,
+    setRefresh,
     setSelectedChat,
     childDialogMethods,
     getChildDialogMethods,
@@ -53,7 +55,6 @@ const GroupInfoBody = ({ messages }) => {
   const admins = groupInfo?.groupAdmins;
 
   const [uploading, setUploading] = useState(false);
-  const [adding, setAdding] = useState(false);
   const [editGroupDpMenuAnchor, setEditGroupDpMenuAnchor] = useState(null);
   const isUserGroupAdmin = admins?.some(
     (admin) => admin?._id === loggedInUser?._id
@@ -65,6 +66,7 @@ const GroupInfoBody = ({ messages }) => {
 
   const updateView = (data) => {
     setGroupInfo(data);
+    setRefresh(!refresh);
     setSelectedChat(data); // To update messages view
   };
 
@@ -425,7 +427,6 @@ const GroupInfoBody = ({ messages }) => {
       });
     }
     setLoading(true);
-    setAdding(true);
 
     const config = {
       headers: {
@@ -452,7 +453,6 @@ const GroupInfoBody = ({ messages }) => {
       });
 
       setLoading(false);
-      setAdding(false);
       updateView(data);
       return "profileUpdated";
     } catch (error) {
@@ -464,7 +464,6 @@ const GroupInfoBody = ({ messages }) => {
         position: "top-center",
       });
       setLoading(false);
-      setAdding(false);
     }
   };
 
@@ -472,9 +471,7 @@ const GroupInfoBody = ({ messages }) => {
   const openAddMembersDialog = () => {
     setShowDialogActions(true);
     setShowDialogClose(false);
-    setChildDialogBody(
-      <AddMembersToGroup getAddedMembers={getAddedMembers} adding={adding} />
-    );
+    setChildDialogBody(<AddMembersToGroup getAddedMembers={getAddedMembers} />);
     displayChildDialog({
       title: "Add Group Members",
       nolabel: "Cancel",

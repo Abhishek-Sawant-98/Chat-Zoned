@@ -1,4 +1,4 @@
-import { Close, GroupAdd, Search } from "@mui/icons-material";
+import { GroupAdd } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
 import { AppState } from "../context/ContextProvider";
 import {
@@ -11,7 +11,7 @@ import AddMembersToGroup from "./dialogs/AddMembersToGroup";
 import ChatListItem from "./utils/ChatListItem";
 import getCustomTooltip from "./utils/CustomTooltip";
 import FullSizeImage from "./utils/FullSizeImage";
-import LoadingIndicator from "./utils/LoadingIndicator";
+import LoadingListItem from "./utils/LoadingListItem";
 import SearchInput from "./utils/SearchInput";
 
 const arrowStyles = {
@@ -26,10 +26,8 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const ChatListView = () => {
+const ChatListView = ({ setFetchMsgs }) => {
   const {
-    setLoggedInUser,
-    formClassNames,
     selectedChat,
     loggedInUser,
     setSelectedChat,
@@ -37,13 +35,11 @@ const ChatListView = () => {
     displayToast,
     setDialogBody,
     setShowDialogActions,
-    chats,
-    setChats,
     refresh,
-    setRefresh,
     setGroupInfo,
   } = AppState();
 
+  const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filteredChats, setFilteredChats] = useState(chats);
   const searchChatInput = useRef();
@@ -171,10 +167,7 @@ const ChatListView = () => {
       {/* Chat list */}
       <section className="chatList m-1 p-1 overflow-auto position-relative">
         {loading ? (
-          <LoadingIndicator
-            message={"Fetching Chats..."}
-            msgStyleClasses={"text-light h3"}
-          />
+          <LoadingListItem dpRadius={"49px"} count={6} />
         ) : filteredChats?.length > 0 ? (
           <div
             // 'Event delegation' (add only one event listener for
@@ -190,6 +183,7 @@ const ChatListView = () => {
                 (chat) => chat._id === chatId
               );
               setSelectedChat(clickedChat);
+              setFetchMsgs(true); // To fetch selected chat msgs
               if (clickedChat?.isGroupChat) setGroupInfo(clickedChat);
             }}
           >
