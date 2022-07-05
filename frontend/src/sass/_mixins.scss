@@ -55,3 +55,10 @@
     background-color: $bgActive;
   }
 }
+
+@mixin setPositions($top: auto, $bottom: auto, $left: auto, $right: auto) {
+  top: $top;
+  bottom: $bottom;
+  left: $left;
+  right: $right;
+}

@@ -16,6 +16,7 @@ import axios from "../utils/axios";
 import ViewProfileBody from "./dialogs/ViewProfileBody";
 import GroupInfoBody from "./dialogs/GroupInfoBody";
 import LoadingIndicator from "./utils/LoadingIndicator";
+import LoadingMsgs from "./utils/LoadingMsgs";
 
 const arrowStyles = {
   color: "#777",
@@ -89,7 +90,7 @@ const MessagesView = ({ fetchMsgs, setFetchMsgs }) => {
         config
       );
       setMessages(
-        data.messages?.map((m) => {
+        data?.map((m) => {
           return {
             ...m,
             fileUrl: !m.fileUrl
@@ -286,19 +287,15 @@ const MessagesView = ({ fetchMsgs, setFetchMsgs }) => {
               </IconButton>
             </CustomTooltip>
           </section>
-          <section className="messagesBody m-1 p-2 position-relative">
+          <section className="messagesBody m-1 p-2 position-relative d-flex flex-column">
             {/* Messages list */}
-            <div className="messages d-flex flex-column justify-content-end">
-              {loading ? (
-                <>
-                  <LoadingIndicator
-                    message={"Fetching Messages..."}
-                    msgStyleClasses={"text-light h3"}
-                  />
-                </>
-              ) : (
-                <div className="overflow-auto">
-                  {messages.map((m) => (
+            <div className="messages rounded-3 d-flex flex-column">
+              <div className="msgArea overflow-auto d-flex flex-column-reverse">
+                <div className="msgListBottom" ref={msgListBottom}></div>
+                {loading ? (
+                  <LoadingMsgs count={6} />
+                ) : (
+                  messages.map((m) => (
                     <div
                       key={m._id}
                       className={`d-flex justify-content-${
@@ -306,15 +303,14 @@ const MessagesView = ({ fetchMsgs, setFetchMsgs }) => {
                       }`}
                     >
                       <span
-                        className={`d-inline-block border mx-4 mx-md-5 my-1`}
+                        className={`d-inline-block py-4 border mx-4 mx-md-5 my-1`}
                       >
                         {m.content}
                       </span>
                     </div>
-                  ))}
-                  <div className="msgListBottom" ref={msgListBottom}></div>
-                </div>
-              )}
+                  ))
+                )}
+              </div>
             </div>
 
             {/* New Message Input */}
@@ -356,7 +352,7 @@ const MessagesView = ({ fetchMsgs, setFetchMsgs }) => {
                   setEnableMsgSend(Boolean(input));
                 }}
                 ref={msgContent}
-                className={`msgInput ${
+                className={`msgInput border-0 w-100 text-start ${
                   !enableMsgSend ? "disabledSend" : ""
                 } d-flex bg-dark px-3 py-2 justify-content-start`}
                 contentEditable={true}

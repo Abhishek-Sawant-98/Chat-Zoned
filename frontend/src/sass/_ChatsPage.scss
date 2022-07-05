@@ -35,16 +35,20 @@
       margin-bottom: 5px;
     }
     .messagesBody {
-      position: absolute;
       height: 100%;
       background-color: #9fb1cf30;
       border-radius: 15px;
       .btnGoBack {
       }
       .messages {
-        height: 80%;
-        overflow: auto;
-        & > div {
+        position: absolute;
+        width: calc(100% - 17px);
+        height: 84%;
+        .msgArea {
+          position: absolute;
+          @include setPositions(0px, 0px, 0px, 0px);
+          width: 95%;
+          margin: auto;
           @include scrollbars(4px);
         }
         .msgListBottom {
@@ -54,19 +58,14 @@
         }
       }
       .msgInputDiv {
-        bottom: 10px;
-        left: 10px;
-        right: 10px;
+        @include setPositions($bottom: 10px, $left: 10px, $right: 10px);
         .attachFile {
           border-radius: 7px 0px 0px 7px;
         }
         .msgInput {
-          border-radius: 0px;
-          width: 100%;
           font-size: 18px;
           max-height: 100px;
           cursor: text;
-          text-align: start;
           caret-color: #6a9bf0;
           line-height: 26px;
           outline: none;

@@ -1,0 +1,12 @@
+.loadingMsg {
+  position: relative;
+  & > * {
+    border-radius: 7px;
+  }
+  .loadingSender {
+    height: 15px;
+  }
+  .loadingContent {
+    height: 30px;
+  }
+}

@@ -18,10 +18,10 @@ const fetchMessages = asyncHandler(async (req, res) => {
       model: "User",
       select: "-password -notifications",
     })
-    .sort({ createdAt: "asc" }); // (oldest to latest)
-  res
-    .status(200)
-    .json({ messages, baseUrl: path.join(__dirname, "../messageFiles/") });
+    .sort({ createdAt: "desc" });
+  // Latest to oldest here, but oldest to latest in frontend
+  // as it's 'd-flex flex-column-reverse' for msg list
+  res.status(200).json(messages);
 });
 
 const sendMessage = asyncHandler(async (req, res) => {

@@ -1,5 +1,4 @@
 import { Skeleton } from "@mui/material";
-import React from "react";
 
 const LoadingListItem = ({ dpRadius, count }) => {
   const skeletonStyle = { backgroundColor: "#999" };
