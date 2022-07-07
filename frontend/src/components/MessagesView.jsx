@@ -311,7 +311,7 @@ const MessagesView = ({
               <div className="msgArea overflow-auto d-flex flex-column-reverse">
                 <div className="msgListBottom" ref={msgListBottom}></div>
                 {loadingMsgs && !sending ? (
-                  <LoadingMsgs count={6} />
+                  <LoadingMsgs count={8} />
                 ) : (
                   messages.map((m, i, msgs) => (
                     <Message
