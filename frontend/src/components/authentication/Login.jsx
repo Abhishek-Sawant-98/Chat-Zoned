@@ -106,7 +106,10 @@ const Login = () => {
   };
 
   return (
-    <form className={`app__form user-select-none row`} disabled={loading}>
+    <form
+      className={`app__form user-select-none row`}
+      style={{ pointerEvents: loading ? "none" : "auto" }}
+    >
       {/* Email input */}
       <section className={`${formFieldClassName} mb-2 col-md-6`}>
         <label htmlFor="login__email" className={`${formLabelClassName}`}>
@@ -120,7 +123,6 @@ const Login = () => {
           autoFocus
           name="email"
           id="login__email"
-          disabled={loading}
           className={`${inputFieldClassName}`}
           placeholder="Used While Registering"
         />
@@ -138,7 +140,6 @@ const Login = () => {
             required
             name="password"
             id="login__password"
-            disabled={loading}
             className={`${inputFieldClassName} rounded-end`}
             placeholder="Hope You Remember"
           />
@@ -189,7 +190,6 @@ const Login = () => {
           name="btnGetGuestCredentials"
           id="login__btnGetGuestCredentials"
           onClick={setGuestCredentials}
-          disabled={loading}
           className={`btn btn-outline-success w-100 fs-4 p-1 rounded-pill`}
         >
           Get Guest Credentials

@@ -23,6 +23,7 @@
   "author": "Abhishek Sawant",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.1168.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.30.0",
     "cors": "^2.8.5",
@@ -32,6 +33,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.3.2",
     "multer": "^1.4.4",
+    "multer-s3": "^3.0.1",
     "socket.io": "^4.5.1"
   },
   "devDependencies": {

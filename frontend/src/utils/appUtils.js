@@ -15,20 +15,18 @@ export const truncateString = (str, limit, index) => {
   return str.length > limit ? `${str.substring(0, index)}...` : str;
 };
 
-// Truncate each word of a sentence/string
-export const truncateWords = (sentence, limit, index) => {
-  if (!sentence || !limit || !index) return "";
-  const words = sentence.split(" ");
-  return words
-    .map((word) =>
-      word.length > limit ? `${word.substring(0, index)}...` : word
-    )
-    .join(" ");
-};
-
 export const getOneOnOneChatReceiver = (loggedInUser, chatUsers) => {
   if (!chatUsers?.length || !loggedInUser) return;
   return loggedInUser._id !== chatUsers[0]._id ? chatUsers[0] : chatUsers[1];
+};
+
+export const getMsgTime = (msgDate) => {
+  if (!msgDate) return "";
+  let hours = msgDate.getHours();
+  let minutes = msgDate.getMinutes();
+  const am_or_pm = hours > 12 ? " pm" : " am";
+  hours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+  return `${hours}:${minutes < 10 ? "0" : ""}${minutes}${am_or_pm}`;
 };
 
 export const DEFAULT_USER_DP =

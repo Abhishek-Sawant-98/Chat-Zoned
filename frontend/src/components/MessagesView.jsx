@@ -2,21 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { Avatar, IconButton } from "@mui/material";
 import { AppState } from "../context/ContextProvider";
 import { getOneOnOneChatReceiver, truncateString } from "../utils/appUtils";
-import {
-  ArrowBack,
-  AttachFile,
-  Close,
-  Search,
-  Send,
-} from "@mui/icons-material";
+import { ArrowBack, AttachFile, Close, Send } from "@mui/icons-material";
 import getCustomTooltip from "./utils/CustomTooltip";
 import animationData from "../animations/letsChatGif.json";
 import LottieAnimation from "./utils/LottieAnimation";
 import axios from "../utils/axios";
 import ViewProfileBody from "./dialogs/ViewProfileBody";
 import GroupInfoBody from "./dialogs/GroupInfoBody";
-import LoadingIndicator from "./utils/LoadingIndicator";
 import LoadingMsgs from "./utils/LoadingMsgs";
+import FullSizeImage from "./utils/FullSizeImage";
+import Message from "./utils/Message";
 
 const arrowStyles = {
   color: "#777",
@@ -38,7 +33,12 @@ const iconStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const MessagesView = ({ fetchMsgs, setFetchMsgs }) => {
+const MessagesView = ({
+  loadingMsgs,
+  setLoadingMsgs,
+  fetchMsgs,
+  setFetchMsgs,
+}) => {
   const letsChatGif = useRef(null);
 
   const {
@@ -51,16 +51,18 @@ const MessagesView = ({ fetchMsgs, setFetchMsgs }) => {
     setDialogBody,
     displayDialog,
     setGroupInfo,
+    refresh,
+    setRefresh,
   } = AppState();
 
   const { disableIfLoading } = formClassNames;
 
   const closeChat = () => {
+    setLoadingMsgs(false);
     setSelectedChat(null);
     resetMsgInput();
   };
   const [sending, setSending] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [enableMsgSend, setEnableMsgSend] = useState(false);
   const [messages, setMessages] = useState([]);
   const [newMsgData, setNewMsgData] = useState({
@@ -76,7 +78,7 @@ const MessagesView = ({ fetchMsgs, setFetchMsgs }) => {
     : getOneOnOneChatReceiver(loggedInUser, selectedChat?.users)?.name;
 
   const fetchMessages = async () => {
-    setLoading(true);
+    setLoadingMsgs(true);
 
     const config = {
       headers: {
@@ -89,20 +91,11 @@ const MessagesView = ({ fetchMsgs, setFetchMsgs }) => {
         `/api/message/${selectedChat?._id}`,
         config
       );
-      setMessages(
-        data?.map((m) => {
-          return {
-            ...m,
-            fileUrl: !m.fileUrl
-              ? null
-              : m.fileUrl.startsWith("https://res.cloudinary.com")
-              ? m.fileUrl
-              : `${data.baseUrl}${m.fileUrl}`,
-          };
-        })
-      );
-      setLoading(false);
+      console.log(data);
+      setMessages(data);
+      setLoadingMsgs(false);
       if (fetchMsgs) setFetchMsgs(false);
+      setSending(false);
     } catch (error) {
       displayToast({
         title: "Couldn't Fetch Messages",
@@ -111,15 +104,32 @@ const MessagesView = ({ fetchMsgs, setFetchMsgs }) => {
         duration: 5000,
         position: "bottom-center",
       });
-      setLoading(false);
+      setLoadingMsgs(false);
       if (fetchMsgs) setFetchMsgs(false);
     }
   };
 
+  const viewAudio = (audioSrc, fileName) => {
+    if (!audioSrc) return;
+    setShowDialogActions(false);
+    setDialogBody(<FullSizeImage audioSrc={audioSrc} />);
+    displayDialog({
+      title: fileName || "Audio File",
+    });
+  };
+
+  const viewVideo = (videoSrc, fileName) => {
+    if (!videoSrc) return;
+    setShowDialogActions(false);
+    setDialogBody(<FullSizeImage videoSrc={videoSrc} />);
+    displayDialog({
+      title: fileName || "Video File",
+    });
+  };
+
   const sendMessage = async () => {
     console.log("sending message");
-    resetMsgInput();
-    if (!newMsgData.attachment || msgContent.current?.innerText) return;
+    if (!newMsgData.attachment && !msgContent.current?.innerText) return;
 
     setSending(true);
     const config = {
@@ -130,14 +140,22 @@ const MessagesView = ({ fetchMsgs, setFetchMsgs }) => {
     };
 
     try {
+      // Upload img/gif to cloudinary, and all other files to aws s3
+      const apiUrl = /(\.png|\.jpg|\.jpeg|\.gif|\.svg)$/.test(
+        newMsgData.attachment?.name
+      )
+        ? `/api/message`
+        : `/api/message/upload-to-s3`;
+
       const formData = new FormData();
       formData.append("attachment", newMsgData.attachment);
-      formData.append("content", newMsgData.content);
+      formData.append("content", msgContent.current?.innerText);
       formData.append("chatId", selectedChat?._id);
-      await axios.post(`/api/message`, formData, config);
+      await axios.post(apiUrl, formData, config);
 
-      setSending(false);
+      resetMsgInput();
       fetchMessages();
+      setRefresh(!refresh);
     } catch (error) {
       displayToast({
         title: "Couldn't Send Messages",
@@ -292,22 +310,15 @@ const MessagesView = ({ fetchMsgs, setFetchMsgs }) => {
             <div className="messages rounded-3 d-flex flex-column">
               <div className="msgArea overflow-auto d-flex flex-column-reverse">
                 <div className="msgListBottom" ref={msgListBottom}></div>
-                {loading ? (
+                {loadingMsgs && !sending ? (
                   <LoadingMsgs count={6} />
                 ) : (
-                  messages.map((m) => (
-                    <div
+                  messages.map((m, i, msgs) => (
+                    <Message
                       key={m._id}
-                      className={`d-flex justify-content-${
-                        m.sender._id === loggedInUser._id ? "end" : "start"
-                      }`}
-                    >
-                      <span
-                        className={`d-inline-block py-4 border mx-4 mx-md-5 my-1`}
-                      >
-                        {m.content}
-                      </span>
-                    </div>
+                      currMsg={m}
+                      prevMsg={i < msgs.length - 1 ? msgs[i + 1] : null}
+                    />
                   ))
                 )}
               </div>
@@ -342,7 +353,7 @@ const MessagesView = ({ fetchMsgs, setFetchMsgs }) => {
                   id="attachMsgFile"
                   ref={msgFileInput}
                   className={`d-none`}
-                  disabled={loading}
+                  disabled={loadingMsgs}
                 />
               </span>
               {/* Content/text input */}

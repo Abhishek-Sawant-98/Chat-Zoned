@@ -11,7 +11,7 @@ import AddMembersToGroup from "./dialogs/AddMembersToGroup";
 import ChatListItem from "./utils/ChatListItem";
 import getCustomTooltip from "./utils/CustomTooltip";
 import FullSizeImage from "./utils/FullSizeImage";
-import LoadingListItem from "./utils/LoadingListItem";
+import LoadingList from "./utils/LoadingList";
 import SearchInput from "./utils/SearchInput";
 
 const arrowStyles = {
@@ -26,7 +26,7 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const ChatListView = ({ setFetchMsgs }) => {
+const ChatListView = ({ loadingMsgs, setFetchMsgs }) => {
   const {
     selectedChat,
     loggedInUser,
@@ -40,7 +40,7 @@ const ChatListView = ({ setFetchMsgs }) => {
   } = AppState();
 
   const [chats, setChats] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [filteredChats, setFilteredChats] = useState(chats);
   const searchChatInput = useRef();
 
@@ -65,13 +65,12 @@ const ChatListView = ({ setFetchMsgs }) => {
     setShowDialogActions(false);
     setDialogBody(<FullSizeImage event={e} />);
     displayDialog({
+      isFullScreen: true,
       title: e.target?.alt || "Display Pic",
     });
   };
 
   const fetchChats = async () => {
-    setLoading(true);
-
     const config = {
       headers: {
         Authorization: `Bearer ${loggedInUser?.token}`,
@@ -98,7 +97,7 @@ const ChatListView = ({ setFetchMsgs }) => {
       setChats(mappedChats);
       console.log("chats : ", mappedChats);
       setFilteredChats(mappedChats);
-      setLoading(false);
+      if (loading) setLoading(false);
     } catch (error) {
       displayToast({
         title: "Couldn't Fetch Chats",
@@ -107,7 +106,7 @@ const ChatListView = ({ setFetchMsgs }) => {
         duration: 5000,
         position: "bottom-center",
       });
-      setLoading(false);
+      if (loading) setLoading(false);
     }
   };
 
@@ -130,9 +129,10 @@ const ChatListView = ({ setFetchMsgs }) => {
 
   return (
     <div
-      className={`chatpageDiv chatpageView chatListView col-md-5 col-lg-4 mx-1 p-2 text-light ${
+      className={`chatpageDiv chatpageView chatListView text-light ${
         selectedChat ? "d-none d-md-flex" : "d-flex"
-      } flex-column user-select-none`}
+      } flex-column user-select-none col-md-5 col-lg-4 mx-1 p-2`}
+      style={{ pointerEvents: loadingMsgs ? "none" : "auto" }}
     >
       <section className="position-relative">
         <p className="chatListHeader fw-bold fs-3 rounded-pill bg-info bg-opacity-10 py-2">
@@ -167,7 +167,7 @@ const ChatListView = ({ setFetchMsgs }) => {
       {/* Chat list */}
       <section className="chatList m-1 p-1 overflow-auto position-relative">
         {loading ? (
-          <LoadingListItem dpRadius={"49px"} count={6} />
+          <LoadingList dpRadius={"49px"} count={6} />
         ) : filteredChats?.length > 0 ? (
           <div
             // 'Event delegation' (add only one event listener for
@@ -188,7 +188,9 @@ const ChatListView = ({ setFetchMsgs }) => {
             }}
           >
             {filteredChats
-              .filter((chat) => chat.lastMessage !== undefined)
+              .filter(
+                (chat) => chat.lastMessage !== undefined || chat.isGroupChat
+              )
               .map((chat) => (
                 <ChatListItem key={chat._id} chat={chat} />
               ))}

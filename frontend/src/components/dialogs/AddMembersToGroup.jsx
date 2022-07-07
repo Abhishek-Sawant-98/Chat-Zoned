@@ -8,7 +8,7 @@ import UserListItem from "../utils/UserListItem";
 import SearchInput from "../utils/SearchInput";
 import NewGroupBody from "./NewGroupBody";
 import ChildDialog from "../utils/ChildDialog";
-import LoadingListItem from "../utils/LoadingListItem";
+import LoadingList from "../utils/LoadingList";
 
 const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
   const {
@@ -188,7 +188,7 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
           }}
         >
           {fetching ? (
-            <LoadingListItem dpRadius={"43px"} count={4} />
+            <LoadingList dpRadius={"43px"} count={4} />
           ) : searchResults.length > 0 ? (
             searchResults.map((user) => (
               <UserListItem

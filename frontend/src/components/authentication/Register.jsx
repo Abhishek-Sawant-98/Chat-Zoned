@@ -158,7 +158,10 @@ const Register = () => {
   };
 
   return (
-    <form className={`app__form user-select-none row ${disableIfLoading} `}>
+    <form
+      className={`app__form user-select-none row ${disableIfLoading}`}
+      style={{ pointerEvents: loading ? "none" : "auto" }}
+    >
       {/* Select Profile Pic */}
       <section className="app__formfield position-relative mb-4">
         <img
@@ -184,7 +187,6 @@ const Register = () => {
           id="register__img_input"
           ref={imgInput}
           className={`d-none`}
-          disabled={loading}
         />
       </section>
       {/* Name input */}
@@ -200,7 +202,6 @@ const Register = () => {
           name="username"
           id="register__username"
           className={`${inputFieldClassName}`}
-          disabled={loading}
           placeholder="Eg: John Titor"
         />
       </section>
@@ -217,7 +218,6 @@ const Register = () => {
           name="email"
           id="register__email"
           className={`${inputFieldClassName}`}
-          disabled={loading}
           placeholder="Eg: john.titor@yahoo.com"
         />
       </section>
@@ -235,7 +235,6 @@ const Register = () => {
             name="password"
             id="register__password"
             className={`${inputFieldClassName} rounded-end`}
-            disabled={loading}
             placeholder="Please Remember This"
           />
           <PasswordVisibilityToggle
@@ -262,7 +261,6 @@ const Register = () => {
             name="confirmpassword"
             id="register__confirmpassword"
             className={`${inputFieldClassName} rounded-end`}
-            disabled={loading}
             placeholder="Must Match the Above"
           />
           <PasswordVisibilityToggle

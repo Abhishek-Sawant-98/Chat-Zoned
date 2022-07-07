@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const authorizeUser = require("../middleware/AuthMiddleware");
-const upload = require("../utils/multer");
+const { upload } = require("../utils/multer");
 const {
   registerUser,
   authenticateUser,

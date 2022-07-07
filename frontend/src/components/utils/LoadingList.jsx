@@ -1,6 +1,6 @@
 import { Skeleton } from "@mui/material";
 
-const LoadingListItem = ({ dpRadius, count }) => {
+const LoadingList = ({ dpRadius, count }) => {
   const skeletonStyle = { backgroundColor: "#999" };
   return (
     <>
@@ -31,4 +31,4 @@ const LoadingListItem = ({ dpRadius, count }) => {
   );
 };
 
-export default LoadingListItem;
+export default LoadingList;

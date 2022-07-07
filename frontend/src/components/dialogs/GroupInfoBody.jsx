@@ -262,7 +262,7 @@ const GroupInfoBody = ({ messages }) => {
         position: "bottom-center",
       });
       setLoading(false);
-      setSelectedChat(null);
+      updateView(null);
       closeDialog();
     } catch (error) {
       displayToast({
@@ -291,18 +291,22 @@ const GroupInfoBody = ({ messages }) => {
       const deleteGroupPromise = axios.put(
         `/api/chat/group/delete`,
         {
+          currentDP: groupInfo?.chatDisplayPic,
+          cloudinary_id: groupInfo?.cloudinary_id,
           chatId: groupInfo?._id,
         },
         config
       );
-      const deleteMessagesPromise = axios.put(
-        `/api/message/delete`,
-        {
-          messageIds: JSON.stringify(messages?.map((m) => m._id)),
-          isDeleteGroupRequest: true,
-        },
-        config
-      );
+      const deleteMessagesPromise = messages?.length
+        ? axios.put(
+            `/api/message/delete`,
+            {
+              messageIds: JSON.stringify(messages?.map((m) => m._id)),
+              isDeleteGroupRequest: true,
+            },
+            config
+          )
+        : Promise.resolve();
 
       // Parallel execution of independent promises
       await Promise.all([deleteGroupPromise, deleteMessagesPromise]);
@@ -314,7 +318,7 @@ const GroupInfoBody = ({ messages }) => {
         position: "bottom-center",
       });
       setLoading(false);
-      setSelectedChat(null);
+      updateView(null);
       closeDialog();
     } catch (error) {
       displayToast({

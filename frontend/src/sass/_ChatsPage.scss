@@ -38,16 +38,14 @@
       height: 100%;
       background-color: #9fb1cf30;
       border-radius: 15px;
-      .btnGoBack {
-      }
       .messages {
         position: absolute;
         width: calc(100% - 17px);
-        height: 84%;
+        height: 82%;
         .msgArea {
           position: absolute;
           @include setPositions(0px, 0px, 0px, 0px);
-          width: 95%;
+          width: 98%;
           margin: auto;
           @include scrollbars(4px);
         }

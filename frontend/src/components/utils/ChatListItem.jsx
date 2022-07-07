@@ -6,10 +6,8 @@ import {
   PictureAsPdf,
   VideoFile,
 } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
-import React from "react";
 import { AppState } from "../../context/ContextProvider";
-import { getOneOnOneChatReceiver, truncateString } from "../../utils/appUtils";
+import { truncateString } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 
 const arrowStyles = {
@@ -27,7 +25,7 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const ChatListItem = ({ chat }) => {
-  const { selectedChat } = AppState();
+  const { selectedChat, loggedInUser } = AppState();
   const {
     _id,
     chatName,
@@ -60,9 +58,9 @@ const ChatListItem = ({ chat }) => {
   return (
     <div
       data-chat={_id}
-      className={`chatListItem ${
+      className={`chatListItem user-select-none text-light pointer ${
         selectedChat?._id === _id ? "isSelected" : ""
-      } user-select-none d-flex text-light justify-content-start align-items-center pointer`}
+      } d-flex justify-content-start align-items-center`}
     >
       {/* Chat Display Pic */}
       <CustomTooltip
@@ -88,12 +86,14 @@ const ChatListItem = ({ chat }) => {
           {truncateString(chatName, 23, 20)}
         </p>
         {/* Last Message Data */}
-        {(lastMessage || lastMessage === null) && (
+        {(lastMessage || lastMessage === null || isGroupChat) && (
           <p data-chat={_id} className="chatListLastMessage">
             <span data-chat={_id} className="lastMsgSender text-warning">
               {`${
-                lastMessage === null
+                lastMessage === null || (isGroupChat && !lastMessage)
                   ? ""
+                  : lastMessage?.sender?._id === loggedInUser?._id
+                  ? "You: "
                   : truncateString(
                       lastMessage?.sender?.name?.split(" ")[0],
                       12,
@@ -133,6 +133,8 @@ const ChatListItem = ({ chat }) => {
               <span data-chat={_id}>
                 {lastMessage === null
                   ? " Last Message was deleted"
+                  : isGroupChat && !lastMessage
+                  ? `New Group Created`
                   : truncateString(lastMessage?.content || "", 27, 24)}
               </span>
             )}

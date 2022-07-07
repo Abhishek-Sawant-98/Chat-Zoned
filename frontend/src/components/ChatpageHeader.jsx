@@ -21,7 +21,7 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const ChatpageHeader = () => {
+const ChatpageHeader = ({ setFetchMsgs }) => {
   const { loggedInUser } = AppState();
   const appGif = useRef();
 
@@ -60,6 +60,7 @@ const ChatpageHeader = () => {
         </button>
       </CustomTooltip>
       <SearchUsersDrawer
+        setFetchMsgs={setFetchMsgs}
         isDrawerOpen={isDrawerOpen}
         setIsDrawerOpen={setIsDrawerOpen}
       />

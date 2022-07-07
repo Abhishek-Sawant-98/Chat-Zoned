@@ -33,8 +33,15 @@ const CustomDialog = ({
   showDialogClose,
 }) => {
   const { formClassNames, setSelectedChat, closeDialog } = AppState();
-  const { isOpen, title, nolabel, yeslabel, loadingYeslabel, action } =
-    dialogData;
+  const {
+    isFullScreen,
+    isOpen,
+    title,
+    nolabel,
+    yeslabel,
+    loadingYeslabel,
+    action,
+  } = dialogData;
   const { loading, disableIfLoading } = formClassNames;
   const navigate = useNavigate();
 
@@ -55,6 +62,7 @@ const CustomDialog = ({
 
   return (
     <Dialog
+      fullScreen={Boolean(isFullScreen)}
       PaperProps={{
         sx: {
           borderRadius: 2,

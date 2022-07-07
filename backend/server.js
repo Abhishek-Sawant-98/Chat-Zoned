@@ -30,7 +30,7 @@ app.use("/api/message", MessageRoutes);
 const PORT = process.env.PORT || 5000;
 
 // ------------------ Deployment ----------------------- //
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === "production3") {
   // Establishes the path to our frontend (most important)
   app.use(express.static(path.join(__dirname, "../frontend/build")));
   app.get("*", (req, res) =>

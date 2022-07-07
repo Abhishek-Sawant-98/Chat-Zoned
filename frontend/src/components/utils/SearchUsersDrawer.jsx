@@ -5,10 +5,10 @@ import { AppState } from "../../context/ContextProvider";
 import axios from "../../utils/axios";
 import { debounce, truncateString } from "../../utils/appUtils";
 import UserListItem from "./UserListItem";
-import LoadingListItem from "./LoadingListItem";
+import LoadingList from "./LoadingList";
 import SearchInput from "./SearchInput";
 
-const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
+const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const {
@@ -83,8 +83,8 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
       const { data } = await axios.post(`/api/chat`, { userId }, config);
 
       setLoading(false);
-      setRefresh(!refresh);
       setSelectedChat(data);
+      setFetchMsgs(true);
     } catch (error) {
       displayToast({
         title: "Couldn't Create/Retrieve Chat",
@@ -158,11 +158,12 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
             // parent element instead of adding for each child element)
             onClick={(e) => {
               const userId = e.target.dataset.user;
-              if (userId) createOrRetrieveChat(userId);
+              if (!userId) return;
+              createOrRetrieveChat(userId);
             }}
           >
             {loading ? (
-              <LoadingListItem dpRadius={"42px"} count={6} />
+              <LoadingList dpRadius={"42px"} count={6} />
             ) : searchResults.length > 0 ? (
               searchResults.map((user) => (
                 <UserListItem

@@ -3,6 +3,7 @@ const MessageModel = require("../models/MessageModel");
 const ChatModel = require("../models/ChatModel");
 const { deleteFile, deleteExistingAttachment } = require("../utils/deleteFile");
 const cloudinary = require("../config/cloudinary");
+const { s3, s3_bucket } = require("../config/aws_S3");
 const path = require("path");
 
 const fetchMessages = asyncHandler(async (req, res) => {
@@ -26,6 +27,7 @@ const fetchMessages = asyncHandler(async (req, res) => {
 
 const sendMessage = asyncHandler(async (req, res) => {
   const attachment = req.file;
+  console.log("In sendMessage() ", attachment);
   const { content, chatId } = req.body;
   const loggedInUser = req.user?._id;
 
@@ -39,6 +41,7 @@ const sendMessage = asyncHandler(async (req, res) => {
     attachmentData = {
       fileUrl: null,
       file_id: null,
+      file_name: null,
     };
   } else if (
     /(\.png|\.jpg|\.jpeg|\.gif|\.svg)$/.test(attachment.originalname)
@@ -47,12 +50,15 @@ const sendMessage = asyncHandler(async (req, res) => {
     attachmentData = {
       fileUrl: uploadResponse.secure_url,
       file_id: uploadResponse.public_id,
+      file_name: attachment.originalname,
     };
     deleteFile(attachment.path);
   } else {
+    // For any other file type, it's uploaded via uploadToS3 middleware
     attachmentData = {
-      fileUrl: attachment.filename,
-      file_id: attachment.path,
+      fileUrl: attachment.location,
+      file_id: attachment.key,
+      file_name: attachment.originalname,
     };
   }
 
@@ -123,6 +129,7 @@ const updateMessage = asyncHandler(async (req, res) => {
     attachmentData = {
       fileUrl: null,
       file_id: null,
+      file_name: null,
     };
   } else if (
     /(\.png|\.jpg|\.jpeg|\.gif|\.svg)$/.test(updatedAttachment.originalname)
@@ -137,16 +144,17 @@ const updateMessage = asyncHandler(async (req, res) => {
     attachmentData = {
       fileUrl: uploadResponse.secure_url,
       file_id: uploadResponse.public_id,
+      file_name: updatedAttachment.originalname.split("--")[1],
     };
     deleteFile(updatedAttachment.path);
   } else {
-    // Updated attachment is of non-image type
-    if (file_id) deleteExistingAttachment(fileUrl, file_id);
-
+    // For any other file type, it's uploaded via uploadToS3 middleware
     attachmentData = {
-      fileUrl: updatedAttachment.filename,
-      file_id: updatedAttachment.path,
+      fileUrl: updatedAttachment.location,
+      file_id: updatedAttachment.originalname,
+      file_name: updatedAttachment.originalname.split("--")[1],
     };
+    if (file_id) deleteExistingAttachment(fileUrl, file_id);
   }
 
   const updatedMessage = await MessageModel.findByIdAndUpdate(
@@ -183,7 +191,7 @@ const deleteMessages = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Invalid messageIds for deleting message/s");
   }
-  const resolvedMessage = "Message Deleted Successfully";
+  const resolvedMessage = "Successfully Deleted a Message";
 
   // Deleting each message attachment, message in parallel
   await Promise.all(
@@ -243,7 +251,20 @@ const deleteMessages = asyncHandler(async (req, res) => {
       return resolvedMessage;
     })
   );
-  res.status(200).json({ status: "Messages Deleted Successfully" });
+  res.status(200).json({ status: "Message/s Deleted Successfully" });
 });
 
-module.exports = { fetchMessages, sendMessage, updateMessage, deleteMessages };
+const accessAttachment = asyncHandler(async (req, res) => {
+  const { filename } = req.params;
+  const params = { Bucket: s3_bucket, Key: filename };
+  const fileObj = await s3.getObject(params).promise();
+  res.status(200).send(fileObj.Body);
+});
+
+module.exports = {
+  fetchMessages,
+  sendMessage,
+  updateMessage,
+  deleteMessages,
+  accessAttachment,
+};

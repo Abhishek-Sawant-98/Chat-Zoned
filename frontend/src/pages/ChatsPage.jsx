@@ -28,20 +28,29 @@ const ChatsPage = () => {
 
   useEffect(() => {}, [selectedChat]);
   const [fetchMsgs, setFetchMsgs] = useState(false);
+  const [loadingMsgs, setLoadingMsgs] = useState(false);
 
   return (
     <>
       {loggedInUser && (
         <div className={`chatpage`}>
           {/* Header component */}
-          <ChatpageHeader />
+          <ChatpageHeader setFetchMsgs={setFetchMsgs} />
 
           <section className={`row g-1`}>
             {/* Chat List component */}
-            <ChatListView setFetchMsgs={setFetchMsgs} />
+            <ChatListView
+              loadingMsgs={loadingMsgs}
+              setFetchMsgs={setFetchMsgs}
+            />
 
             {/* Chat Messages component */}
-            <MessagesView fetchMsgs={fetchMsgs} setFetchMsgs={setFetchMsgs} />
+            <MessagesView
+              loadingMsgs={loadingMsgs}
+              setLoadingMsgs={setLoadingMsgs}
+              fetchMsgs={fetchMsgs}
+              setFetchMsgs={setFetchMsgs}
+            />
           </section>
 
           {/* Alert dialog */}

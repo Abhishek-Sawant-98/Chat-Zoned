@@ -1,0 +1,42 @@
+.msgRow {
+  .msgBox {
+    max-width: 80%;
+  }
+  @media (min-width: 576px) {
+    .msgBox {
+      max-width: 70%;
+    }
+  }
+  @media (min-width: 900px) {
+    .msgBox {
+      max-width: 60%;
+    }
+  }
+  .yourMsg {
+    background-color: #006652;
+  }
+  .receiversMsg {
+    background-color: #2e2e2e;
+  }
+  .msgSender {
+    color: #db84f5;
+    margin: -10px 5px 4px 0px;
+    font-size: 15px;
+  }
+  .senderAvatar {
+    @include getImgDimensions(0.3);
+    background-color: #a71ce7;
+    font-size: 14px;
+    margin: 5px -2px 0px 2px;
+  }
+  .msgContent {
+    font-size: 17px;
+    margin-top: -9px;
+  }
+  .msgTime {
+    min-width: 65px;
+    margin: -2px -2px -5px -5px;
+    font-size: 14px;
+    color: #c7c7c7;
+  }
+}
