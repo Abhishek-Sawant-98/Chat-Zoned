@@ -95,7 +95,6 @@ const ChatListView = ({ loadingMsgs, setFetchMsgs }) => {
         return chat;
       });
       setChats(mappedChats);
-      console.log("chats : ", mappedChats);
       setFilteredChats(mappedChats);
       if (loading) setLoading(false);
     } catch (error) {

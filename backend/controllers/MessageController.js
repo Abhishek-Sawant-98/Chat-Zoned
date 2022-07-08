@@ -27,7 +27,6 @@ const fetchMessages = asyncHandler(async (req, res) => {
 
 const sendMessage = asyncHandler(async (req, res) => {
   const attachment = req.file;
-  console.log("In sendMessage() ", attachment);
   const { content, chatId } = req.body;
   const loggedInUser = req.user?._id;
 
@@ -38,7 +37,6 @@ const sendMessage = asyncHandler(async (req, res) => {
 
   let attachmentData;
   if (!attachment) {
-    console.log("In sendMessage() - no attachment");
     attachmentData = {
       fileUrl: null,
       file_id: null,
@@ -48,7 +46,6 @@ const sendMessage = asyncHandler(async (req, res) => {
     /(\.png|\.jpg|\.jpeg|\.gif|\.svg)$/.test(attachment.originalname)
   ) {
     const uploadResponse = await cloudinary.uploader.upload(attachment.path);
-    console.log("In sendMessage() - uploaded to cloudinary");
     attachmentData = {
       fileUrl: uploadResponse.secure_url,
       file_id: uploadResponse.public_id,
@@ -56,7 +53,6 @@ const sendMessage = asyncHandler(async (req, res) => {
     };
     deleteFile(attachment.path);
   } else {
-    console.log("In sendMessage() - uploaded to s3");
     // For any other file type, it's uploaded via uploadToS3 middleware
     attachmentData = {
       fileUrl: attachment.location || "",

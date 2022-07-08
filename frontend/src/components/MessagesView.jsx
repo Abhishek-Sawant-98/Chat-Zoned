@@ -141,7 +141,6 @@ const MessagesView = ({
   };
 
   const sendMessage = async () => {
-    console.log("sending message");
     if (!newMsgData.attachment && !msgContent.current?.innerText) return;
 
     const msgData = {
