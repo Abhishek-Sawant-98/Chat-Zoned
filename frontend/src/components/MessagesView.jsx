@@ -137,6 +137,7 @@ const MessagesView = ({
       });
       setLoadingMsgs(false);
       if (fetchMsgs) setFetchMsgs(false);
+      setSending(false);
     }
   };
 
@@ -234,8 +235,8 @@ const MessagesView = ({
         duration: 3000,
         position: "bottom-center",
       });
+      setMessages(messages.filter((msg) => msg?._id !== clickedMsg));
       setLoading(false);
-      fetchMessages();
       setRefresh(!refresh);
       return "msgActionDone";
     } catch (error) {
@@ -316,6 +317,7 @@ const MessagesView = ({
 
   // Open delete photo confirm dialog
   const openDeleteMsgConfirmDialog = () => {
+    setShowDialogActions(true);
     setDialogBody(<>Are you sure you want to delete this message?</>);
     displayDialog({
       title: "Delete Message",
