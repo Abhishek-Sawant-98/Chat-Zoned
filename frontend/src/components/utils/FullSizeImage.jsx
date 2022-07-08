@@ -6,11 +6,13 @@ const FullSizeImage = ({ event, audioSrc, videoSrc }) => {
         <audio style={fileStyle} controls>
           <source src={audioSrc} type="audio/mpeg"></source>
           <source src={audioSrc} type="audio/ogg"></source>
+          <source src={audioSrc} type="audio/wav"></source>
           Your browser does not support the audio tag.
         </audio>
       ) : videoSrc ? (
         <video style={fileStyle} controls>
           <source src={videoSrc} type="video/mp4"></source>
+          <source src={videoSrc} type="video/webm"></source>
           <source src={videoSrc} type="video/ogg"></source>
           Your browser does not support the video tag.
         </video>

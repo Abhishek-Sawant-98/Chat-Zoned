@@ -1,12 +1,29 @@
-import { Avatar } from "@mui/material";
+import { DoneAll, KeyboardArrowDown } from "@mui/icons-material";
+import { CircularProgress } from "@mui/material";
 import { AppState } from "../../context/ContextProvider";
 import { getMsgTime } from "../../utils/appUtils";
+import getCustomTooltip from "../utils/CustomTooltip";
 
-const Message = ({ currMsg, prevMsg }) => {
+const arrowStyles = {
+  color: "#E6480C",
+};
+const tooltipStyles = {
+  maxWidth: 230,
+  color: "#eee",
+  fontFamily: "Mirza",
+  fontSize: 16,
+  borderRadius: 5,
+  backgroundColor: "#E6480C",
+};
+const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
+
+const Message = ({ msgSent, currMsg, prevMsg }) => {
   const { loggedInUser, selectedChat } = AppState();
-  const currSender = currMsg?.sender;
-  const isLoggedInUser = currSender._id === loggedInUser._id;
-  const isSameSender = currSender._id === prevMsg?.sender._id;
+  const { _id, profilePic, name, email } = currMsg?.sender;
+  const isLoggedInUser = _id === loggedInUser._id;
+  const senderData = `${profilePic}===${name}===${email}`;
+  const currMsgId = isLoggedInUser ? currMsg?._id : null;
+  const isSameSender = _id === prevMsg?.sender._id;
   const currMsgDate = new Date(currMsg.createdAt);
   const showCurrSender =
     !isLoggedInUser && selectedChat?.isGroupChat && !isSameSender;
@@ -19,27 +36,58 @@ const Message = ({ currMsg, prevMsg }) => {
       style={{ marginTop: isSameSender ? "3px" : "10px" }}
     >
       {showCurrSender ? (
-        <>
-          <Avatar className="senderAvatar" src={currSender?.profilePic} />
-        </>
-      ) : selectedChat?.isGroupChat ? (
-        <span style={{ width: "30px" }}></span>
+        <CustomTooltip title={`View Profile`} placement="top-start" arrow>
+          <img
+            src={profilePic}
+            alt={name}
+            data-sender={senderData}
+            className="senderAvatar rounded-circle pointer"
+          />
+        </CustomTooltip>
       ) : (
-        <></>
+        selectedChat?.isGroupChat && <span style={{ width: "30px" }}></span>
       )}
       <div
         className={`msgBox d-flex flex-column text-start p-2 rounded-3
         mx-2 mx-md-3 ${isLoggedInUser ? "yourMsg" : "receiversMsg"}`}
+        data-msg={currMsgId}
       >
-        {showCurrSender ? (
-          <span className="msgSender">{currSender?.name}</span>
-        ) : (
-          <></>
+        {showCurrSender && (
+          <span data-sender={senderData} className="msgSender pointer">
+            {name}
+          </span>
         )}
-        <div className="msgContent d-flex">
-          {currMsg.content}
-          <span className="msgTime text-end d-flex align-items-end justify-content-end">
+        {isLoggedInUser && msgSent && (
+          <span
+            data-msg={currMsgId}
+            className={`msgOptionsIcon text-light position-absolute 
+            top-0 end-0 w-25 h-100`}
+          >
+            <KeyboardArrowDown
+              data-msg={currMsgId}
+              style={{ fontSize: 22 }}
+              className="position-absolute top-0 end-0"
+            />
+          </span>
+        )}
+        <div data-msg={currMsgId} className="msgContent d-flex">
+          <pre style={{ fontSize: 17, overflowX: "auto" }}>
+            {currMsg.content}
+          </pre>
+          <span
+            data-msg={currMsgId}
+            className="msgTime text-end d-flex align-items-end justify-content-end"
+          >
             {getMsgTime(currMsgDate)}
+            {isLoggedInUser && (
+              <>
+                {msgSent ? (
+                  <DoneAll className="text-info fs-6 ms-1" />
+                ) : (
+                  <CircularProgress size={10} className="sendStatusIcon ms-1" />
+                )}
+              </>
+            )}
           </span>
         </div>
       </div>

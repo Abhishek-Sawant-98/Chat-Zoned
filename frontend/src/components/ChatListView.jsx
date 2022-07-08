@@ -182,6 +182,7 @@ const ChatListView = ({ loadingMsgs, setFetchMsgs }) => {
               const clickedChat = filteredChats.find(
                 (chat) => chat._id === chatId
               );
+              if (clickedChat._id === selectedChat?._id) return;
               setSelectedChat(clickedChat);
               setFetchMsgs(true); // To fetch selected chat msgs
               if (clickedChat?.isGroupChat) setGroupInfo(clickedChat);

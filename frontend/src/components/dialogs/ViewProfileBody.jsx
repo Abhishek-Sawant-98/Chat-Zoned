@@ -16,10 +16,9 @@ const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const ViewProfileBody = ({ memberProfilePic, memberName, memberEmail }) => {
   const { loggedInUser, selectedChat } = AppState();
-  const isGroupInfoDialogOpen = selectedChat?.isGroupChat;
   let name, email, profilePic;
 
-  if (isGroupInfoDialogOpen) {
+  if (memberProfilePic && memberName && memberEmail) {
     name = memberName;
     email = memberEmail;
     profilePic = memberProfilePic;

@@ -15,7 +15,7 @@ const LoadingMsgs = ({ count }) => {
         >
           <Skeleton
             variant="rectangular"
-            className={`loadingSender col-2 mb-1`}
+            className={`loadingSender col-3 mb-1`}
             style={skeletonStyle}
           />
           <Skeleton

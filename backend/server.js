@@ -1,6 +1,6 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
 const connectToMongoDB = require("./config/db");
 const UserRoutes = require("./routes/UserRoutes");
 const ChatRoutes = require("./routes/ChatRoutes");
@@ -12,7 +12,6 @@ const {
   appErrorHandler,
 } = require("./middleware/ErrorMiddleware");
 
-dotenv.config();
 connectToMongoDB();
 
 const app = express();

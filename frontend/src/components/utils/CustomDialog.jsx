@@ -47,7 +47,11 @@ const CustomDialog = ({
 
   const handleYes = async () => {
     const result = await action();
-    if (result === "profileUpdated" || result === "membersUpdated") {
+    if (
+      result === "profileUpdated" ||
+      result === "membersUpdated" ||
+      result === "msgActionDone"
+    ) {
       handleDialogClose();
     } else if (result === "createdGroup") {
       handleDialogClose();

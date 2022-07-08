@@ -38,6 +38,7 @@ const sendMessage = asyncHandler(async (req, res) => {
 
   let attachmentData;
   if (!attachment) {
+    console.log("In sendMessage() - no attachment");
     attachmentData = {
       fileUrl: null,
       file_id: null,
@@ -47,6 +48,7 @@ const sendMessage = asyncHandler(async (req, res) => {
     /(\.png|\.jpg|\.jpeg|\.gif|\.svg)$/.test(attachment.originalname)
   ) {
     const uploadResponse = await cloudinary.uploader.upload(attachment.path);
+    console.log("In sendMessage() - uploaded to cloudinary");
     attachmentData = {
       fileUrl: uploadResponse.secure_url,
       file_id: uploadResponse.public_id,
@@ -54,10 +56,11 @@ const sendMessage = asyncHandler(async (req, res) => {
     };
     deleteFile(attachment.path);
   } else {
+    console.log("In sendMessage() - uploaded to s3");
     // For any other file type, it's uploaded via uploadToS3 middleware
     attachmentData = {
-      fileUrl: attachment.location,
-      file_id: attachment.key,
+      fileUrl: attachment.location || "",
+      file_id: attachment.key || "",
       file_name: attachment.originalname,
     };
   }
@@ -144,15 +147,15 @@ const updateMessage = asyncHandler(async (req, res) => {
     attachmentData = {
       fileUrl: uploadResponse.secure_url,
       file_id: uploadResponse.public_id,
-      file_name: updatedAttachment.originalname.split("--")[1],
+      file_name: updatedAttachment.originalname,
     };
     deleteFile(updatedAttachment.path);
   } else {
     // For any other file type, it's uploaded via uploadToS3 middleware
     attachmentData = {
-      fileUrl: updatedAttachment.location,
-      file_id: updatedAttachment.originalname,
-      file_name: updatedAttachment.originalname.split("--")[1],
+      fileUrl: updatedAttachment.location || "",
+      file_id: updatedAttachment.key || "",
+      file_name: updatedAttachment.originalname,
     };
     if (file_id) deleteExistingAttachment(fileUrl, file_id);
   }

@@ -2,7 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { Avatar, IconButton } from "@mui/material";
 import { AppState } from "../context/ContextProvider";
 import { getOneOnOneChatReceiver, truncateString } from "../utils/appUtils";
-import { ArrowBack, AttachFile, Close, Send } from "@mui/icons-material";
+import {
+  ArrowBack,
+  AttachFile,
+  Close,
+  Send,
+  SettingsRemoteOutlined,
+} from "@mui/icons-material";
 import getCustomTooltip from "./utils/CustomTooltip";
 import animationData from "../animations/letsChatGif.json";
 import LottieAnimation from "./utils/LottieAnimation";
@@ -12,6 +18,7 @@ import GroupInfoBody from "./dialogs/GroupInfoBody";
 import LoadingMsgs from "./utils/LoadingMsgs";
 import FullSizeImage from "./utils/FullSizeImage";
 import Message from "./utils/Message";
+import MsgOptionsMenu from "./menus/MsgOptionsMenu";
 
 const arrowStyles = {
   color: "#777",
@@ -47,15 +54,15 @@ const MessagesView = ({
     loggedInUser,
     displayToast,
     setSelectedChat,
-    setShowDialogActions,
-    setDialogBody,
-    displayDialog,
     setGroupInfo,
     refresh,
     setRefresh,
+    displayDialog,
+    setDialogBody,
+    setShowDialogActions,
   } = AppState();
 
-  const { disableIfLoading } = formClassNames;
+  const { disableIfLoading, setLoading } = formClassNames;
 
   const closeChat = () => {
     setLoadingMsgs(false);
@@ -65,6 +72,7 @@ const MessagesView = ({
   const [sending, setSending] = useState(false);
   const [enableMsgSend, setEnableMsgSend] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [clickedMsg, setClickedMsg] = useState("");
   const [newMsgData, setNewMsgData] = useState({
     attachment: null,
     attachmentPreviewUrl: "",
@@ -72,42 +80,11 @@ const MessagesView = ({
   const msgListBottom = useRef(null);
   const msgFileInput = useRef(null);
   const msgContent = useRef(null);
+  const [msgOptionsMenuAnchor, setMsgOptionsMenuAnchor] = useState(null);
 
   const chatName = selectedChat?.isGroupChat
     ? selectedChat?.chatName
     : getOneOnOneChatReceiver(loggedInUser, selectedChat?.users)?.name;
-
-  const fetchMessages = async () => {
-    setLoadingMsgs(true);
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
-
-    try {
-      const { data } = await axios.get(
-        `/api/message/${selectedChat?._id}`,
-        config
-      );
-      console.log(data);
-      setMessages(data);
-      setLoadingMsgs(false);
-      if (fetchMsgs) setFetchMsgs(false);
-      setSending(false);
-    } catch (error) {
-      displayToast({
-        title: "Couldn't Fetch Messages",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 5000,
-        position: "bottom-center",
-      });
-      setLoadingMsgs(false);
-      if (fetchMsgs) setFetchMsgs(false);
-    }
-  };
 
   const viewAudio = (audioSrc, fileName) => {
     if (!audioSrc) return;
@@ -127,10 +104,75 @@ const MessagesView = ({
     });
   };
 
+  const fetchMessages = async () => {
+    setLoadingMsgs(true);
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+    };
+
+    try {
+      const { data } = await axios.get(
+        `/api/message/${selectedChat?._id}`,
+        config
+      );
+      setMessages(
+        data.map((msg) => {
+          msg["sent"] = true;
+          return msg;
+        })
+      );
+      setLoadingMsgs(false);
+      if (fetchMsgs) setFetchMsgs(false);
+      setSending(false);
+    } catch (error) {
+      displayToast({
+        title: "Couldn't Fetch Messages",
+        message: error.response?.data?.message || error.message,
+        type: "error",
+        duration: 5000,
+        position: "bottom-center",
+      });
+      setLoadingMsgs(false);
+      if (fetchMsgs) setFetchMsgs(false);
+    }
+  };
+
   const sendMessage = async () => {
     console.log("sending message");
     if (!newMsgData.attachment && !msgContent.current?.innerText) return;
 
+    const msgData = {
+      ...newMsgData,
+      content:
+        msgContent.current?.innerText ||
+        newMsgData?.attachment?.name ||
+        "No content",
+    };
+
+    // To display our
+    setMessages([
+      {
+        _id: new Date().getTime(),
+        sender: {
+          _id: loggedInUser?._id,
+          profilePic: "",
+          name: "",
+          email: "",
+        },
+        fileUrl: msgData?.attachmentPreviewUrl,
+        file_id: "",
+        file_name: msgData?.attachment?.name,
+        content: msgData?.content,
+        createdAt: new Date().toISOString(),
+        sent: false,
+      },
+      ...messages,
+    ]);
+
+    resetMsgInput();
     setSending(true);
     const config = {
       headers: {
@@ -142,18 +184,17 @@ const MessagesView = ({
     try {
       // Upload img/gif to cloudinary, and all other files to aws s3
       const apiUrl = /(\.png|\.jpg|\.jpeg|\.gif|\.svg)$/.test(
-        newMsgData.attachment?.name
+        msgData.attachment?.name
       )
         ? `/api/message`
         : `/api/message/upload-to-s3`;
 
       const formData = new FormData();
-      formData.append("attachment", newMsgData.attachment);
-      formData.append("content", msgContent.current?.innerText);
+      formData.append("attachment", msgData.attachment);
+      formData.append("content", msgData.content);
       formData.append("chatId", selectedChat?._id);
       await axios.post(apiUrl, formData, config);
 
-      resetMsgInput();
       fetchMessages();
       setRefresh(!refresh);
     } catch (error) {
@@ -168,6 +209,51 @@ const MessagesView = ({
     }
   };
 
+  const deleteMessage = async () => {
+    setLoading(true);
+    setSending(true);
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+    };
+
+    try {
+      await axios.put(
+        `/api/message/delete`,
+        {
+          messageIds: JSON.stringify([clickedMsg]),
+        },
+        config
+      );
+
+      displayToast({
+        message: "Message Deleted Successfully",
+        type: "success",
+        duration: 3000,
+        position: "bottom-center",
+      });
+      setLoading(false);
+      fetchMessages();
+      setRefresh(!refresh);
+      return "msgActionDone";
+    } catch (error) {
+      displayToast({
+        title: "Couldn't Delete Message",
+        message: error.response?.data?.message || error.message,
+        type: "error",
+        duration: 4000,
+        position: "top-center",
+      });
+      setLoading(false);
+      setSending(false);
+    }
+  };
+
+  const updateMessage = async () => {};
+
   const handleMsgFileInputChange = (e) => {
     const msgFile = e.target.files[0];
     if (!msgFile) return;
@@ -181,6 +267,7 @@ const MessagesView = ({
         position: "top-center",
       });
     }
+    setEnableMsgSend(true);
     setNewMsgData({
       ...newMsgData,
       attachment: msgFile,
@@ -193,6 +280,7 @@ const MessagesView = ({
       attachment: null,
       attachmentPreviewUrl: "",
     });
+    setEnableMsgSend(false);
     msgContent.current.innerHTML = "";
     msgFileInput.current.value = "";
   };
@@ -209,9 +297,9 @@ const MessagesView = ({
     if (fetchMsgs) fetchMessages();
   }, [fetchMsgs]);
 
-  const openViewProfileDialog = () => {
+  const openViewProfileDialog = (props) => {
     setShowDialogActions(false);
-    setDialogBody(<ViewProfileBody />);
+    setDialogBody(props ? <ViewProfileBody {...props} /> : <ViewProfileBody />);
     displayDialog({
       title: "View Profile",
     });
@@ -225,6 +313,22 @@ const MessagesView = ({
     displayDialog({
       title: "Group Info",
     });
+  };
+
+  // Open delete photo confirm dialog
+  const openDeleteMsgConfirmDialog = () => {
+    setDialogBody(<>Are you sure you want to delete this message?</>);
+    displayDialog({
+      title: "Delete Message",
+      nolabel: "NO",
+      yeslabel: "YES",
+      loadingYeslabel: "Deleting...",
+      action: deleteMessage,
+    });
+  };
+
+  const openMsgOptionsMenu = (e) => {
+    setMsgOptionsMenuAnchor(e.target);
   };
 
   return (
@@ -308,7 +412,27 @@ const MessagesView = ({
           <section className="messagesBody m-1 p-2 position-relative d-flex flex-column">
             {/* Messages list */}
             <div className="messages rounded-3 d-flex flex-column">
-              <div className="msgArea overflow-auto d-flex flex-column-reverse">
+              <div
+                // Event delegation
+                onClick={(e) => {
+                  const senderData = e.target?.dataset?.sender?.split("===");
+                  const msgId = e.target?.dataset?.msg;
+                  if (senderData?.length) {
+                    // Open view profile dialog
+                    const props = {
+                      memberProfilePic: senderData[0],
+                      memberName: senderData[1],
+                      memberEmail: senderData[2],
+                    };
+                    return openViewProfileDialog(props);
+                  }
+                  if (msgId) {
+                    setClickedMsg(msgId);
+                    openMsgOptionsMenu(e);
+                  }
+                }}
+                className="msgArea overflow-auto d-flex flex-column-reverse"
+              >
                 <div className="msgListBottom" ref={msgListBottom}></div>
                 {loadingMsgs && !sending ? (
                   <LoadingMsgs count={8} />
@@ -316,6 +440,7 @@ const MessagesView = ({
                   messages.map((m, i, msgs) => (
                     <Message
                       key={m._id}
+                      msgSent={m.sent}
                       currMsg={m}
                       prevMsg={i < msgs.length - 1 ? msgs[i + 1] : null}
                     />
@@ -323,7 +448,14 @@ const MessagesView = ({
                 )}
               </div>
             </div>
-
+            {/* Edit/Delete Message menu */}
+            <MsgOptionsMenu
+              anchor={msgOptionsMenuAnchor}
+              setAnchor={setMsgOptionsMenuAnchor}
+              clickedMsg={clickedMsg}
+              openEditMsgDialog={() => {}}
+              openDeleteMsgConfirmDialog={openDeleteMsgConfirmDialog}
+            />
             {/* New Message Input */}
             <div className="msgInputDiv d-flex position-absolute">
               <span

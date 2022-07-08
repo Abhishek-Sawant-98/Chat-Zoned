@@ -13,14 +13,10 @@ $bgColor: $selectedChatBgColor;
   .chatListData {
     margin: 5px 0px;
     .chatListName {
-      margin-top: 6px;
-      margin-bottom: -6px;
+      margin: 6px 0px -6px 0px;
     }
     .chatListLastMessage {
-      margin-top: 2px;
-      margin-bottom: 6px;
-      .lastMsgSender {
-      }
+      margin: 2px 8px 6px 0px;
       .fileIcon {
         color: #9c9c9c;
         font-size: 20px;

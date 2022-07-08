@@ -6,7 +6,7 @@ const { s3, s3_bucket } = require("../config/aws_S3");
 const generateUniqueFileName = (file) => {
   return (
     (Date.now() + Math.random()).toString().replace(".", "") +
-    "--" +
+    "---" +
     file.originalname
   );
 };
@@ -31,9 +31,8 @@ const uploadToS3 = multer({
     s3: s3,
     acl: "public-read",
     bucket: s3_bucket,
-    key: (req, file, cb) => {
+    key: function (req, file, cb) {
       if (file) {
-        console.log("In uploadToS3 key method", file);
         cb(null, generateUniqueFileName(file));
       }
     },

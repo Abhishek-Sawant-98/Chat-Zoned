@@ -1,6 +1,7 @@
 import {
   Article,
   AudioFile,
+  DoneAll,
   GifBox,
   Image,
   PictureAsPdf,
@@ -18,7 +19,7 @@ const tooltipStyles = {
   color: "#eee",
   fontFamily: "Mirza",
   fontSize: 17,
-  borderRadius: 10,
+  borderRadius: 5,
   backgroundColor: "#E6480C",
 };
 
@@ -36,8 +37,8 @@ const ChatListItem = ({ chat }) => {
   } = chat;
 
   const tooltipTitle = isGroupChat
-    ? `Group: ${chatName}`
-    : `${chatName} (${receiverEmail})`;
+    ? `Group: ${chatName}\n(${chat?.users?.length} Members)`
+    : `${chatName}\n${receiverEmail}`;
 
   const lastMsgFile = lastMessage?.fileUrl;
   let lastMsgFileType;
@@ -64,8 +65,7 @@ const ChatListItem = ({ chat }) => {
     >
       {/* Chat Display Pic */}
       <CustomTooltip
-        data-chat={_id}
-        title={tooltipTitle}
+        title={`View ${isGroupChat ? "Group DP" : "Profile Pic"}`}
         placement="top-start"
         arrow
       >
@@ -82,24 +82,42 @@ const ChatListItem = ({ chat }) => {
         className="chatListData d-flex flex-column align-items-start px-2"
       >
         {/* Chat Name */}
-        <p data-chat={_id} className="chatListName fs-5 fw-bold text-info">
+        <p
+          data-chat={_id}
+          title={tooltipTitle}
+          className="chatListName fs-5 fw-bold text-info"
+        >
           {truncateString(chatName, 23, 20)}
         </p>
         {/* Last Message Data */}
         {(lastMessage || lastMessage === null || isGroupChat) && (
           <p data-chat={_id} className="chatListLastMessage">
-            <span data-chat={_id} className="lastMsgSender text-warning">
-              {`${
-                lastMessage === null || (isGroupChat && !lastMessage)
-                  ? ""
-                  : lastMessage?.sender?._id === loggedInUser?._id
-                  ? "You: "
-                  : truncateString(
-                      lastMessage?.sender?.name?.split(" ")[0],
-                      12,
-                      8
-                    ) + ": "
-              }`}
+            <span data-chat={_id} className="text-warning">
+              <>
+                {lastMessage === null ||
+                (isGroupChat && !lastMessage) ||
+                (!isGroupChat &&
+                  lastMessage?.sender?._id !== loggedInUser?._id) ? (
+                  ""
+                ) : lastMessage?.sender?._id === loggedInUser?._id ? (
+                  <>
+                    {isGroupChat ? (
+                      <>You: </>
+                    ) : (
+                      <DoneAll
+                        className="me-1 fs-5"
+                        style={{ color: "lightblue" }}
+                      />
+                    )}
+                  </>
+                ) : (
+                  truncateString(
+                    lastMessage?.sender?.name?.split(" ")[0],
+                    12,
+                    8
+                  ) + ": "
+                )}
+              </>
             </span>
             {lastMsgFile ? (
               <span data-chat={_id}>
@@ -130,12 +148,12 @@ const ChatListItem = ({ chat }) => {
                 )}
               </span>
             ) : (
-              <span data-chat={_id}>
+              <span data-chat={_id} title={lastMessage?.content}>
                 {lastMessage === null
                   ? " Last Message was deleted"
                   : isGroupChat && !lastMessage
                   ? `New Group Created`
-                  : truncateString(lastMessage?.content || "", 27, 24)}
+                  : truncateString(lastMessage?.content || "", 29, 26)}
               </span>
             )}
           </p>

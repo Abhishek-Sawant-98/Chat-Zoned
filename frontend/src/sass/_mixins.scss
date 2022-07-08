@@ -62,3 +62,10 @@
   left: $left;
   right: $right;
 }
+
+@mixin setIconStyles {
+  transition: background-color 0.2s;
+  &:hover {
+    background-color: #aaaaaa40;
+  }
+}

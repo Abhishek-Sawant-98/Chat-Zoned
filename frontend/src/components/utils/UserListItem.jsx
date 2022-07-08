@@ -9,7 +9,7 @@ const tooltipStyles = {
   color: "#eee",
   fontFamily: "Mirza",
   fontSize: 17,
-  borderRadius: 10,
+  borderRadius: 5,
   backgroundColor: "#E6480C",
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);

@@ -1,6 +1,7 @@
 .msgRow {
   .msgBox {
     max-width: 80%;
+    position: relative;
   }
   @media (min-width: 576px) {
     .msgBox {
@@ -13,30 +14,55 @@
     }
   }
   .yourMsg {
+    cursor: pointer;
     background-color: #006652;
   }
   .receiversMsg {
     background-color: #2e2e2e;
   }
   .msgSender {
-    color: #db84f5;
+    width: fit-content;
     margin: -5px 5px 4px 0px;
     font-size: 15px;
+    color: #db84f5;
+    &:hover {
+      color: #98affa;
+    }
+    &:active {
+      color: #25d1f0;
+    }
+  }
+  .msgOptionsIcon {
+    cursor: pointer;
+    padding: 0px 2px;
+    opacity: 0;
+    &:hover {
+      opacity: 1;
+    }
   }
   .senderAvatar {
     @include getImgDimensions(0.3);
-    background-color: #a71ce7;
+    background-color: transparent;
     font-size: 14px;
     margin: 5px -2px 0px 2px;
   }
   .msgContent {
+    cursor: auto;
+    user-select: text;
+    & > * {
+      @include scrollbars(6px, #696969, #333);
+    }
     font-size: 17px;
     margin-top: -5px;
   }
   .msgTime {
-    min-width: 65px;
+    min-width: 80px;
     margin: -2px -2px -5px -5px;
     font-size: 14px;
     color: #c7c7c7;
+    .sendStatusIcon {
+      color: #39c3f1;
+      margin: 3px;
+    }
   }
 }
