@@ -142,12 +142,12 @@ const MessagesView = ({
   };
 
   const sendMessage = async () => {
-    if (!newMsgData.attachment && !msgContent.current?.innerText) return;
+    if (!newMsgData.attachment && !msgContent.current?.innerHTML) return;
 
     const msgData = {
       ...newMsgData,
       content:
-        msgContent.current?.innerText ||
+        msgContent.current?.innerHTML ||
         newMsgData?.attachment?.name ||
         "No content",
     };
@@ -492,7 +492,7 @@ const MessagesView = ({
               {/* Content/text input */}
               <div
                 onInput={(e) => {
-                  const input = e.target.textContent;
+                  const input = e.target.innerHTML;
                   setEnableMsgSend(Boolean(input));
                 }}
                 ref={msgContent}

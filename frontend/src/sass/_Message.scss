@@ -49,14 +49,14 @@
   .msgContent {
     cursor: auto;
     user-select: text;
-    & > * {
-      @include scrollbars(6px, #696969, #333);
+    & > span {
+      word-break: break-all;
     }
     font-size: 17px;
     margin-top: -5px;
   }
   .msgTime {
-    min-width: 80px;
+    min-width: 83px;
     margin: -2px -2px -5px -5px;
     font-size: 14px;
     color: #c7c7c7;

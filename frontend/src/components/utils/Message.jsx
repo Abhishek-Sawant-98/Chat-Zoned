@@ -1,5 +1,6 @@
 import { DoneAll, KeyboardArrowDown } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
+import { useEffect, useRef } from "react";
 import { AppState } from "../../context/ContextProvider";
 import { getMsgTime } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
@@ -18,6 +19,7 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const Message = ({ msgSent, currMsg, prevMsg }) => {
+  const msgContentRef = useRef(null);
   const { loggedInUser, selectedChat } = AppState();
   const { _id, profilePic, name, email } = currMsg?.sender;
   const isLoggedInUser = _id === loggedInUser._id;
@@ -27,6 +29,10 @@ const Message = ({ msgSent, currMsg, prevMsg }) => {
   const currMsgDate = new Date(currMsg.createdAt);
   const showCurrSender =
     !isLoggedInUser && selectedChat?.isGroupChat && !isSameSender;
+
+  useEffect(() => {
+    msgContentRef.current.innerHTML = currMsg?.content;
+  }, []);
 
   return (
     <section
@@ -71,9 +77,7 @@ const Message = ({ msgSent, currMsg, prevMsg }) => {
           </span>
         )}
         <div data-msg={currMsgId} className="msgContent d-flex">
-          <pre style={{ fontSize: 17, overflowX: "auto" }}>
-            {currMsg.content}
-          </pre>
+          <span ref={msgContentRef}></span>
           <span
             data-msg={currMsgId}
             className="msgTime text-end d-flex align-items-end justify-content-end"

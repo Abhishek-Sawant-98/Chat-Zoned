@@ -40,6 +40,10 @@ const ChatListItem = ({ chat }) => {
     ? `Group: ${chatName}\n(${chat?.users?.length} Members)`
     : `${chatName}\n${receiverEmail}`;
 
+  const lastMsgContent = lastMessage?.content
+    ?.replaceAll("<br>", "\n")
+    .replaceAll("&nbsp;", " ");
+
   const lastMsgFile = lastMessage?.fileUrl;
   let lastMsgFileType;
 
@@ -148,12 +152,12 @@ const ChatListItem = ({ chat }) => {
                 )}
               </span>
             ) : (
-              <span data-chat={_id} title={lastMessage?.content}>
+              <span data-chat={_id} title={lastMsgContent}>
                 {lastMessage === null
                   ? " Last Message was deleted"
                   : isGroupChat && !lastMessage
                   ? `New Group Created`
-                  : truncateString(lastMessage?.content || "", 29, 26)}
+                  : truncateString(lastMsgContent || "", 29, 26)}
               </span>
             )}
           </p>
