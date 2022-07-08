@@ -50,7 +50,8 @@
     cursor: auto;
     user-select: text;
     & > span {
-      word-break: break-all;
+      overflow-x: auto;
+      @include scrollbars(2px);
     }
     font-size: 17px;
     margin-top: -5px;
