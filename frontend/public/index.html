@@ -2,7 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.png" />
+    <link rel="icon" href="%PUBLIC_URL%/icons/favicon512.png" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/icons/favicon192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta
@@ -21,6 +23,29 @@
   <body class="container-fluid">
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+
+    <!-- Service worker registration script -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", async () => {
+          try {
+            const registration = await navigator.serviceWorker.register(
+              "serviceWorker.js"
+            );
+            if (registration) {
+              // Registration was successful
+              console.log(
+                "ServiceWorker registration successful with scope: ",
+                registration.scope
+              );
+            }
+          } catch (error) {
+            // registration failed :(
+            console.log("ServiceWorker registration failed: ", error);
+          }
+        });
+      }
+    </script>
 
     <!-- JavaScript Bundle without Popper -->
     <script

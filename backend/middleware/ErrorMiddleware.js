@@ -1,4 +1,3 @@
-// require("dotenv").config();
 const notFoundHandler = (req, res, next) => {
   const notFoundError = new Error(`Not Found : '${req.originalUrl}'`);
   res.status(404);
