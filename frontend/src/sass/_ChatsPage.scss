@@ -41,7 +41,7 @@
       .messages {
         position: absolute;
         width: calc(100% - 17px);
-        height: 82%;
+        height: calc(100% - 80px);
         .msgArea {
           position: absolute;
           @include setPositions(0px, 0px, 0px, 0px);
