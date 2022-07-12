@@ -2,7 +2,7 @@ import { DoneAll, KeyboardArrowDown } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { AppState } from "../../context/ContextProvider";
-import { getMsgTime } from "../../utils/appUtils";
+import { msgTimeStringOf } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 
 const arrowStyles = {
@@ -82,7 +82,7 @@ const Message = ({ msgSent, currMsg, prevMsg }) => {
             data-msg={currMsgId}
             className="msgTime text-end d-flex align-items-end justify-content-end"
           >
-            {getMsgTime(currMsgDate)}
+            {msgTimeStringOf(currMsgDate)}
             {isLoggedInUser && (
               <>
                 {msgSent ? (
