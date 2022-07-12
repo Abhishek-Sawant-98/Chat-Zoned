@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/icons/favicon512.png" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/icons/favicon192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!-- <link rel="manifest" href="%PUBLIC_URL%/manifest.json" /> -->
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta
@@ -26,16 +26,16 @@
 
     <!-- Service worker registration script -->
     <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", async () => {
-          try {
-            await navigator.serviceWorker.register("serviceWorker.js");
-          } catch (error) {
-            // registration failed :(
-            console.error("ServiceWorker registration failed: ", error);
-          }
-        });
-      }
+      // if ("serviceWorker" in navigator) {
+      //   window.addEventListener("load", async () => {
+      //     try {
+      //       await navigator.serviceWorker.register("serviceWorker.js");
+      //     } catch (error) {
+      //       // registration failed :(
+      //       console.error("ServiceWorker registration failed: ", error);
+      //     }
+      //   });
+      // }
     </script>
 
     <!-- JavaScript Bundle without Popper -->
