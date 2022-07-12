@@ -43,7 +43,7 @@ export const msgTimeStringOf = memoize((msgDate) => {
   if (!msgDate) return "";
   let hours = msgDate.getHours();
   let minutes = msgDate.getMinutes();
-  const am_or_pm = hours > 12 ? " pm" : " am";
+  const am_or_pm = hours >= 12 ? " pm" : " am";
   hours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
   return `${hours}:${minutes < 10 ? "0" : ""}${minutes}${am_or_pm}`;
 });
