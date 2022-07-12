@@ -24,6 +24,20 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
 
+    <!-- Service worker registration script -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", async () => {
+          try {
+            await navigator.serviceWorker.register("service-worker.js");
+          } catch (error) {
+            // registration failed :(
+            console.error("ServiceWorker registration failed: ", error);
+          }
+        });
+      }
+    </script>
+
     <!-- JavaScript Bundle without Popper -->
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js"
