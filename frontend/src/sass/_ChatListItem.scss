@@ -1,5 +1,6 @@
 $bgColor: $selectedChatBgColor;
 .chatListItem {
+  position: relative;
   margin-bottom: 5px;
   border-radius: 10px;
   padding: 1px 13px;
@@ -14,6 +15,11 @@ $bgColor: $selectedChatBgColor;
     margin: 5px 0px;
     .chatListName {
       margin: 6px 0px -6px 0px;
+    }
+    .lastMsgDate {
+      position: absolute;
+      color: #b9b9b9;
+      @include setPositions($top: 12px, $right: 15px);
     }
     .chatListLastMessage {
       margin: 2px 8px 6px 0px;

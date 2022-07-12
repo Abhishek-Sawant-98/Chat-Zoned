@@ -8,7 +8,12 @@ import {
   VideoFile,
 } from "@mui/icons-material";
 import { AppState } from "../../context/ContextProvider";
-import { truncateString } from "../../utils/appUtils";
+import {
+  dateStringOf,
+  msgDateStringOf,
+  msgTimeStringOf,
+  truncateString,
+} from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 
 const arrowStyles = {
@@ -42,7 +47,12 @@ const ChatListItem = ({ chat }) => {
 
   const lastMsgContent = lastMessage?.content
     ?.replaceAll("<br>", "\n")
-    .replaceAll("&nbsp;", " ");
+    .replaceAll("&nbsp;", " ")
+    .replaceAll("<div>", "\n")
+    .replaceAll("</div>", "\n");
+
+  const lastMsgDate = new Date(lastMessage?.createdAt);
+  const lastMsgDateString = msgDateStringOf(lastMsgDate);
 
   const lastMsgFile = lastMessage?.fileUrl;
   let lastMsgFileType;
@@ -93,6 +103,15 @@ const ChatListItem = ({ chat }) => {
         >
           {truncateString(chatName, 23, 20)}
         </p>
+        {lastMessage && (
+          <span className="lastMsgDate">
+            {lastMsgDateString === "Today"
+              ? msgTimeStringOf(lastMsgDate)
+              : lastMsgDateString !== "Yesterday"
+              ? dateStringOf(lastMsgDate)
+              : "Yesterday"}
+          </span>
+        )}
         {/* Last Message Data */}
         {(lastMessage || lastMessage === null || isGroupChat) && (
           <p data-chat={_id} className="chatListLastMessage">
