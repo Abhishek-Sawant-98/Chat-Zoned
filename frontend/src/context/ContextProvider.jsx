@@ -1,5 +1,10 @@
 import { createContext, useContext, useState } from "react";
 import { DEFAULT_GROUP_DP } from "../utils/appUtils";
+import io from "socket.io-client";
+
+let socket;
+const ENDPOINT = "http://localhost:5000";
+// const ENDPOINT = "https://chat-zoned.herokuapp.com";
 
 const AppContext = createContext();
 
@@ -14,6 +19,9 @@ const ContextProvider = ({ children }) => {
     chatName: "",
     users: [],
   });
+
+  // Socket config
+  socket = io(ENDPOINT, { transports: ["websocket"] });
 
   // Toast config
   const [toastData, setToastData] = useState({
@@ -113,6 +121,7 @@ const ContextProvider = ({ children }) => {
         formClassNames,
         groupInfo,
         setGroupInfo,
+        socket,
       }}
     >
       {children}

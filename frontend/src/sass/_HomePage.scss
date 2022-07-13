@@ -11,3 +11,21 @@
     font-weight: 700;
   }
 }
+.footer {
+  position: absolute;
+  @include setPositions($bottom: 0px, $left: 50%);
+  transform: translate(-50%, -50%);
+  #footerLink {
+    font-size: 22px;
+    color: #2f95f5;
+    &:hover {
+      color: #95ccff;
+    }
+  }
+}
+@media (max-height: 590px) {
+  .footer {
+    position: relative;
+    top: 20px;
+  }
+}

@@ -2,13 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Avatar, IconButton } from "@mui/material";
 import { AppState } from "../context/ContextProvider";
 import { getOneOnOneChatReceiver, truncateString } from "../utils/appUtils";
-import {
-  ArrowBack,
-  AttachFile,
-  Close,
-  Send,
-  SettingsRemoteOutlined,
-} from "@mui/icons-material";
+import { ArrowBack, AttachFile, Close, Send } from "@mui/icons-material";
 import getCustomTooltip from "./utils/CustomTooltip";
 import animationData from "../animations/letsChatGif.json";
 import LottieAnimation from "./utils/LottieAnimation";
@@ -60,6 +54,7 @@ const MessagesView = ({
     displayDialog,
     setDialogBody,
     setShowDialogActions,
+    socket,
   } = AppState();
 
   const { disableIfLoading, setLoading } = formClassNames;
@@ -152,26 +147,23 @@ const MessagesView = ({
         "No content",
     };
 
-    // To display our
-    setMessages([
-      {
-        _id: new Date().getTime(),
-        sender: {
-          _id: loggedInUser?._id,
-          profilePic: "",
-          name: "",
-          email: "",
-        },
-        fileUrl: msgData?.attachmentPreviewUrl,
-        file_id: "",
-        file_name: msgData?.attachment?.name,
-        content: msgData?.content,
-        createdAt: new Date().toISOString(),
-        sent: false,
+    const newMsg = {
+      _id: new Date().getTime(),
+      sender: {
+        _id: loggedInUser?._id,
+        profilePic: "",
+        name: "",
+        email: "",
       },
-      ...messages,
-    ]);
+      fileUrl: msgData?.attachmentPreviewUrl,
+      file_id: "",
+      file_name: msgData?.attachment?.name,
+      content: msgData?.content,
+      createdAt: new Date().toISOString(),
+      sent: false,
+    };
 
+    setMessages([newMsg, ...messages]);
     resetMsgInput();
     setSending(true);
     const config = {
@@ -193,8 +185,9 @@ const MessagesView = ({
       formData.append("attachment", msgData.attachment);
       formData.append("content", msgData.content);
       formData.append("chatId", selectedChat?._id);
-      await axios.post(apiUrl, formData, config);
+      const { data } = await axios.post(apiUrl, formData, config);
 
+      socket.emit("new msg sent", data);
       fetchMessages();
       setRefresh(!refresh);
     } catch (error) {
@@ -229,6 +222,11 @@ const MessagesView = ({
         config
       );
 
+      socket.emit("msg deleted", {
+        deletedMsgId: clickedMsg,
+        senderId: loggedInUser?._id,
+        chat: selectedChat,
+      });
       displayToast({
         message: "Message Deleted Successfully",
         type: "success",
@@ -289,12 +287,39 @@ const MessagesView = ({
     msgListBottom.current?.scrollIntoView({ behaviour: "smooth" });
   };
 
+  // Listening to socket events
+  useEffect(() => {
+    socket.on("new msg received", (newMsg) => {
+      setRefresh(!refresh);
+      if (selectedChat) setMessages([newMsg, ...messages]);
+    });
+
+    socket.on("remove deleted msg", (deletedMsgId) => {
+      setRefresh(!refresh);
+      if (selectedChat)
+        setMessages(messages.filter((msg) => msg?._id !== deletedMsgId));
+    });
+
+    socket.on("update updated msg", (updatedMsg) => {
+      setRefresh(!refresh);
+      if (selectedChat)
+        setMessages(
+          messages.map((msg) => {
+            return msg?._id === updatedMsg?._id ? updatedMsg : msg;
+          })
+        );
+    });
+  });
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
   useEffect(() => {
-    if (fetchMsgs) fetchMessages();
+    if (fetchMsgs) {
+      fetchMessages();
+      socket.emit("join chat", selectedChat?._id);
+    }
   }, [fetchMsgs]);
 
   const openViewProfileDialog = (props) => {

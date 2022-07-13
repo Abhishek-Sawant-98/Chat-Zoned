@@ -14,21 +14,30 @@ const ChatsPage = () => {
     dialogData,
     closeDialog,
     showDialogActions,
-    selectedChat,
+    setSelectedChat,
+    socket,
   } = AppState();
 
   const navigate = useNavigate();
+  const [fetchMsgs, setFetchMsgs] = useState(false);
+  const [loadingMsgs, setLoadingMsgs] = useState(false);
 
   useEffect(() => {
     // Session storage persists data even after page refresh, unlike state
     const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
     if (!user) return navigate("/");
     setLoggedInUser(user);
+    closeDialog();
+    setSelectedChat(null);
   }, []);
 
-  useEffect(() => {}, [selectedChat]);
-  const [fetchMsgs, setFetchMsgs] = useState(false);
-  const [loadingMsgs, setLoadingMsgs] = useState(false);
+  // Socket client config
+  useEffect(() => {
+    socket.emit("init user", loggedInUser?._id);
+    socket.on("user connected", () => {
+      console.log("socket connected");
+    });
+  }, []);
 
   return (
     <>

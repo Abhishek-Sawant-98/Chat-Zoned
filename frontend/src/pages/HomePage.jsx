@@ -63,6 +63,19 @@ const HomePage = () => {
           </section>
         </section>
       )}
+      {showLogin && (
+        <div className={`footer fs-5 w-75 text-light`}>
+          &copy; 2022 Made with 💙 by &nbsp;
+          <a
+            id="footerLink"
+            className="text-decoration-none"
+            href="https://github.com/Abhishek-Sawant-98"
+            target="blank"
+          >
+            <strong>Abhishek Sawant</strong>
+          </a>
+        </div>
+      )}
     </>
   );
 };
