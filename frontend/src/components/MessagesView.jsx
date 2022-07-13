@@ -39,6 +39,7 @@ const MessagesView = ({
   setLoadingMsgs,
   fetchMsgs,
   setFetchMsgs,
+  socket
 }) => {
   const letsChatGif = useRef(null);
 
@@ -54,7 +55,6 @@ const MessagesView = ({
     displayDialog,
     setDialogBody,
     setShowDialogActions,
-    socket,
   } = AppState();
 
   const { disableIfLoading, setLoading } = formClassNames;
@@ -286,6 +286,14 @@ const MessagesView = ({
   const scrollToBottom = () => {
     msgListBottom.current?.scrollIntoView({ behaviour: "smooth" });
   };
+
+  // Socket client config
+  useEffect(() => {
+    socket.emit("init user", loggedInUser?._id);
+    socket.on("user connected", () => {
+      console.log("socket connected");
+    });
+  }, []);
 
   // Listening to socket events
   useEffect(() => {

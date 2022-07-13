@@ -5,6 +5,11 @@ import ChatpageHeader from "../components/ChatpageHeader";
 import CustomDialog from "../components/utils/CustomDialog";
 import ChatListView from "../components/ChatListView";
 import MessagesView from "../components/MessagesView";
+import io from "socket.io-client";
+
+let socket;
+const ENDPOINT = "http://localhost:5000";
+// const ENDPOINT = "https://chat-zoned.herokuapp.com";
 
 const ChatsPage = () => {
   const {
@@ -15,7 +20,6 @@ const ChatsPage = () => {
     closeDialog,
     showDialogActions,
     setSelectedChat,
-    socket,
   } = AppState();
 
   const navigate = useNavigate();
@@ -29,14 +33,7 @@ const ChatsPage = () => {
     setLoggedInUser(user);
     closeDialog();
     setSelectedChat(null);
-  }, []);
-
-  // Socket client config
-  useEffect(() => {
-    socket.emit("init user", loggedInUser?._id);
-    socket.on("user connected", () => {
-      console.log("socket connected");
-    });
+    socket = io(ENDPOINT, { transports: ["websocket"] });
   }, []);
 
   return (
@@ -44,13 +41,14 @@ const ChatsPage = () => {
       {loggedInUser && (
         <div className={`chatpage`}>
           {/* Header component */}
-          <ChatpageHeader setFetchMsgs={setFetchMsgs} />
+          <ChatpageHeader setFetchMsgs={setFetchMsgs} socket={socket} />
 
           <section className={`row g-1`}>
             {/* Chat List component */}
             <ChatListView
               loadingMsgs={loadingMsgs}
               setFetchMsgs={setFetchMsgs}
+              socket={socket}
             />
 
             {/* Chat Messages component */}
@@ -59,6 +57,7 @@ const ChatsPage = () => {
               setLoadingMsgs={setLoadingMsgs}
               fetchMsgs={fetchMsgs}
               setFetchMsgs={setFetchMsgs}
+              socket={socket}
             />
           </section>
 
