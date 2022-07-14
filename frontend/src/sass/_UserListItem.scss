@@ -1,5 +1,5 @@
 .userListItem {
-  @include setListItemBaseStyles;
+  @include setListItemBaseStyles($bgActive: $selectedChatBgColor);
   .userListAvatar {
     margin-left: -5px;
     @include getImgDimensions(0.42);

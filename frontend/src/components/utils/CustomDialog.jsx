@@ -70,7 +70,7 @@ const CustomDialog = ({
       PaperProps={{
         sx: {
           borderRadius: 2,
-          backgroundColor: "#4d4d4d",
+          backgroundImage: "linear-gradient(0deg,#411452,#242556)",
         },
       }}
       className={`user-select-none ${disableIfLoading}`}
