@@ -13,6 +13,7 @@ import getCustomTooltip from "./utils/CustomTooltip";
 import FullSizeImage from "./utils/FullSizeImage";
 import LoadingList from "./utils/LoadingList";
 import SearchInput from "./utils/SearchInput";
+import io from "socket.io-client";
 
 const arrowStyles = {
   color: "#777",
@@ -25,6 +26,11 @@ const tooltipStyles = {
   backgroundColor: "#777",
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
+
+// const SOCKET_ENDPOINT = "http://localhost:5000";
+const SOCKET_ENDPOINT = "https://chat-zoned.herokuapp.com";
+
+const clientSocket = io(SOCKET_ENDPOINT, { transports: ["websocket"] });
 
 const ChatListView = ({ loadingMsgs, setFetchMsgs }) => {
   const {

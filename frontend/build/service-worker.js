@@ -9,7 +9,6 @@ self.addEventListener("install", (e) => {
   // Perform install steps
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log("Caching assets");
       cache.addAll(assetsToCache);
     })
   );

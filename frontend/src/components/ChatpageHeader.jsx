@@ -8,6 +8,7 @@ import SearchUsersDrawer from "./utils/SearchUsersDrawer";
 import getCustomTooltip from "./utils/CustomTooltip";
 import animationData from "../animations/chat-gif.json";
 import LottieAnimation from "./utils/LottieAnimation";
+import io from "socket.io-client";
 
 const arrowStyles = {
   color: "#777",
@@ -20,6 +21,11 @@ const tooltipStyles = {
   backgroundColor: "#777",
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
+
+// const SOCKET_ENDPOINT = "http://localhost:5000";
+const SOCKET_ENDPOINT = "https://chat-zoned.herokuapp.com";
+
+const clientSocket = io(SOCKET_ENDPOINT, { transports: ["websocket"] });
 
 const ChatpageHeader = ({ setFetchMsgs }) => {
   const { loggedInUser } = AppState();

@@ -13,6 +13,7 @@ import LoadingMsgs from "./utils/LoadingMsgs";
 import FullSizeImage from "./utils/FullSizeImage";
 import Message from "./utils/Message";
 import MsgOptionsMenu from "./menus/MsgOptionsMenu";
+import io from "socket.io-client";
 
 const arrowStyles = {
   color: "#777",
@@ -34,12 +35,16 @@ const iconStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
+// const SOCKET_ENDPOINT = "http://localhost:5000";
+const SOCKET_ENDPOINT = "https://chat-zoned.herokuapp.com";
+
+const clientSocket = io(SOCKET_ENDPOINT, { transports: ["websocket"] });
+
 const MessagesView = ({
   loadingMsgs,
   setLoadingMsgs,
   fetchMsgs,
   setFetchMsgs,
-  socket,
 }) => {
   const letsChatGif = useRef(null);
 
@@ -187,7 +192,7 @@ const MessagesView = ({
       formData.append("chatId", selectedChat?._id);
       const { data } = await axios.post(apiUrl, formData, config);
 
-      socket?.emit("new msg sent", data);
+      clientSocket?.emit("new msg sent", data);
       fetchMessages();
       setRefresh(!refresh);
     } catch (error) {
@@ -222,7 +227,7 @@ const MessagesView = ({
         config
       );
 
-      socket?.emit("msg deleted", {
+      clientSocket?.emit("msg deleted", {
         deletedMsgId: clickedMsg,
         senderId: loggedInUser?._id,
         chat: selectedChat,
@@ -289,28 +294,32 @@ const MessagesView = ({
 
   // Socket client config
   useEffect(() => {
-    if (!socket) return console.log("socket not defined : ", socket);
-    socket?.emit("init user", loggedInUser?._id);
-    socket?.on("user connected", () => {
+    if (!clientSocket)
+      return console.log("socket not defined : ", clientSocket);
+
+    clientSocket.emit("init user", loggedInUser?._id);
+    clientSocket.on("user connected", () => {
       console.log("socket connected");
     });
   }, []);
 
   // Listening to socket events
   useEffect(() => {
-    if (!socket) return console.log("socket not defined : ", socket);
-    socket?.on("new msg received", (newMsg) => {
+    if (!clientSocket)
+      return console.log("socket not defined : ", clientSocket);
+
+    clientSocket.on("new msg received", (newMsg) => {
       setRefresh(!refresh);
       if (selectedChat) setMessages([newMsg, ...messages]);
     });
 
-    socket?.on("remove deleted msg", (deletedMsgId) => {
+    clientSocket.on("remove deleted msg", (deletedMsgId) => {
       setRefresh(!refresh);
       if (selectedChat)
         setMessages(messages.filter((msg) => msg?._id !== deletedMsgId));
     });
 
-    socket?.on("update updated msg", (updatedMsg) => {
+    clientSocket.on("update updated msg", (updatedMsg) => {
       setRefresh(!refresh);
       if (selectedChat)
         setMessages(
@@ -328,7 +337,7 @@ const MessagesView = ({
   useEffect(() => {
     if (fetchMsgs) {
       fetchMessages();
-      socket?.emit("join chat", selectedChat?._id);
+      clientSocket?.emit("join chat", selectedChat?._id);
     }
   }, [fetchMsgs]);
 

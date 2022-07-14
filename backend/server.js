@@ -128,7 +128,6 @@ io.on("connection", (socket) => {
     console.log("user disconnected");
   });
 
-  // Free up resources to save bandwidth
   socket.off("init user", (userId) => {
     console.log("User socket disconnected");
     socket.leave(userId);

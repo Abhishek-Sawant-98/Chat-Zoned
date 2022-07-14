@@ -64,7 +64,7 @@ const HomePage = () => {
         </section>
       )}
       {showLogin && (
-        <div className={`footer fs-5 w-75 text-light`}>
+        <div className={`footer fs-5 w-50 text-light`}>
           &copy; 2022 Made with 💙 by &nbsp;
           <a
             id="footerLink"
