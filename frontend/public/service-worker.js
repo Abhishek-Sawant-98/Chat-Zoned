@@ -1,34 +1,40 @@
 /* eslint-disable no-restricted-globals */
-
 const CACHE_NAME = "pwa-task-manager";
-const urlsToCache = ["/", "/chats"];
+const assetsToCache = ["/", "/chats"];
+
+// self : ServiceWorkerGlobalScope
 
 // Install a service worker
-this.addEventListener("install", function (event) {
+self.addEventListener("install", (e) => {
   // Perform install steps
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(function (cache) {
-      console.log("Opened cache");
-      return cache.addAll(urlsToCache);
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log("Caching assets");
+      cache.addAll(assetsToCache);
     })
   );
   // To instantly activate a newly installed service worker
-  this.skipWaiting();
+  self.skipWaiting();
 });
 
 // Cache and return requests
-this.addEventListener("fetch", function (event) {
-  event.respondWith(
-    caches.match(event.request).then(function (response) {
-      return response || fetch(event.request);
+self.addEventListener("fetch", (e) => {
+  e.respondWith(
+    caches.match(e.request).then((res) => {
+      return (
+        res ||
+        fetch(e.request).catch((err) => {
+          console.log("Error occured white fetching : ", err);
+        })
+      );
     })
   );
 });
 
 // Update a service worker
-this.addEventListener("activate", (event) => {
+self.addEventListener("activate", async (e) => {
   const cacheWhitelist = ["pwa-task-manager"];
-  event.waitUntil(
+  e.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
@@ -40,4 +46,13 @@ this.addEventListener("activate", (event) => {
       );
     })
   );
+  // Refresh all tabs
+  const tabs = await self.clients.matchAll({ type: "window" });
+  tabs.forEach((tab) => {
+    try {
+      tab.navigate(tab.url);
+    } catch (error) {
+      console.log("Error occurred while refreshing tab : ", tab.url);
+    }
+  });
 });

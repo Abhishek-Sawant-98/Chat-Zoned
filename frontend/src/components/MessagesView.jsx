@@ -39,7 +39,7 @@ const MessagesView = ({
   setLoadingMsgs,
   fetchMsgs,
   setFetchMsgs,
-  socket
+  socket,
 }) => {
   const letsChatGif = useRef(null);
 
@@ -187,7 +187,7 @@ const MessagesView = ({
       formData.append("chatId", selectedChat?._id);
       const { data } = await axios.post(apiUrl, formData, config);
 
-      socket.emit("new msg sent", data);
+      socket?.emit("new msg sent", data);
       fetchMessages();
       setRefresh(!refresh);
     } catch (error) {
@@ -222,7 +222,7 @@ const MessagesView = ({
         config
       );
 
-      socket.emit("msg deleted", {
+      socket?.emit("msg deleted", {
         deletedMsgId: clickedMsg,
         senderId: loggedInUser?._id,
         chat: selectedChat,
@@ -289,26 +289,28 @@ const MessagesView = ({
 
   // Socket client config
   useEffect(() => {
-    socket.emit("init user", loggedInUser?._id);
-    socket.on("user connected", () => {
+    if (!socket) return console.log("socket not defined : ", socket);
+    socket?.emit("init user", loggedInUser?._id);
+    socket?.on("user connected", () => {
       console.log("socket connected");
     });
   }, []);
 
   // Listening to socket events
   useEffect(() => {
-    socket.on("new msg received", (newMsg) => {
+    if (!socket) return console.log("socket not defined : ", socket);
+    socket?.on("new msg received", (newMsg) => {
       setRefresh(!refresh);
       if (selectedChat) setMessages([newMsg, ...messages]);
     });
 
-    socket.on("remove deleted msg", (deletedMsgId) => {
+    socket?.on("remove deleted msg", (deletedMsgId) => {
       setRefresh(!refresh);
       if (selectedChat)
         setMessages(messages.filter((msg) => msg?._id !== deletedMsgId));
     });
 
-    socket.on("update updated msg", (updatedMsg) => {
+    socket?.on("update updated msg", (updatedMsg) => {
       setRefresh(!refresh);
       if (selectedChat)
         setMessages(
@@ -326,7 +328,7 @@ const MessagesView = ({
   useEffect(() => {
     if (fetchMsgs) {
       fetchMessages();
-      socket.emit("join chat", selectedChat?._id);
+      socket?.emit("join chat", selectedChat?._id);
     }
   }, [fetchMsgs]);
 
