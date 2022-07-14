@@ -1,23 +1,23 @@
-// /* eslint-disable no-restricted-globals */
-// const CACHE_NAME = "pwa-task-manager";
-// const assetsToCache = ["/", "/chats"];
+/* eslint-disable no-restricted-globals */
+const CACHE_NAME = "pwa-task-manager";
+const assetsToCache = ["/", "/chats"];
 
-// // self : ServiceWorkerGlobalScope
+// self : ServiceWorkerGlobalScope
 
-// // Install a service worker
-// self.addEventListener("install", (e) => {
-//   // Perform install steps
+// Install a service worker
+self.addEventListener("install", (e) => {
+  // Perform install steps
 //   e.waitUntil(
 //     caches.open(CACHE_NAME).then((cache) => {
 //       cache.addAll(assetsToCache);
 //     })
 //   );
-//   // To instantly activate a newly installed service worker
-//   self.skipWaiting();
-// });
+  // To instantly activate a newly installed service worker
+  self.skipWaiting();
+});
 
-// // Cache and return requests
-// self.addEventListener("fetch", (e) => {
+// Cache and return requests
+self.addEventListener("fetch", (e) => {
 //   e.respondWith(
 //     caches.match(e.request).then((res) => {
 //       return (
@@ -28,23 +28,11 @@
 //       );
 //     })
 //   );
-// });
+});
 
-// // Update a service worker
-// self.addEventListener("activate", async (e) => {
-//   const cacheWhitelist = ["pwa-task-manager"];
-//   e.waitUntil(
-//     caches.keys().then((cacheNames) => {
-//       return Promise.all(
-//         cacheNames.map((cacheName) => {
-//           if (cacheWhitelist.indexOf(cacheName) === -1) {
-//             return caches.delete(cacheName);
-//           }
-//           return Promise.resolve();
-//         })
-//       );
-//     })
-//   );
+// Update a service worker
+self.addEventListener("activate", async (e) => {
+//   await self.registration.unregister();
 //   // Refresh all tabs
 //   const tabs = await self.clients.matchAll({ type: "window" });
 //   tabs.forEach((tab) => {
@@ -54,4 +42,4 @@
 //       console.log("Error occurred while refreshing tab : ", tab.url);
 //     }
 //   });
-// });
+});

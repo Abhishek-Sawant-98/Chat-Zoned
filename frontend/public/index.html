@@ -25,23 +25,20 @@
     <div id="root"></div>
 
     <!-- Service worker registration script -->
-    <!-- <script>
+    <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", async () => {
           try {
-            const reg = await navigator.serviceWorker.register(
+            await navigator.serviceWorker.register(
               "service-worker.js"
             );
-            if (reg.waiting || reg.active) {
-              window.location.reload();
-            }
           } catch (error) {
             // registration failed :(
             console.error("ServiceWorker registration failed: ", error);
           }
         });
       }
-    </script> -->
+    </script>
 
     <!-- JavaScript Bundle without Popper -->
     <script
