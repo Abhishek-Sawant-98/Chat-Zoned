@@ -8,8 +8,8 @@ import MessagesView from "../components/MessagesView";
 import io from "socket.io-client";
 
 let socket;
-const ENDPOINT = "http://localhost:5000";
-// const ENDPOINT = "https://chat-zoned.herokuapp.com";
+// const ENDPOINT = "http://localhost:5000";
+const ENDPOINT = "https://chat-zoned.herokuapp.com";
 
 const ChatsPage = () => {
   const {
