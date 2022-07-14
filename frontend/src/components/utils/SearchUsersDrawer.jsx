@@ -163,7 +163,7 @@ const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
             }}
           >
             {loading ? (
-              <LoadingList dpRadius={"42px"} count={6} />
+              <LoadingList dpRadius={"42px"} count={8} />
             ) : searchResults.length > 0 ? (
               searchResults.map((user) => (
                 <UserListItem

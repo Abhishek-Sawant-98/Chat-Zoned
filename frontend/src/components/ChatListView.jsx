@@ -172,7 +172,7 @@ const ChatListView = ({ loadingMsgs, setFetchMsgs }) => {
       {/* Chat list */}
       <section className="chatList m-1 p-1 overflow-auto position-relative">
         {loading ? (
-          <LoadingList dpRadius={"49px"} count={6} />
+          <LoadingList dpRadius={"49px"} count={8} />
         ) : filteredChats?.length > 0 ? (
           <div
             // 'Event delegation' (add only one event listener for
