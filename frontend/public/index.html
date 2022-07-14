@@ -29,9 +29,12 @@
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", async () => {
           try {
-            await navigator.serviceWorker.register(
+            const reg = await navigator.serviceWorker.register(
               "service-worker.js"
             );
+            if (reg.waiting || reg.active) {
+              window.location.reload();
+            }
           } catch (error) {
             // registration failed :(
             console.error("ServiceWorker registration failed: ", error);
