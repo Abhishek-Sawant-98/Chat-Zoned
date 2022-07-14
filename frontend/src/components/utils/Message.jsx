@@ -34,7 +34,9 @@ const Message = ({ msgSent, currMsg, prevMsg }) => {
   const prevMsgDate = new Date(prevMsg?.createdAt);
   const isOtherDay = dateStringOf(currMsgDate) !== dateStringOf(prevMsgDate);
   const showCurrSender =
-    !isLoggedInUser && selectedChat?.isGroupChat && !isSameSender;
+    !isLoggedInUser &&
+    selectedChat?.isGroupChat &&
+    (!isSameSender || isOtherDay);
 
   useEffect(() => {
     msgContentRef.current.innerHTML = currMsg?.content;
