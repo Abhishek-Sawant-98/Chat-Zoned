@@ -33,7 +33,7 @@ const ChatsPage = () => {
   return (
     <>
       {loggedInUser && (
-        <div className={`chatpage bg-light`}>
+        <div className={`chatpage`}>
           {/* Header component */}
           <ChatpageHeader setFetchMsgs={setFetchMsgs} />
 
