@@ -42,8 +42,8 @@
 
 @mixin setListItemBaseStyles(
   $bgDefault: #101010,
-  $bgHover: #181818,
-  $bgActive: #491500
+  $bgHover: #1d1d1d,
+  $bgActive: #30002d
 ) {
   margin-bottom: 5px;
   border-radius: 10px;
