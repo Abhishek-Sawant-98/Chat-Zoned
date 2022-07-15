@@ -104,7 +104,7 @@ const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
           sx: {
             borderTopRightRadius: 10,
             borderBottomRightRadius: 10,
-            backgroundImage: "linear-gradient(0deg,#411452,#242556)",
+            backgroundImage: "linear-gradient(0deg,#222,#444)",
             padding: "10px",
             width: "350px",
           },
