@@ -102,13 +102,14 @@ const Register = () => {
 
       // Success toast : register successful
       displayToast({
-        message: "Registration Successful",
+        title: "Registration Successful",
+        message: "Your login session will expire in 15 days",
         type: "success",
-        duration: 3000,
+        duration: 5000,
         position: "bottom-center",
       });
 
-      sessionStorage.setItem("loggedInUser", JSON.stringify(data));
+      localStorage.setItem("loggedInUser", JSON.stringify(data));
       setLoggedInUser(data);
       setLoading(false);
       navigate("/chats");

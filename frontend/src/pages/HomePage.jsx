@@ -17,8 +17,8 @@ const HomePage = () => {
 
   useEffect(() => {
     // Session storage persists data even after page refresh, unlike state
-    const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
-    if (user) navigate("/chats");
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (user && Date.now() < parseInt(user.expiryTime)) navigate("/chats");
   }, []);
 
   return (

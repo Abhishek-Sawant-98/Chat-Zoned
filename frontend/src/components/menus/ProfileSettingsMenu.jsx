@@ -36,7 +36,7 @@ const ProfileSettingsMenu = ({ anchor, setAnchor }) => {
       yeslabel: "YES",
       loadingYeslabel: "Logging Out...",
       action: () => {
-        sessionStorage.removeItem("loggedInUser");
+        localStorage.removeItem("loggedInUser");
         setLoggedInUser(null);
         displayToast({
           message: "Logged Out",
@@ -118,7 +118,7 @@ const ProfileSettingsMenu = ({ anchor, setAnchor }) => {
           });
 
           setLoading(false);
-          sessionStorage.removeItem("loggedInUser");
+          localStorage.removeItem("loggedInUser");
           setLoggedInUser(null);
           return "pwdUpdated";
         } catch (error) {

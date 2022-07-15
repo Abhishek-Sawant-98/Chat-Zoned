@@ -60,7 +60,7 @@ const Message = ({ msgSent, currMsg, prevMsg }) => {
             />
           </CustomTooltip>
         ) : (
-          selectedChat?.isGroupChat && <span style={{ width: "30px" }}></span>
+          selectedChat?.isGroupChat && <span style={{ width: "31px" }}></span>
         )}
         <div
           className={`msgBox d-flex flex-column text-start p-2 rounded-3

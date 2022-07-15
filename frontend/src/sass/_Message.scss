@@ -22,8 +22,8 @@
   }
   .msgSender {
     width: fit-content;
-    margin: -5px 5px 4px 0px;
-    font-size: 15px;
+    margin: -4px 5px 4px 0px;
+    font-size: 16px;
     color: #db84f5;
     &:hover {
       color: #98affa;
@@ -41,10 +41,9 @@
     }
   }
   .senderAvatar {
-    @include getImgDimensions(0.3);
+    @include getImgDimensions(0.31);
     background-color: transparent;
-    font-size: 14px;
-    margin: 5px -2px 0px 2px;
+    margin: 7px -2px 0px 2px;
   }
   .msgContent {
     cursor: auto;
@@ -53,13 +52,13 @@
       overflow-x: auto;
       @include scrollbars(2px);
     }
-    font-size: 17px;
-    margin-top: -5px;
+    font-size: 18px;
+    margin-top: -3px;
   }
   .msgTime {
-    min-width: 83px;
+    min-width: 90px;
     margin: -2px -2px -5px -5px;
-    font-size: 14px;
+    font-size: 15px;
     color: #c7c7c7;
     .sendStatusIcon {
       color: #39c3f1;
@@ -68,7 +67,7 @@
   }
 }
 .msgDate {
-  font-size: 14px;
+  font-size: 15px;
   width: max-content;
   color: #f5f5f5;
   background-color: #5e5a69;

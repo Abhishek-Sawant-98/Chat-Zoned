@@ -58,6 +58,8 @@ const registerUser = asyncHandler(async (req, res) => {
     cloudinary_id: createdUser.cloudinary_id,
     profilePic: createdUser.profilePic,
     token: generateToken(createdUser._id),
+    /* Expire session after 15 days */
+    expiryTime: Date.now() + 15 * 24 * 60 * 60 * 1000,
   });
 });
 
@@ -98,6 +100,8 @@ const authenticateUser = asyncHandler(async (req, res) => {
       cloudinary_id: user.cloudinary_id,
       profilePic: user.profilePic,
       token: generateToken(user._id),
+      /* Expire session after 15 days */
+      expiryTime: Date.now() + 15 * 24 * 60 * 60 * 1000,
     });
   } else {
     res.status(401);

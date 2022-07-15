@@ -8,6 +8,7 @@ import MessagesView from "../components/MessagesView";
 
 const ChatsPage = () => {
   const {
+    displayToast,
     loggedInUser,
     setLoggedInUser,
     dialogBody,
@@ -23,8 +24,20 @@ const ChatsPage = () => {
 
   useEffect(() => {
     // Session storage persists data even after page refresh, unlike state
-    const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
     if (!user) return navigate("/");
+
+    if (Date.now() >= parseInt(user.expiryTime)) {
+      navigate("/");
+      return displayToast({
+        title: "Session Expired",
+        message: "Please Login Again",
+        type: "info",
+        duration: 4000,
+        position: "bottom-center",
+      });
+    }
+
     setLoggedInUser(user);
     closeDialog();
     setSelectedChat(null);

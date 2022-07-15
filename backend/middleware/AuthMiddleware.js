@@ -19,11 +19,13 @@ const authorizeUser = asyncHandler(async (req, res, next) => {
       next();
     } catch (error) {
       res.status(401);
-      throw new Error("Not authorized, token failed!");
+      throw new Error(
+        "Not Authorized, token failed or expired! Please Logout and Login Again."
+      );
     }
   } else {
     res.status(401);
-    throw new Error("Not authorized, no token received!");
+    throw new Error("Not Authorized, no token received!");
   }
 });
 

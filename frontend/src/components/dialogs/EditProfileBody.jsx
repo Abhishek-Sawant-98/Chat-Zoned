@@ -60,7 +60,7 @@ const EditProfileBody = () => {
 
   const persistUpdatedUser = (updatedUser) => {
     // Session storage persists updated user even after page refresh
-    sessionStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
+    localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
     setLoggedInUser(updatedUser);
   };
 
@@ -115,7 +115,11 @@ const EditProfileBody = () => {
       });
       setLoading(false);
       setUploading(false);
-      persistUpdatedUser({ ...data, token: loggedInUser.token });
+      persistUpdatedUser({
+        ...data,
+        token: loggedInUser.token,
+        expiryTime: loggedInUser.expiryTime,
+      });
     } catch (error) {
       displayToast({
         title: "ProfilePic Update Failed",
@@ -156,7 +160,11 @@ const EditProfileBody = () => {
         position: "bottom-center",
       });
       setLoading(false);
-      persistUpdatedUser({ ...data, token: loggedInUser.token });
+      persistUpdatedUser({
+        ...data,
+        token: loggedInUser.token,
+        expiryTime: loggedInUser.expiryTime,
+      });
       return "profileUpdated";
     } catch (error) {
       displayToast({
@@ -210,7 +218,11 @@ const EditProfileBody = () => {
       });
 
       setLoading(false);
-      persistUpdatedUser({ ...data, token: loggedInUser.token });
+      persistUpdatedUser({
+        ...data,
+        token: loggedInUser.token,
+        expiryTime: loggedInUser.expiryTime,
+      });
       return "profileUpdated";
     } catch (error) {
       displayToast({

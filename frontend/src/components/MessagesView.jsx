@@ -432,7 +432,7 @@ const MessagesView = ({
               </IconButton>
             </CustomTooltip>
 
-            <span className="ms-3 mt-1 text-info" title={chatName}>
+            <span className="ms-3 mt-1 fs-3 text-info" title={chatName}>
               {truncateString(chatName, 22, 17)}
             </span>
 

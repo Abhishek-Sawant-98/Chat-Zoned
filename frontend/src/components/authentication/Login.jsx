@@ -67,13 +67,14 @@ const Login = () => {
 
       // Success toast : login successful
       displayToast({
-        message: "Login Successful",
+        title: "Login Successful",
+        message: "Your login session will expire in 15 days",
         type: "success",
-        duration: 2000,
+        duration: 5000,
         position: "bottom-center",
       });
 
-      sessionStorage.setItem("loggedInUser", JSON.stringify(data));
+      localStorage.setItem("loggedInUser", JSON.stringify(data));
       setLoggedInUser(data);
       setLoading(false);
       navigate("/chats");
