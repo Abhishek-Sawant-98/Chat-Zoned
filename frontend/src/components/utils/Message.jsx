@@ -1,7 +1,8 @@
 import { DoneAll, KeyboardArrowDown } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
 import { useEffect, useRef } from "react";
-import { AppState } from "../../context/ContextProvider";
+import { useSelector } from "react-redux";
+import { selectAppState } from "../../redux/slices/AppSlice";
 import {
   msgTimeStringOf,
   msgDateStringOf,
@@ -23,8 +24,8 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const Message = ({ msgSent, currMsg, prevMsg }) => {
+  const { loggedInUser, selectedChat } = useSelector(selectAppState);
   const msgContentRef = useRef(null);
-  const { loggedInUser, selectedChat } = AppState();
   const { _id, profilePic, name, email } = currMsg?.sender;
   const isLoggedInUser = _id === loggedInUser._id;
   const senderData = `${profilePic}===${name}===${email}`;

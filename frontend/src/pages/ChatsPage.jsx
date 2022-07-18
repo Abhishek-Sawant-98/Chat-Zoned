@@ -1,26 +1,33 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AppState } from "../context/ContextProvider";
 import ChatpageHeader from "../components/ChatpageHeader";
 import CustomDialog from "../components/utils/CustomDialog";
 import ChatListView from "../components/ChatListView";
 import MessagesView from "../components/MessagesView";
+import { useDispatch, useSelector } from "react-redux";
+import { displayToast } from "../redux/slices/ToastSlice";
+import {
+  selectAppState,
+  setLoggedInUser,
+  setSelectedChat,
+} from "../redux/slices/AppSlice";
+import {
+  hideDialog,
+  selectCustomDialogState,
+} from "../redux/slices/CustomDialogSlice";
 
 const ChatsPage = () => {
-  const {
-    displayToast,
-    loggedInUser,
-    setLoggedInUser,
-    dialogBody,
-    dialogData,
-    closeDialog,
-    showDialogActions,
-    setSelectedChat,
-  } = AppState();
+  const { loggedInUser } = useSelector(selectAppState);
+  const { dialogData, showDialogActions } = useSelector(
+    selectCustomDialogState
+  );
+
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
   const [fetchMsgs, setFetchMsgs] = useState(false);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
+  const [dialogBody, setDialogBody] = useState(<></>);
 
   useEffect(() => {
     // Session storage persists data even after page refresh, unlike state
@@ -29,18 +36,20 @@ const ChatsPage = () => {
 
     if (Date.now() >= parseInt(user.expiryTime)) {
       navigate("/");
-      return displayToast({
-        title: "Session Expired",
-        message: "Please Login Again",
-        type: "info",
-        duration: 4000,
-        position: "bottom-center",
-      });
+      return dispatch(
+        displayToast({
+          title: "Session Expired",
+          message: "Please Login Again",
+          type: "info",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
     }
 
-    setLoggedInUser(user);
-    closeDialog();
-    setSelectedChat(null);
+    dispatch(setLoggedInUser(user));
+    dispatch(hideDialog());
+    dispatch(setSelectedChat(null));
   }, []);
 
   return (
@@ -48,13 +57,17 @@ const ChatsPage = () => {
       {loggedInUser && (
         <div className={`chatpage`}>
           {/* Header component */}
-          <ChatpageHeader setFetchMsgs={setFetchMsgs} />
+          <ChatpageHeader
+            setFetchMsgs={setFetchMsgs}
+            setDialogBody={setDialogBody}
+          />
 
           <section className={`row g-1`}>
             {/* Chat List component */}
             <ChatListView
               loadingMsgs={loadingMsgs}
               setFetchMsgs={setFetchMsgs}
+              setDialogBody={setDialogBody}
             />
 
             {/* Chat Messages component */}
@@ -63,13 +76,13 @@ const ChatsPage = () => {
               setLoadingMsgs={setLoadingMsgs}
               fetchMsgs={fetchMsgs}
               setFetchMsgs={setFetchMsgs}
+              setDialogBody={setDialogBody}
             />
           </section>
 
           {/* Alert dialog */}
           <CustomDialog
             dialogData={dialogData}
-            handleDialogClose={closeDialog}
             showDialogActions={showDialogActions}
             showDialogClose={true}
           >

@@ -1,7 +1,6 @@
 import { Notifications, Search } from "@mui/icons-material";
 import { Avatar, IconButton } from "@mui/material";
 import { useRef, useState } from "react";
-import { AppState } from "../context/ContextProvider";
 import NotificationsMenu from "./menus/NotificationsMenu";
 import ProfileSettingsMenu from "./menus/ProfileSettingsMenu";
 import SearchUsersDrawer from "./utils/SearchUsersDrawer";
@@ -9,6 +8,8 @@ import getCustomTooltip from "./utils/CustomTooltip";
 import animationData from "../animations/chat-gif.json";
 import LottieAnimation from "./utils/LottieAnimation";
 import io from "socket.io-client";
+import { useDispatch, useSelector } from "react-redux";
+import { selectAppState } from "../redux/slices/AppSlice";
 
 const arrowStyles = {
   color: "#777",
@@ -27,8 +28,9 @@ const SOCKET_ENDPOINT = "https://chat-zoned.herokuapp.com";
 
 const clientSocket = io(SOCKET_ENDPOINT, { transports: ["websocket"] });
 
-const ChatpageHeader = ({ setFetchMsgs }) => {
-  const { loggedInUser } = AppState();
+const ChatpageHeader = ({ setFetchMsgs, setDialogBody }) => {
+  const { loggedInUser } = useSelector(selectAppState);
+  const dispatch = useDispatch();
   const appGif = useRef();
 
   const [notificationsMenuAnchor, setNotificationsMenuAnchor] = useState(null);
@@ -129,6 +131,7 @@ const ChatpageHeader = ({ setFetchMsgs }) => {
         <ProfileSettingsMenu
           anchor={profileSettingsMenuAnchor}
           setAnchor={setProfileSettingsMenuAnchor}
+          setDialogBody={setDialogBody}
         />
       </div>
     </header>

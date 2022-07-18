@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
-import { AppState } from "../../context/ContextProvider";
+import { useSelector } from "react-redux";
+import { selectFormfieldState } from "../../redux/slices/FormfieldSlice";
 import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
 
 const ChangePasswordBody = ({ getUpdatedState }) => {
-  const { formClassNames } = AppState();
-
   const {
     loading,
     disableIfLoading,
     formLabelClassName,
     formFieldClassName,
     inputFieldClassName,
-  } = formClassNames;
+  } = useSelector(selectFormfieldState);
 
   const [showPassword, setShowPassword] = useState(false);
   const [changePasswordData, setChangePasswordData] = useState({

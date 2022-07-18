@@ -7,7 +7,8 @@ import {
   PictureAsPdf,
   VideoFile,
 } from "@mui/icons-material";
-import { AppState } from "../../context/ContextProvider";
+import { useSelector } from "react-redux";
+import { selectAppState } from "../../redux/slices/AppSlice";
 import {
   dateStringOf,
   msgDateStringOf,
@@ -31,7 +32,7 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const ChatListItem = ({ chat }) => {
-  const { selectedChat, loggedInUser } = AppState();
+  const { selectedChat, loggedInUser } = useSelector(selectAppState);
   const {
     _id,
     chatName,

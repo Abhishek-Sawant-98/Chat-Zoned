@@ -1,14 +1,14 @@
 import { Clear, Search } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import { forwardRef, useState } from "react";
-import { AppState } from "../../context/ContextProvider";
+import { useSelector } from "react-redux";
+import { selectFormfieldState } from "../../redux/slices/FormfieldSlice";
 
 const SearchInput = forwardRef((props, inputRef) => {
-  const { formClassNames } = AppState();
   const { searchHandler, autoFocus, placeholder, clearInput } = props;
-
   const { disableIfLoading, formFieldClassName, inputFieldClassName } =
-    formClassNames;
+    useSelector(selectFormfieldState);
+
   // To display/hide clear search (<Close />) icon when typing
   const [typing, setTyping] = useState(false);
 

@@ -6,11 +6,20 @@ import {
 } from "@mui/icons-material";
 import { ListItemIcon, MenuItem } from "@mui/material";
 import Menu, { menuIconProps, menuItemProps } from "../utils/Menu";
-import { AppState } from "../../context/ContextProvider";
 import axios from "../../utils/axios";
 import MenuItemText from "../utils/MenuItemText";
 import { truncateString } from "../../utils/appUtils";
 import ViewProfileBody from "../dialogs/ViewProfileBody";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectAppState,
+  setGroupInfo,
+  setSelectedChat,
+  toggleRefresh,
+} from "../../redux/slices/AppSlice";
+import { displayToast } from "../../redux/slices/ToastSlice";
+import { setLoading } from "../../redux/slices/FormfieldSlice";
+import { hideDialog } from "../../redux/slices/CustomDialogSlice";
 
 const MemberOptionsMenu = ({
   anchor,
@@ -20,20 +29,10 @@ const MemberOptionsMenu = ({
   setShowDialogClose,
   childDialogMethods,
 }) => {
-  const {
-    loggedInUser,
-    displayToast,
-    refresh,
-    setRefresh,
-    closeDialog,
-    formClassNames,
-    setSelectedChat,
-    groupInfo,
-    setGroupInfo,
-  } = AppState();
+  const { loggedInUser, refresh, groupInfo } = useSelector(selectAppState);
+  const dispatch = useDispatch();
 
   const { setChildDialogBody, displayChildDialog } = childDialogMethods;
-  const { setLoading } = formClassNames;
   const isLoggedInUserGroupAdmin = groupInfo?.groupAdmins?.some(
     (admin) => admin?._id === loggedInUser?._id
   );
@@ -48,14 +47,14 @@ const MemberOptionsMenu = ({
     </span>
   );
   const updateView = (data) => {
-    setRefresh(!refresh);
-    setSelectedChat(data);
+    dispatch(toggleRefresh(!refresh));
+    dispatch(setSelectedChat(data));
   };
 
   // Create/Retreive chat when 'Message Member' is clicked
   const openChat = async () => {
-    closeDialog(); // Close all dialogs by closing parent dialog
-    setLoading(true);
+    dispatch(hideDialog()); // Close all dialogs by closing parent dialog
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -71,17 +70,19 @@ const MemberOptionsMenu = ({
         config
       );
 
-      setLoading(false);
+      dispatch(setLoading(false));
       updateView(data);
     } catch (error) {
-      displayToast({
-        title: "Couldn't Create/Retrieve Chat",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 4000,
-        position: "bottom-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Couldn't Create/Retrieve Chat",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
     }
   };
 
@@ -101,7 +102,7 @@ const MemberOptionsMenu = ({
   };
 
   const makeGroupAdmin = async () => {
-    setLoading(true);
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -117,29 +118,33 @@ const MemberOptionsMenu = ({
         config
       );
 
-      displayToast({
-        message: `${clickedMemberName} is now a Group Admin`,
-        type: "success",
-        duration: 4000,
-        position: "bottom-center",
-      });
-      setGroupInfo(data);
+      dispatch(
+        displayToast({
+          message: `${clickedMemberName} is now a Group Admin`,
+          type: "success",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setGroupInfo(data));
       updateView(data);
-      setLoading(false);
+      dispatch(setLoading(false));
     } catch (error) {
-      displayToast({
-        title: "Make Group Admin Failed",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 4000,
-        position: "bottom-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Make Group Admin Failed",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
     }
   };
 
   const dismissAsAdmin = async () => {
-    setLoading(true);
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -155,31 +160,35 @@ const MemberOptionsMenu = ({
         config
       );
 
-      displayToast({
-        message: `${clickedMemberName} is no longer a Group Admin`,
-        type: "info",
-        duration: 4000,
-        position: "bottom-center",
-      });
-      setLoading(false);
-      setGroupInfo(data);
+      dispatch(
+        displayToast({
+          message: `${clickedMemberName} is no longer a Group Admin`,
+          type: "info",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
+      dispatch(setGroupInfo(data));
       updateView(data);
       return "membersUpdated";
     } catch (error) {
-      displayToast({
-        title: "Dismiss As Group Admin Failed",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 4000,
-        position: "bottom-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Dismiss As Group Admin Failed",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
       return "membersUpdated";
     }
   };
 
   const removeFromGroup = async () => {
-    setLoading(true);
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -199,25 +208,29 @@ const MemberOptionsMenu = ({
         config
       );
 
-      displayToast({
-        message: `${clickedMemberName} removed from Group`,
-        type: "info",
-        duration: 4000,
-        position: "bottom-center",
-      });
-      setLoading(false);
-      setGroupInfo(data);
+      dispatch(
+        displayToast({
+          message: `${clickedMemberName} removed from Group`,
+          type: "info",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
+      dispatch(setGroupInfo(data));
       updateView(data);
       return "membersUpdated";
     } catch (error) {
-      displayToast({
-        title: "Remove From Group Failed",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 4000,
-        position: "bottom-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Remove From Group Failed",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
       return "membersUpdated";
     }
   };

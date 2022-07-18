@@ -1,10 +1,10 @@
-const asyncHandler = require("express-async-handler");
-const MessageModel = require("../models/MessageModel");
-const ChatModel = require("../models/ChatModel");
-const { deleteFile, deleteExistingAttachment } = require("../utils/deleteFile");
-const cloudinary = require("../config/cloudinary");
-const { s3, s3_bucket } = require("../config/aws_S3");
-const path = require("path");
+import asyncHandler from "express-async-handler";
+import MessageModel from "../models/MessageModel.js";
+import ChatModel from "../models/ChatModel.js";
+import { deleteFile, deleteExistingAttachment } from "../utils/deleteFile.js";
+import cloudinary from "../config/cloudinary.js";
+import { s3, s3_bucket } from "../config/aws_S3.js";
+import path from "path";
 
 const fetchMessages = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
@@ -260,7 +260,7 @@ const accessAttachment = asyncHandler(async (req, res) => {
   res.status(200).send(fileObj.Body);
 });
 
-module.exports = {
+export {
   fetchMessages,
   sendMessage,
   updateMessage,

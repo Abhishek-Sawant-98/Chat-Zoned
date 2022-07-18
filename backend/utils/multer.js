@@ -1,6 +1,6 @@
-const multer = require("multer");
-const multerS3 = require("multer-s3");
-const { s3, s3_bucket } = require("../config/aws_S3");
+import multer from "multer";
+import multerS3 from "multer-s3";
+import { s3, s3_bucket } from "../config/aws_S3.js";
 
 // Generating a unique file name
 const generateUniqueFileName = (file) => {
@@ -39,4 +39,4 @@ const uploadToS3 = multer({
   }),
 });
 
-module.exports = { upload, uploadToS3 };
+export { upload, uploadToS3 };

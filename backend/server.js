@@ -1,19 +1,23 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const connectToMongoDB = require("./config/db");
-const UserRoutes = require("./routes/UserRoutes");
-const ChatRoutes = require("./routes/ChatRoutes");
-const MessageRoutes = require("./routes/MessageRoutes");
-const path = require("path");
-const {
+import dotenv from "dotenv";
+dotenv.config();
+import express from "express";
+import cors from "cors";
+import connectToMongoDB from "./config/db.js";
+import UserRoutes from "./routes/UserRoutes.js";
+import ChatRoutes from "./routes/ChatRoutes.js";
+import MessageRoutes from "./routes/MessageRoutes.js";
+import path from "path";
+import { Server } from "socket.io";
+import {
   notFoundHandler,
   appErrorHandler,
-} = require("./middleware/ErrorMiddleware");
+} from "./middleware/ErrorMiddleware.js";
 
 connectToMongoDB();
 
 const app = express();
+const DIRNAME = path.resolve();
+const PORT = process.env.PORT || 5000;
 
 // Config middlewares
 app.use(cors());
@@ -25,14 +29,12 @@ app.use("/api/user", UserRoutes);
 app.use("/api/chat", ChatRoutes);
 app.use("/api/message", MessageRoutes);
 
-const PORT = process.env.PORT || 5000;
-
 // ------------------ Deployment ----------------------- //
 if (process.env.NODE_ENV === "production") {
   // Establishes the path to our frontend (most important)
-  app.use(express.static(path.join(__dirname, "../frontend/build")));
+  app.use(express.static(path.join(DIRNAME, "/frontend/build")));
   app.get("*", (req, res) =>
-    res.sendFile(path.join(__dirname, "../frontend/build/index.html"))
+    res.sendFile(path.join(DIRNAME, "/frontend/build/index.html"))
   );
 }
 // ------------------ Deployment ----------------------- //
@@ -46,7 +48,7 @@ const server = app.listen(PORT, () =>
 );
 
 // Sockets setup
-const io = require("socket.io")(server, {
+const io = new Server(server, {
   pingTimeout: 90000,
   cors: {
     origin: "http://localhost:3000",

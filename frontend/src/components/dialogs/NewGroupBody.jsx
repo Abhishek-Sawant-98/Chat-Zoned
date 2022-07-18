@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { AppState } from "../../context/ContextProvider";
 import { Edit, KeyboardDoubleArrowLeft } from "@mui/icons-material";
 import getCustomTooltip from "../utils/CustomTooltip";
 import { DEFAULT_GROUP_DP } from "../../utils/appUtils";
@@ -7,6 +6,18 @@ import EditPicMenu from "../menus/EditPicMenu";
 import axios from "../../utils/axios";
 import { Button, CircularProgress, DialogActions } from "@mui/material";
 import { btnCustomStyle, btnHoverStyle } from "../utils/CustomDialog";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectAppState,
+  setGroupInfo,
+  toggleRefresh,
+} from "../../redux/slices/AppSlice";
+import {
+  selectFormfieldState,
+  setLoading,
+} from "../../redux/slices/FormfieldSlice";
+import { displayToast } from "../../redux/slices/ToastSlice";
+import { hideDialog } from "../../redux/slices/CustomDialogSlice";
 
 const arrowStyles = {
   color: "#111",
@@ -22,24 +33,15 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const NewGroupBody = ({ closeChildDialog }) => {
-  const {
-    formClassNames,
-    displayToast,
-    loggedInUser,
-    refresh,
-    setRefresh,
-    groupInfo,
-    setGroupInfo,
-    closeDialog,
-  } = AppState();
+  const { loggedInUser, refresh, groupInfo } = useSelector(selectAppState);
   const {
     loading,
-    setLoading,
     disableIfLoading,
     formFieldClassName,
     inputFieldClassName,
     formLabelClassName,
-  } = formClassNames;
+  } = useSelector(selectFormfieldState);
+  const dispatch = useDispatch();
 
   const { chatDisplayPicUrl, chatName } = groupInfo;
   const [editGroupDpMenuAnchor, setEditGroupDpMenuAnchor] = useState(null);
@@ -58,23 +60,27 @@ const NewGroupBody = ({ closeChildDialog }) => {
     const { chatDisplayPic, chatName, users } = groupInfo;
 
     if (!chatName) {
-      return displayToast({
-        message: "Please Enter a Group Name",
-        type: "warning",
-        duration: 3000,
-        position: "top-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Please Enter a Group Name",
+          type: "warning",
+          duration: 3000,
+          position: "top-center",
+        })
+      );
     }
     if (users?.length < 2) {
-      return displayToast({
-        message: "Please Add Atleast 2 Members",
-        type: "warning",
-        duration: 3000,
-        position: "top-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Please Add Atleast 2 Members",
+          type: "warning",
+          duration: 3000,
+          position: "top-center",
+        })
+      );
     }
 
-    setLoading(true);
+    dispatch(setLoading(true));
     const config = {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -89,26 +95,30 @@ const NewGroupBody = ({ closeChildDialog }) => {
 
       await axios.post("/api/chat/group", formData, config);
 
-      displayToast({
-        message: "Group Created Successfully",
-        type: "success",
-        duration: 2000,
-        position: "bottom-center",
-      });
+      dispatch(
+        displayToast({
+          message: "Group Created Successfully",
+          type: "success",
+          duration: 2000,
+          position: "bottom-center",
+        })
+      );
 
-      setLoading(false);
-      setRefresh(!refresh);
+      dispatch(setLoading(false));
+      dispatch(toggleRefresh(!refresh));
       closeChildDialog();
       // Close Parent Dialog as well
-      closeDialog();
+      dispatch(hideDialog());
     } catch (error) {
-      displayToast({
-        title: "Couldn't Create Group",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 5000,
-        position: "top-center",
-      });
+      dispatch(
+        displayToast({
+          title: "Couldn't Create Group",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 5000,
+          position: "top-center",
+        })
+      );
     }
   };
 
@@ -118,27 +128,33 @@ const NewGroupBody = ({ closeChildDialog }) => {
 
     if (image.size >= 2097152) {
       imgInput.current.value = "";
-      return displayToast({
-        message: "Please Select an Image Smaller than 2 MB",
-        type: "warning",
-        duration: 4000,
-        position: "top-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Please Select an Image Smaller than 2 MB",
+          type: "warning",
+          duration: 4000,
+          position: "top-center",
+        })
+      );
     }
-    setGroupInfo({
-      ...groupInfo,
-      chatDisplayPic: image,
-      chatDisplayPicUrl: URL.createObjectURL(image),
-    });
+    dispatch(
+      setGroupInfo({
+        ...groupInfo,
+        chatDisplayPic: image,
+        chatDisplayPicUrl: URL.createObjectURL(image),
+      })
+    );
   };
 
   const handleReset = (e) => {
     e.preventDefault();
-    setGroupInfo({
-      ...groupInfo,
-      chatDisplayPic: null,
-      chatDisplayPicUrl: DEFAULT_GROUP_DP,
-    });
+    dispatch(
+      setGroupInfo({
+        ...groupInfo,
+        chatDisplayPic: null,
+        chatDisplayPicUrl: DEFAULT_GROUP_DP,
+      })
+    );
     imgInput.current.value = "";
   };
 
@@ -196,7 +212,7 @@ const NewGroupBody = ({ closeChildDialog }) => {
           type="text"
           value={chatName}
           onChange={(e) => {
-            setGroupInfo({ ...groupInfo, chatName: e.target.value });
+            dispatch(setGroupInfo({ ...groupInfo, chatName: e.target.value }));
           }}
           required
           autoFocus

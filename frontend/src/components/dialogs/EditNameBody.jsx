@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { AppState } from "../../context/ContextProvider";
+import { useSelector } from "react-redux";
+import { selectFormfieldState } from "../../redux/slices/FormfieldSlice";
 
 const EditNameBody = ({ originalName, getUpdatedName, placeholder }) => {
-  const { formClassNames } = AppState();
-  const { loading, formFieldClassName, inputFieldClassName } = formClassNames;
+  const { loading, formFieldClassName, inputFieldClassName } =
+    useSelector(selectFormfieldState);
   const [name, setName] = useState(originalName);
 
   useEffect(() => {

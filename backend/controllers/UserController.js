@@ -1,9 +1,8 @@
-const asyncHandler = require("express-async-handler");
-const UserModel = require("../models/UserModel");
-const cloudinary = require("../config/cloudinary");
-const { deleteFile } = require("../utils/deleteFile");
-const generateToken = require("../utils/generateToken");
-const path = require("path");
+import asyncHandler from "express-async-handler";
+import UserModel from "../models/UserModel.js";
+import cloudinary from "../config/cloudinary.js";
+import { deleteFile } from "../utils/deleteFile.js";
+import generateToken from "../utils/generateToken.js";
 
 const registerUser = asyncHandler(async (req, res) => {
   const profilePic = req.file;
@@ -425,7 +424,7 @@ const deleteNotification = asyncHandler(async (req, res) => {
   res.status(200).json(updatedUser);
 });
 
-module.exports = {
+export {
   registerUser,
   authenticateUser,
   fetchUsers,
@@ -435,5 +434,4 @@ module.exports = {
   deleteUserProfilePic,
   addNotification,
   deleteNotification,
-  // fetchFile,
 };

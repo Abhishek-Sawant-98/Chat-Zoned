@@ -1,24 +1,23 @@
 import { Key, Logout, ManageAccounts, Person } from "@mui/icons-material";
 import { ListItemIcon, MenuItem } from "@mui/material";
 import Menu, { menuIconProps, menuItemProps } from "../utils/Menu";
-import { AppState } from "../../context/ContextProvider";
 import axios from "../../utils/axios";
 import ChangePasswordBody from "../dialogs/ChangePasswordBody";
 import EditProfileBody from "../dialogs/EditProfileBody";
 import MenuItemText from "../utils/MenuItemText";
+import { useDispatch, useSelector } from "react-redux";
+import { selectAppState, setLoggedInUser } from "../../redux/slices/AppSlice";
+import { setLoading } from "../../redux/slices/FormfieldSlice";
+import {
+  displayDialog,
+  setShowDialogActions,
+} from "../../redux/slices/CustomDialogSlice";
+import { displayToast } from "../../redux/slices/ToastSlice";
 
-const ProfileSettingsMenu = ({ anchor, setAnchor }) => {
-  const {
-    loggedInUser,
-    setLoggedInUser,
-    displayDialog,
-    displayToast,
-    setDialogBody,
-    setShowDialogActions,
-    formClassNames,
-  } = AppState();
+const ProfileSettingsMenu = ({ anchor, setAnchor, setDialogBody }) => {
+  const { loggedInUser } = useSelector(selectAppState);
+  const dispatch = useDispatch();
 
-  const { setLoading } = formClassNames;
   const isGuestUser = loggedInUser?.email === "guest.user@gmail.com";
 
   let editPasswordData;
@@ -28,111 +27,129 @@ const ProfileSettingsMenu = ({ anchor, setAnchor }) => {
   };
 
   const openLogoutConfirmDialog = () => {
-    setShowDialogActions(true);
+    dispatch(setShowDialogActions(true));
     setDialogBody(<>Are you sure you want to log out?</>);
-    displayDialog({
-      title: "Logout Confirmation",
-      nolabel: "NO",
-      yeslabel: "YES",
-      loadingYeslabel: "Logging Out...",
-      action: () => {
-        localStorage.removeItem("loggedInUser");
-        setLoggedInUser(null);
-        displayToast({
-          message: "Logged Out",
-          type: "info",
-          duration: 2000,
-          position: "bottom-center",
-        });
-        return "loggingOut";
-      },
-    });
+    dispatch(
+      displayDialog({
+        title: "Logout Confirmation",
+        nolabel: "NO",
+        yeslabel: "YES",
+        loadingYeslabel: "Logging Out...",
+        action: () => {
+          localStorage.removeItem("loggedInUser");
+          dispatch(setLoggedInUser(null));
+          dispatch(
+            displayToast({
+              message: "Logged Out",
+              type: "info",
+              duration: 2000,
+              position: "bottom-center",
+            })
+          );
+          return "loggingOut";
+        },
+      })
+    );
   };
 
   const openEditProfileDialog = () => {
-    setShowDialogActions(false);
+    dispatch(setShowDialogActions(false));
     setDialogBody(<EditProfileBody />);
-    displayDialog({
-      title: isGuestUser ? "View Profile" : "Edit Profile",
-    });
+    dispatch(
+      displayDialog({
+        title: isGuestUser ? "View Profile" : "Edit Profile",
+      })
+    );
   };
 
   const openEditPasswordDialog = () => {
-    setShowDialogActions(true);
+    dispatch(setShowDialogActions(true));
     setDialogBody(<ChangePasswordBody getUpdatedState={getUpdatedState} />);
-    displayDialog({
-      title: "Change Password",
-      nolabel: "CANCEL",
-      yeslabel: "SAVE",
-      loadingYeslabel: "Saving...",
-      action: async () => {
-        const { currentPassword, newPassword, confirmNewPassword } =
-          editPasswordData;
+    dispatch(
+      displayDialog({
+        title: "Change Password",
+        nolabel: "CANCEL",
+        yeslabel: "SAVE",
+        loadingYeslabel: "Saving...",
+        action: async () => {
+          const { currentPassword, newPassword, confirmNewPassword } =
+            editPasswordData;
 
-        if (!currentPassword || !newPassword || !confirmNewPassword) {
-          return displayToast({
-            message: "Please Enter All the Fields",
-            type: "warning",
-            duration: 5000,
-            position: "top-center",
-          });
-        }
-        if (currentPassword === newPassword) {
-          return displayToast({
-            message: "New Password Must Differ from Current Password",
-            type: "warning",
-            duration: 5000,
-            position: "top-center",
-          });
-        }
-        if (newPassword !== confirmNewPassword) {
-          return displayToast({
-            message: "New Password Must Match Confirm New Password",
-            type: "warning",
-            duration: 5000,
-            position: "top-center",
-          });
-        }
+          if (!currentPassword || !newPassword || !confirmNewPassword) {
+            return dispatch(
+              displayToast({
+                message: "Please Enter All the Fields",
+                type: "warning",
+                duration: 5000,
+                position: "top-center",
+              })
+            );
+          }
+          if (currentPassword === newPassword) {
+            return dispatch(
+              displayToast({
+                message: "New Password Must Differ from Current Password",
+                type: "warning",
+                duration: 5000,
+                position: "top-center",
+              })
+            );
+          }
+          if (newPassword !== confirmNewPassword) {
+            return dispatch(
+              displayToast({
+                message: "New Password Must Match Confirm New Password",
+                type: "warning",
+                duration: 5000,
+                position: "top-center",
+              })
+            );
+          }
 
-        setLoading(true);
+          dispatch(setLoading(true));
 
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${loggedInUser.token}`,
-          },
-        };
+          const config = {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${loggedInUser.token}`,
+            },
+          };
 
-        try {
-          await axios.put(
-            "/api/user/update/password",
-            { currentPassword, newPassword },
-            config
-          );
-          displayToast({
-            message:
-              "Password Updated Successfully. Please Login Again with Updated Password.",
-            type: "success",
-            duration: 5000,
-            position: "bottom-center",
-          });
+          try {
+            await axios.put(
+              "/api/user/update/password",
+              { currentPassword, newPassword },
+              config
+            );
+            dispatch(
+              displayToast({
+                message:
+                  "Password Updated Successfully. Please Login Again with Updated Password.",
+                type: "success",
+                duration: 5000,
+                position: "bottom-center",
+              })
+            );
 
-          setLoading(false);
-          localStorage.removeItem("loggedInUser");
-          setLoggedInUser(null);
-          return "pwdUpdated";
-        } catch (error) {
-          displayToast({
-            title: "Password Update Failed",
-            message: error.response?.data?.message || error.message,
-            type: "error",
-            duration: 5000,
-            position: "top-center",
-          });
-          setLoading(false);
-        }
-      },
-    });
+            dispatch(setLoading(false));
+            localStorage.removeItem("loggedInUser");
+            dispatch(setLoggedInUser(null));
+            return "pwdUpdated";
+          } catch (error) {
+            dispatch(
+              displayToast({
+                title: "Password Update Failed",
+                message: error.response?.data?.message || error.message,
+                type: "error",
+                duration: 5000,
+                position: "top-center",
+              })
+            );
+            dispatch(setLoading(false));
+          }
+        },
+      })
+    );
   };
 
   return (

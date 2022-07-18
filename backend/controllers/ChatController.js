@@ -1,7 +1,7 @@
-const asyncHandler = require("express-async-handler");
-const ChatModel = require("../models/ChatModel");
-const cloudinary = require("../config/cloudinary");
-const { deleteFile } = require("../utils/deleteFile");
+import asyncHandler from "express-async-handler";
+import ChatModel from "../models/ChatModel.js";
+import cloudinary from "../config/cloudinary.js";
+import { deleteFile } from "../utils/deleteFile.js";
 
 const createOrRetrieveChat = asyncHandler(async (req, res) => {
   const receiverUserId = req.body?.userId;
@@ -359,7 +359,7 @@ const dismissAsAdmin = asyncHandler(async (req, res) => {
   res.status(200).json(updatedGroup);
 });
 
-module.exports = {
+export {
   createOrRetrieveChat,
   fetchChats,
   createGroupChat,

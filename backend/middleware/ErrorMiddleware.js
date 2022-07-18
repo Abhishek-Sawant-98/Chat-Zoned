@@ -1,3 +1,7 @@
+import dotenv from "dotenv";
+dotenv.config();
+
+// Fallback error handler for invalid routes
 const notFoundHandler = (req, res, next) => {
   const notFoundError = new Error(`Not Found : '${req.originalUrl}'`);
   res.status(404);
@@ -17,4 +21,4 @@ const appErrorHandler = (err, req, res, next) => {
   });
 };
 
-module.exports = { notFoundHandler, appErrorHandler };
+export { notFoundHandler, appErrorHandler };

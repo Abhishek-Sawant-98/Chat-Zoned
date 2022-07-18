@@ -1,12 +1,13 @@
 import { Logout, ManageAccounts } from "@mui/icons-material";
 import { ListItemIcon, MenuItem } from "@mui/material";
 import Menu, { menuIconProps, menuItemProps } from "../utils/Menu";
-import { useState } from "react";
-import { AppState } from "../../context/ContextProvider";
 import MenuItemText from "../utils/MenuItemText";
+import { useDispatch, useSelector } from "react-redux";
+import { selectAppState } from "../../redux/slices/AppSlice";
 
 const NotificationsMenu = ({ anchor, setAnchor }) => {
-  const { loggedInUser, setLoggedInUser } = AppState();
+  const { loggedInUser } = useSelector(selectAppState);
+  const dispatch = useDispatch();
   const notifs = loggedInUser?.notifications;
   return (
     <Menu

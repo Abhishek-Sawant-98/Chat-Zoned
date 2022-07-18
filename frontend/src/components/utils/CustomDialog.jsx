@@ -12,8 +12,11 @@ import {
   DialogTitle,
   IconButton,
 } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { AppState } from "../../context/ContextProvider";
+import { setSelectedChat } from "../../redux/slices/AppSlice";
+import { hideDialog } from "../../redux/slices/CustomDialogSlice";
+import { selectFormfieldState } from "../../redux/slices/FormfieldSlice";
 
 export const btnHoverStyle = {
   ":hover": { backgroundColor: "#93c2f727" },
@@ -28,11 +31,13 @@ export const btnCustomStyle = {
 const CustomDialog = ({
   children,
   dialogData,
-  handleDialogClose,
   showDialogActions,
   showDialogClose,
+  closeDialog,
 }) => {
-  const { formClassNames, setSelectedChat, closeDialog } = AppState();
+  const { loading, disableIfLoading } = useSelector(selectFormfieldState);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const {
     isFullScreen,
     isOpen,
@@ -42,8 +47,11 @@ const CustomDialog = ({
     loadingYeslabel,
     action,
   } = dialogData;
-  const { loading, disableIfLoading } = formClassNames;
-  const navigate = useNavigate();
+
+  const handleDialogClose = () => {
+    if (closeDialog) return closeDialog();
+    dispatch(hideDialog());
+  };
 
   const handleYes = async () => {
     const result = await action();
@@ -56,10 +64,10 @@ const CustomDialog = ({
     } else if (result === "createdGroup") {
       handleDialogClose();
       // Close Parent Dialog as well
-      closeDialog();
+      dispatch(hideDialog());
     } else if (result === "pwdUpdated" || result === "loggingOut") {
       handleDialogClose();
-      setSelectedChat(null);
+      dispatch(setSelectedChat(null));
       navigate("/");
     }
   };
@@ -107,7 +115,7 @@ const CustomDialog = ({
       <DialogContent
         style={{ fontSize: "19px", color: "#e0e0e0", fontFamily: "Mirza" }}
       >
-        {children}
+        {children || <></>}
       </DialogContent>
       {showDialogActions && (
         <DialogActions>

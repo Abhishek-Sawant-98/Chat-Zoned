@@ -2,13 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { debounce } from "../../utils/appUtils";
 import SearchInput from "../utils/SearchInput";
 import GroupMemberItem from "../utils/GroupMemberItem";
-import { AppState } from "../../context/ContextProvider";
 import MemberOptionsMenu from "../menus/MemberOptionsMenu";
 import ChildDialog from "../utils/ChildDialog";
+import { useSelector } from "react-redux";
+import { selectAppState } from "../../redux/slices/AppSlice";
+import { selectChildDialogState } from "../../redux/slices/ChildDialogSlice";
 
 const ViewGroupMembers = () => {
-  const { loggedInUser, childDialogMethods, getChildDialogMethods, groupInfo } =
-    AppState();
+  const { loggedInUser, groupInfo } = useSelector(selectAppState);
+  const { childDialogMethods } = useSelector(selectChildDialogState);
   const [showDialogActions, setShowDialogActions] = useState(true);
   const [showDialogClose, setShowDialogClose] = useState(false);
   const groupMembers = groupInfo?.users;
@@ -122,7 +124,6 @@ const ViewGroupMembers = () => {
       />
       {/* Child dialog */}
       <ChildDialog
-        getChildDialogMethods={getChildDialogMethods}
         showChildDialogActions={showDialogActions}
         showChildDialogClose={showDialogClose}
       />

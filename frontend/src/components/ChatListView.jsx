@@ -1,6 +1,5 @@
 import { GroupAdd } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
-import { AppState } from "../context/ContextProvider";
 import {
   debounce,
   DEFAULT_GROUP_DP,
@@ -14,6 +13,17 @@ import FullSizeImage from "./utils/FullSizeImage";
 import LoadingList from "./utils/LoadingList";
 import SearchInput from "./utils/SearchInput";
 import io from "socket.io-client";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectAppState,
+  setGroupInfo,
+  setSelectedChat,
+} from "../redux/slices/AppSlice";
+import {
+  displayDialog,
+  setShowDialogActions,
+} from "../redux/slices/CustomDialogSlice";
+import { displayToast } from "../redux/slices/ToastSlice";
 
 const arrowStyles = {
   color: "#777",
@@ -32,18 +42,9 @@ const SOCKET_ENDPOINT = "https://chat-zoned.herokuapp.com";
 
 const clientSocket = io(SOCKET_ENDPOINT, { transports: ["websocket"] });
 
-const ChatListView = ({ loadingMsgs, setFetchMsgs }) => {
-  const {
-    selectedChat,
-    loggedInUser,
-    setSelectedChat,
-    displayDialog,
-    displayToast,
-    setDialogBody,
-    setShowDialogActions,
-    refresh,
-    setGroupInfo,
-  } = AppState();
+const ChatListView = ({ loadingMsgs, setFetchMsgs, setDialogBody }) => {
+  const { loggedInUser, selectedChat, refresh } = useSelector(selectAppState);
+  const dispatch = useDispatch();
 
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,29 +52,35 @@ const ChatListView = ({ loadingMsgs, setFetchMsgs }) => {
   const searchChatInput = useRef();
 
   const openCreateGroupChatDialog = () => {
-    setGroupInfo({
-      chatDisplayPic: null,
-      chatDisplayPicUrl: DEFAULT_GROUP_DP,
-      chatName: "",
-      users: [],
-    });
-    setShowDialogActions(true);
+    dispatch(
+      setGroupInfo({
+        chatDisplayPic: null,
+        chatDisplayPicUrl: DEFAULT_GROUP_DP,
+        chatName: "",
+        users: [],
+      })
+    );
+    dispatch(setShowDialogActions(true));
     setDialogBody(<AddMembersToGroup forCreateGroup={true} />);
-    displayDialog({
-      title: "Add Group Members",
-      nolabel: "Cancel",
-      yeslabel: "Next",
-      action: null,
-    });
+    dispatch(
+      displayDialog({
+        title: "Add Group Members",
+        nolabel: "Cancel",
+        yeslabel: "Next",
+        action: null,
+      })
+    );
   };
 
   const displayFullSizeImage = (e) => {
-    setShowDialogActions(false);
+    dispatch(setShowDialogActions(false));
     setDialogBody(<FullSizeImage event={e} />);
-    displayDialog({
-      isFullScreen: true,
-      title: e.target?.alt || "Display Pic",
-    });
+    dispatch(
+      displayDialog({
+        isFullScreen: true,
+        title: e.target?.alt || "Display Pic",
+      })
+    );
   };
 
   const fetchChats = async () => {
@@ -104,13 +111,15 @@ const ChatListView = ({ loadingMsgs, setFetchMsgs }) => {
       setFilteredChats(mappedChats);
       if (loading) setLoading(false);
     } catch (error) {
-      displayToast({
-        title: "Couldn't Fetch Chats",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 5000,
-        position: "bottom-center",
-      });
+      dispatch(
+        displayToast({
+          title: "Couldn't Fetch Chats",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 5000,
+          position: "bottom-center",
+        })
+      );
       if (loading) setLoading(false);
     }
   };
@@ -172,7 +181,7 @@ const ChatListView = ({ loadingMsgs, setFetchMsgs }) => {
       {/* Chat list */}
       <section className="chatList m-1 p-1 overflow-auto position-relative">
         {loading ? (
-          <LoadingList dpRadius={"49px"} count={8} />
+          <LoadingList listOf="Chat" dpRadius={"49px"} count={8} />
         ) : filteredChats?.length > 0 ? (
           <div
             // 'Event delegation' (add only one event listener for
@@ -188,9 +197,9 @@ const ChatListView = ({ loadingMsgs, setFetchMsgs }) => {
                 (chat) => chat._id === chatId
               );
               if (clickedChat._id === selectedChat?._id) return;
-              setSelectedChat(clickedChat);
+              dispatch(setSelectedChat(clickedChat));
               setFetchMsgs(true); // To fetch selected chat msgs
-              if (clickedChat?.isGroupChat) setGroupInfo(clickedChat);
+              if (clickedChat?.isGroupChat) dispatch(setGroupInfo(clickedChat));
             }}
           >
             {filteredChats

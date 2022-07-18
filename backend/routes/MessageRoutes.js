@@ -1,13 +1,15 @@
-const router = require("express").Router();
-const authorizeUser = require("../middleware/AuthMiddleware");
-const { upload, uploadToS3 } = require("../utils/multer");
-const {
+import { Router } from "express";
+import authorizeUser from "../middleware/AuthMiddleware.js";
+import { upload, uploadToS3 } from "../utils/multer.js";
+import {
   fetchMessages,
   deleteMessages,
   updateMessage,
   sendMessage,
   accessAttachment,
-} = require("../controllers/MessageController");
+} from "../controllers/MessageController.js";
+
+const router = Router();
 
 /*   Base route: /api/message   */
 router.post("/", authorizeUser, upload.single("attachment"), sendMessage);
@@ -34,4 +36,4 @@ router.put(
 router.put("/delete", authorizeUser, deleteMessages);
 router.get("/files/:filename", authorizeUser, accessAttachment);
 
-module.exports = router;
+export default router;

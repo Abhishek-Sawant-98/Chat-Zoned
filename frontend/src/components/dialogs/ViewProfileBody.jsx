@@ -1,6 +1,7 @@
 import { getOneOnOneChatReceiver, truncateString } from "../../utils/appUtils";
-import { AppState } from "../../context/ContextProvider";
 import getCustomTooltip from "../utils/CustomTooltip";
+import { useSelector } from "react-redux";
+import { selectAppState } from "../../redux/slices/AppSlice";
 const arrowStyles = {
   color: "#111",
 };
@@ -15,7 +16,7 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const ViewProfileBody = ({ memberProfilePic, memberName, memberEmail }) => {
-  const { loggedInUser, selectedChat } = AppState();
+  const { loggedInUser, selectedChat } = useSelector(selectAppState);
   let name, email, profilePic;
 
   if (memberProfilePic && memberName && memberEmail) {

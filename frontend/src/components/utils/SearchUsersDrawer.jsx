@@ -1,32 +1,33 @@
 import { ChevronLeft } from "@mui/icons-material";
 import { Drawer, IconButton } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import { AppState } from "../../context/ContextProvider";
 import axios from "../../utils/axios";
 import { debounce, truncateString } from "../../utils/appUtils";
 import UserListItem from "./UserListItem";
 import LoadingList from "./LoadingList";
 import SearchInput from "./SearchInput";
+import { useDispatch, useSelector } from "react-redux";
+import { selectAppState, setSelectedChat } from "../../redux/slices/AppSlice";
+import {
+  selectFormfieldState,
+  setLoading,
+} from "../../redux/slices/FormfieldSlice";
+import { displayToast } from "../../redux/slices/ToastSlice";
 
 const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const {
-    formClassNames,
-    loggedInUser,
-    displayToast,
-    setSelectedChat,
-    refresh,
-    setRefresh,
-  } = AppState();
-  const searchUserInput = useRef(null);
 
-  const { loading, setLoading } = formClassNames;
+  const { loggedInUser } = useSelector(selectAppState);
+  const { loading } = useSelector(selectFormfieldState);
+  const dispatch = useDispatch();
+
+  const searchUserInput = useRef(null);
 
   useEffect(() => {
     if (isDrawerOpen) {
       setSearchResults([]);
-      setLoading(false);
+      dispatch(setLoading(false));
       setSearchQuery("");
     }
   }, [isDrawerOpen]);
@@ -41,7 +42,7 @@ const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
     setSearchQuery(query);
     if (!query) return setSearchResults([]);
 
-    setLoading(true);
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -53,24 +54,26 @@ const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
     try {
       const { data } = await axios.get(`/api/user?search=${query}`, config);
 
-      setLoading(false);
+      dispatch(setLoading(false));
       setSearchResults(data);
     } catch (error) {
-      displayToast({
-        title: "Couldn't Fetch Users",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 5000,
-        position: "bottom-left",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Couldn't Fetch Users",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 5000,
+          position: "bottom-left",
+        })
+      );
+      dispatch(setLoading(false));
     }
   }, 800);
 
   // Create/Retreive chat when a user item is clicked
   const createOrRetrieveChat = async (userId) => {
     handleClose();
-    setLoading(true);
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -82,18 +85,20 @@ const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
     try {
       const { data } = await axios.post(`/api/chat`, { userId }, config);
 
-      setLoading(false);
-      setSelectedChat(data);
+      dispatch(setLoading(false));
+      dispatch(setSelectedChat(data));
       setFetchMsgs(true);
     } catch (error) {
-      displayToast({
-        title: "Couldn't Create/Retrieve Chat",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 4000,
-        position: "bottom-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Couldn't Create/Retrieve Chat",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
     }
   };
 
@@ -163,7 +168,7 @@ const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
             }}
           >
             {loading ? (
-              <LoadingList dpRadius={"42px"} count={8} />
+              <LoadingList listOf="User" dpRadius={"42px"} count={8} />
             ) : searchResults.length > 0 ? (
               searchResults.map((user) => (
                 <UserListItem

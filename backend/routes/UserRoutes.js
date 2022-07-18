@@ -1,7 +1,7 @@
-const router = require("express").Router();
-const authorizeUser = require("../middleware/AuthMiddleware");
-const { upload } = require("../utils/multer");
-const {
+import { Router } from "express";
+import authorizeUser from "../middleware/AuthMiddleware.js";
+import { upload } from "../utils/multer.js";
+import {
   registerUser,
   authenticateUser,
   fetchUsers,
@@ -11,8 +11,9 @@ const {
   deleteUserProfilePic,
   addNotification,
   deleteNotification,
-  // fetchFile,
-} = require("../controllers/UserController");
+} from "../controllers/UserController.js";
+
+const router = Router();
 
 /*   Base route: /api/user   */
 router.post("/register", upload.single("profilePic"), registerUser);
@@ -32,4 +33,4 @@ router.put("/delete/notification", authorizeUser, deleteNotification);
 
 // router.get("/:file", fetchFile);
 
-module.exports = router;
+export default router;

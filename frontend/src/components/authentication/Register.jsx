@@ -2,12 +2,30 @@ import { AddAPhoto } from "@mui/icons-material";
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../../utils/axios";
-import { AppState } from "../../context/ContextProvider";
 import { CircularProgress } from "@mui/material";
 import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
 import { DEFAULT_USER_DP } from "../../utils/appUtils";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectFormfieldState,
+  setLoading,
+} from "../../redux/slices/FormfieldSlice";
+import { displayToast } from "../../redux/slices/ToastSlice";
+import { setLoggedInUser } from "../../redux/slices/AppSlice";
 
 const Register = () => {
+  const {
+    loading,
+    disableIfLoading,
+    formLabelClassName,
+    formFieldClassName,
+    inputFieldClassName,
+    btnSubmitClassName,
+    btnResetClassName,
+  } = useSelector(selectFormfieldState);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const imgInput = useRef();
 
@@ -27,63 +45,56 @@ const Register = () => {
     setUserData({ ...userData, [prop]: e.target.value });
   };
 
-  const navigate = useNavigate();
-  const { displayToast, formClassNames, setLoggedInUser } = AppState();
-
-  const {
-    loading,
-    setLoading,
-    disableIfLoading,
-    formLabelClassName,
-    formFieldClassName,
-    inputFieldClassName,
-    btnSubmitClassName,
-    btnResetClassName,
-  } = formClassNames;
-
   const handleRegister = async (e) => {
     e.preventDefault();
-
-    // return setLoading(true);
+    // return dispatch(setLoading(true));
 
     if (!name || !email || !password || !confirmPassword) {
-      return displayToast({
-        message: "Please Enter All the Fields",
-        type: "warning",
-        duration: 3000,
-        position: "bottom-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Please Enter All the Fields",
+          type: "warning",
+          duration: 3000,
+          position: "bottom-center",
+        })
+      );
     }
 
     if (name.length > 25) {
-      return displayToast({
-        message: "Name Must be Less than 25 characters",
-        type: "warning",
-        duration: 3000,
-        position: "bottom-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Name Must be Less than 25 characters",
+          type: "warning",
+          duration: 3000,
+          position: "bottom-center",
+        })
+      );
     }
 
     // Validate email
     if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-      return displayToast({
-        message: "Please Enter a Valid Email ID",
-        type: "warning",
-        duration: 3000,
-        position: "bottom-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Please Enter a Valid Email ID",
+          type: "warning",
+          duration: 3000,
+          position: "bottom-center",
+        })
+      );
     }
 
     if (password !== confirmPassword) {
-      return displayToast({
-        message: "Passwords Do Not Match",
-        type: "warning",
-        duration: 3000,
-        position: "bottom-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Passwords Do Not Match",
+          type: "warning",
+          duration: 3000,
+          position: "bottom-center",
+        })
+      );
     }
 
-    setLoading(true);
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -101,27 +112,31 @@ const Register = () => {
       const { data } = await axios.post("/api/user/register", formData, config);
 
       // Success toast : register successful
-      displayToast({
-        title: "Registration Successful",
-        message: "Your login session will expire in 15 days",
-        type: "success",
-        duration: 5000,
-        position: "bottom-center",
-      });
+      dispatch(
+        displayToast({
+          title: "Registration Successful",
+          message: "Your login session will expire in 15 days",
+          type: "success",
+          duration: 5000,
+          position: "bottom-center",
+        })
+      );
 
       localStorage.setItem("loggedInUser", JSON.stringify(data));
-      setLoggedInUser(data);
-      setLoading(false);
+      dispatch(setLoggedInUser(data));
+      dispatch(setLoading(false));
       navigate("/chats");
     } catch (error) {
-      displayToast({
-        title: "Registration Failed",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 4000,
-        position: "bottom-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Registration Failed",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
     }
   };
 
@@ -144,12 +159,14 @@ const Register = () => {
 
     if (image.size >= 2097152) {
       imgInput.current.value = "";
-      return displayToast({
-        message: "Please Select an Image Smaller than 2 MB",
-        type: "warning",
-        duration: 3000,
-        position: "bottom-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Please Select an Image Smaller than 2 MB",
+          type: "warning",
+          duration: 3000,
+          position: "bottom-center",
+        })
+      );
     }
     setUserData({
       ...userData,

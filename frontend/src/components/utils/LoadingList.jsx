@@ -1,11 +1,11 @@
 import { Skeleton } from "@mui/material";
 
-const LoadingList = ({ dpRadius, count }) => {
+const LoadingList = ({ listOf, dpRadius, count }) => {
   const skeletonStyle = { backgroundColor: "#999" };
   return (
     <>
       {[...Array(count)].map((e, i) => (
-        <div key={i} className="loadingListItem row">
+        <div key={`loadingListOf${listOf + i}`} className="loadingListItem row">
           <Skeleton
             variant="circular"
             className="loadingDp rounded-circle"

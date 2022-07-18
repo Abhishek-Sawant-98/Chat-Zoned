@@ -1,11 +1,28 @@
 import { useState } from "react";
 import axios from "../../utils/axios";
 import { useNavigate } from "react-router-dom";
-import { AppState } from "../../context/ContextProvider";
 import { CircularProgress } from "@mui/material";
 import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
+import { useDispatch, useSelector } from "react-redux";
+import { setLoggedInUser } from "../../redux/slices/AppSlice";
+import {
+  selectFormfieldState,
+  setLoading,
+} from "../../redux/slices/FormfieldSlice";
+import { displayToast } from "../../redux/slices/ToastSlice";
 
 const Login = () => {
+  const {
+    loading,
+    disableIfLoading,
+    formLabelClassName,
+    formFieldClassName,
+    inputFieldClassName,
+    btnSubmitClassName,
+    btnResetClassName,
+  } = useSelector(selectFormfieldState);
+
+  const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
@@ -23,34 +40,22 @@ const Login = () => {
     });
   };
 
-  const { displayToast, formClassNames, setLoggedInUser } = AppState();
-
-  const {
-    loading,
-    setLoading,
-    disableIfLoading,
-    formLabelClassName,
-    formFieldClassName,
-    inputFieldClassName,
-    btnSubmitClassName,
-    btnResetClassName,
-  } = formClassNames;
-
   const handleLogin = async (e) => {
     e.preventDefault();
-
-    // return setLoading(true);
+    // return dispatch(setLoading(true));
 
     if (!email || !password) {
-      return displayToast({
-        message: "Please Enter All the Fields",
-        type: "warning",
-        duration: 5000,
-        position: "bottom-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Please Enter All the Fields",
+          type: "warning",
+          duration: 5000,
+          position: "bottom-center",
+        })
+      );
     }
 
-    setLoading(true);
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -66,27 +71,31 @@ const Login = () => {
       );
 
       // Success toast : login successful
-      displayToast({
-        title: "Login Successful",
-        message: "Your login session will expire in 15 days",
-        type: "success",
-        duration: 5000,
-        position: "bottom-center",
-      });
+      dispatch(
+        displayToast({
+          title: "Login Successful",
+          message: "Your login session will expire in 15 days",
+          type: "success",
+          duration: 5000,
+          position: "bottom-center",
+        })
+      );
 
       localStorage.setItem("loggedInUser", JSON.stringify(data));
-      setLoggedInUser(data);
-      setLoading(false);
+      dispatch(setLoggedInUser(data));
+      dispatch(setLoading(false));
       navigate("/chats");
     } catch (error) {
-      displayToast({
-        title: "Login Failed",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 5000,
-        position: "bottom-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Login Failed",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 5000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
     }
   };
 

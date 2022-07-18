@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { setChildDialogMethods } from "../../redux/slices/ChildDialogSlice";
 import CustomDialog from "./CustomDialog";
 
 const ChildDialog = ({
-  getChildDialogMethods,
   showChildDialogActions = true,
   showChildDialogClose = false,
 }) => {
@@ -16,7 +17,7 @@ const ChildDialog = ({
     action: () => {},
   });
   const [childDialogBody, setChildDialogBody] = useState(<></>);
-
+  const dispatch = useDispatch();
   const displayChildDialog = (options) => {
     setChildDialogData({ ...options, isOpen: true });
   };
@@ -25,17 +26,19 @@ const ChildDialog = ({
   };
 
   useEffect(() => {
-    getChildDialogMethods({
-      setChildDialogBody,
-      displayChildDialog,
-      closeChildDialog,
-    });
+    dispatch(
+      setChildDialogMethods({
+        setChildDialogBody,
+        displayChildDialog,
+        closeChildDialog,
+      })
+    );
   }, [childDialogData]);
 
   return (
     <CustomDialog
       dialogData={childDialogData}
-      handleDialogClose={closeChildDialog}
+      closeDialog={closeChildDialog}
       showDialogActions={showChildDialogActions}
       showDialogClose={showChildDialogClose}
     >

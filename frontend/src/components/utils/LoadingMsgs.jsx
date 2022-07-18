@@ -8,7 +8,7 @@ const LoadingMsgs = ({ count }) => {
     <>
       {[...Array(count)].map((e, i) => (
         <div
-          key={i}
+          key={`loadingMsg${i}`}
           className={`loadingMsg d-flex flex-column align-items-${
             i % 2 ? "start" : "end"
           } mb-2 mx-4`}

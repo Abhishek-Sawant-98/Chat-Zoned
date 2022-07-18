@@ -1,6 +1,8 @@
-const asyncHandler = require("express-async-handler");
-const jwt = require("jsonwebtoken");
-const UserModel = require("../models/UserModel");
+import asyncHandler from "express-async-handler";
+import jwt from "jsonwebtoken";
+import UserModel from "../models/UserModel.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 const authorizeUser = asyncHandler(async (req, res, next) => {
   const bearerToken = req.headers?.authorization;
@@ -29,4 +31,4 @@ const authorizeUser = asyncHandler(async (req, res, next) => {
   }
 });
 
-module.exports = authorizeUser;
+export default authorizeUser;

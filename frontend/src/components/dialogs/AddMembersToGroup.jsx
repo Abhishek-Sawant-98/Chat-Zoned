@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { AppState } from "../../context/ContextProvider";
 import {} from "@mui/icons-material";
 import { Avatar, Chip } from "@mui/material";
 import axios from "../../utils/axios";
@@ -9,17 +8,17 @@ import SearchInput from "../utils/SearchInput";
 import NewGroupBody from "./NewGroupBody";
 import ChildDialog from "../utils/ChildDialog";
 import LoadingList from "../utils/LoadingList";
+import { useDispatch, useSelector } from "react-redux";
+import { selectAppState, setGroupInfo } from "../../redux/slices/AppSlice";
+import { selectChildDialogState } from "../../redux/slices/ChildDialogSlice";
+import { displayToast } from "../../redux/slices/ToastSlice";
+import { setDialogAction } from "../../redux/slices/CustomDialogSlice";
 
 const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
-  const {
-    loggedInUser,
-    displayToast,
-    setDialogAction,
-    childDialogMethods,
-    getChildDialogMethods,
-    groupInfo,
-    setGroupInfo,
-  } = AppState();
+  const { loggedInUser, groupInfo } = useSelector(selectAppState);
+  const { childDialogMethods } = useSelector(selectChildDialogState);
+  const dispatch = useDispatch();
+
   const [groupData, setGroupData] = useState(groupInfo);
   const [fetching, setFetching] = useState(false);
   const groupMembers = groupData?.users;
@@ -41,16 +40,18 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
   // For 'create group chat'
   const openNewGroupDialog = () => {
     if (addedMembers?.length < 2) {
-      return displayToast({
-        message: "Please Add Atleast 2 Members",
-        type: "warning",
-        duration: 3000,
-        position: "top-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Please Add Atleast 2 Members",
+          type: "warning",
+          duration: 3000,
+          position: "top-center",
+        })
+      );
     }
     setShowDialogActions(false);
     setShowDialogClose(false);
-    setGroupInfo(groupData);
+    dispatch(setGroupInfo(groupData));
     setChildDialogBody(<NewGroupBody closeChildDialog={closeChildDialog} />);
     displayChildDialog({
       title: "Create New Group",
@@ -64,7 +65,7 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
 
   useEffect(() => {
     // For create group: [Next >>] button
-    if (forCreateGroup) setDialogAction(openNewGroupDialog);
+    if (forCreateGroup) dispatch(setDialogAction(openNewGroupDialog));
   }, [groupData]);
 
   useEffect(() => {
@@ -100,13 +101,15 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
       setFetching(false);
       setSearchResults(membersNotAdded);
     } catch (error) {
-      displayToast({
-        title: "Couldn't Fetch Users",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 5000,
-        position: "bottom-left",
-      });
+      dispatch(
+        displayToast({
+          title: "Couldn't Fetch Users",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 5000,
+          position: "bottom-left",
+        })
+      );
       setFetching(false);
     }
   }, 800);
@@ -188,7 +191,7 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
           }}
         >
           {fetching ? (
-            <LoadingList dpRadius={"43px"} count={4} />
+            <LoadingList listOf="Member" dpRadius={"43px"} count={4} />
           ) : searchResults.length > 0 ? (
             searchResults.map((user) => (
               <UserListItem
@@ -214,7 +217,6 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
       </section>
       {/* Child dialog */}
       <ChildDialog
-        getChildDialogMethods={getChildDialogMethods}
         showChildDialogActions={showDialogActions}
         showChildDialogClose={showDialogClose}
       />

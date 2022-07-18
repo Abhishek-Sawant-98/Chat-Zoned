@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { AppState } from "../../context/ContextProvider";
 import {
   Delete,
   Edit,
@@ -17,6 +16,20 @@ import AddMembersToGroup from "./AddMembersToGroup";
 import ViewGroupMembers from "./ViewGroupMembers";
 import getCustomTooltip from "../utils/CustomTooltip";
 import FullSizeImage from "../utils/FullSizeImage";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectAppState,
+  setGroupInfo,
+  setSelectedChat,
+  toggleRefresh,
+} from "../../redux/slices/AppSlice";
+import {
+  selectFormfieldState,
+  setLoading,
+} from "../../redux/slices/FormfieldSlice";
+import { selectChildDialogState } from "../../redux/slices/ChildDialogSlice";
+import { displayToast } from "../../redux/slices/ToastSlice";
+import { hideDialog } from "../../redux/slices/CustomDialogSlice";
 
 const arrowStyles = {
   color: "#111",
@@ -32,21 +45,10 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const GroupInfoBody = ({ messages }) => {
-  const {
-    formClassNames,
-    loggedInUser,
-    displayToast,
-    refresh,
-    setRefresh,
-    setSelectedChat,
-    childDialogMethods,
-    getChildDialogMethods,
-    groupInfo,
-    setGroupInfo,
-    closeDialog,
-  } = AppState();
-
-  const { loading, setLoading, disableIfLoading } = formClassNames;
+  const { loggedInUser, refresh, groupInfo } = useSelector(selectAppState);
+  const { childDialogMethods } = useSelector(selectChildDialogState);
+  const { loading, disableIfLoading } = useSelector(selectFormfieldState);
+  const dispatch = useDispatch();
   const { setChildDialogBody, displayChildDialog } = childDialogMethods;
 
   const groupDP = groupInfo?.chatDisplayPic;
@@ -65,9 +67,9 @@ const GroupInfoBody = ({ messages }) => {
   const btnClassName = "w-100 btn text-light fs-5";
 
   const updateView = (data) => {
-    setGroupInfo(data);
-    setRefresh(!refresh);
-    setSelectedChat(data); // To update messages view
+    dispatch(setGroupInfo(data));
+    dispatch(toggleRefresh(!refresh));
+    dispatch(setSelectedChat(data)); // To update messages view
   };
 
   // Click a button/icon upon 'Enter' or 'Space' keydown
@@ -85,14 +87,16 @@ const GroupInfoBody = ({ messages }) => {
 
   const updateGroupName = async () => {
     if (!updatedName) {
-      return displayToast({
-        message: "Please Enter Valid Group Name",
-        type: "warning",
-        duration: 3000,
-        position: "top-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Please Enter Valid Group Name",
+          type: "warning",
+          duration: 3000,
+          position: "top-center",
+        })
+      );
     }
-    setLoading(true);
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -108,25 +112,29 @@ const GroupInfoBody = ({ messages }) => {
         config
       );
 
-      displayToast({
-        message: "Group Name Updated Successfully",
-        type: "success",
-        duration: 3000,
-        position: "bottom-center",
-      });
+      dispatch(
+        displayToast({
+          message: "Group Name Updated Successfully",
+          type: "success",
+          duration: 3000,
+          position: "bottom-center",
+        })
+      );
 
-      setLoading(false);
+      dispatch(setLoading(false));
       updateView(data);
       return "profileUpdated";
     } catch (error) {
-      displayToast({
-        title: "Couldn't Update Group Name",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 4000,
-        position: "top-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Couldn't Update Group Name",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "top-center",
+        })
+      );
+      dispatch(setLoading(false));
     }
   };
 
@@ -137,14 +145,16 @@ const GroupInfoBody = ({ messages }) => {
 
     if (image.size >= 2097152) {
       imgInput.current.value = "";
-      return displayToast({
-        message: "Please Select an Image Smaller than 2 MB",
-        type: "warning",
-        duration: 4000,
-        position: "top-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Please Select an Image Smaller than 2 MB",
+          type: "warning",
+          duration: 4000,
+          position: "top-center",
+        })
+      );
     }
-    setLoading(true);
+    dispatch(setLoading(true));
     setUploading(true);
 
     const config = {
@@ -166,30 +176,34 @@ const GroupInfoBody = ({ messages }) => {
         config
       );
 
-      displayToast({
-        message: "Group DP Updated Successfully",
-        type: "success",
-        duration: 3000,
-        position: "bottom-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          message: "Group DP Updated Successfully",
+          type: "success",
+          duration: 3000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
       setUploading(false);
       updateView(data);
     } catch (error) {
-      displayToast({
-        title: "Couldn't Update Group DP",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 4000,
-        position: "top-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Couldn't Update Group DP",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "top-center",
+        })
+      );
+      dispatch(setLoading(false));
       setUploading(false);
     }
   };
 
   const deleteGroupDp = async () => {
-    setLoading(true);
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -209,24 +223,28 @@ const GroupInfoBody = ({ messages }) => {
         config
       );
 
-      displayToast({
-        message: "Group DP Deleted Successfully",
-        type: "success",
-        duration: 3000,
-        position: "bottom-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          message: "Group DP Deleted Successfully",
+          type: "success",
+          duration: 3000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
       updateView(data);
       return "profileUpdated";
     } catch (error) {
-      displayToast({
-        title: "Couldn't Delete Group DP",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 4000,
-        position: "top-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Couldn't Delete Group DP",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "top-center",
+        })
+      );
+      dispatch(setLoading(false));
     }
   };
 
@@ -235,7 +253,7 @@ const GroupInfoBody = ({ messages }) => {
       return deleteGroup();
     }
 
-    setLoading(true);
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -255,30 +273,34 @@ const GroupInfoBody = ({ messages }) => {
         config
       );
 
-      displayToast({
-        message: `Exited From '${data?.chatName}' Group`,
-        type: "info",
-        duration: 4000,
-        position: "bottom-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          message: `Exited From '${data?.chatName}' Group`,
+          type: "info",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
       updateView(null);
-      closeDialog();
+      dispatch(hideDialog());
     } catch (error) {
-      displayToast({
-        title: "Couldn't Exit Group",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 4000,
-        position: "bottom-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Couldn't Exit Group",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
       return "membersUpdated";
     }
   };
 
   const deleteGroup = async () => {
-    setLoading(true);
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -311,24 +333,28 @@ const GroupInfoBody = ({ messages }) => {
       // Parallel execution of independent promises
       await Promise.all([deleteGroupPromise, deleteMessagesPromise]);
 
-      displayToast({
-        message: "Group Deleted Successfully",
-        type: "success",
-        duration: 3000,
-        position: "bottom-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          message: "Group Deleted Successfully",
+          type: "success",
+          duration: 3000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
       updateView(null);
-      closeDialog();
+      dispatch(hideDialog());
     } catch (error) {
-      displayToast({
-        title: "Couldn't Delete Group",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 4000,
-        position: "top-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Couldn't Delete Group",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "top-center",
+        })
+      );
+      dispatch(setLoading(false));
     }
   };
 
@@ -415,22 +441,26 @@ const GroupInfoBody = ({ messages }) => {
 
   const addMembersToGroup = async () => {
     if (!isUserGroupAdmin) {
-      return displayToast({
-        message: "Only Admin Can Add Members to Group",
-        type: "warning",
-        duration: 3000,
-        position: "top-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Only Admin Can Add Members to Group",
+          type: "warning",
+          duration: 3000,
+          position: "top-center",
+        })
+      );
     }
     if (!addedMembers?.length) {
-      return displayToast({
-        message: "Please Select Atleast 1 Member to Add",
-        type: "warning",
-        duration: 3000,
-        position: "top-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Please Select Atleast 1 Member to Add",
+          type: "warning",
+          duration: 3000,
+          position: "top-center",
+        })
+      );
     }
-    setLoading(true);
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -449,25 +479,29 @@ const GroupInfoBody = ({ messages }) => {
         config
       );
 
-      displayToast({
-        message: "Successfully Added Member/s to Group",
-        type: "success",
-        duration: 3000,
-        position: "bottom-center",
-      });
+      dispatch(
+        displayToast({
+          message: "Successfully Added Member/s to Group",
+          type: "success",
+          duration: 3000,
+          position: "bottom-center",
+        })
+      );
 
-      setLoading(false);
+      dispatch(setLoading(false));
       updateView(data);
       return "profileUpdated";
     } catch (error) {
-      displayToast({
-        title: "Couldn't Add Members to Group",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 4000,
-        position: "top-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Couldn't Add Members to Group",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "top-center",
+        })
+      );
+      dispatch(setLoading(false));
     }
   };
 
@@ -647,14 +681,16 @@ const GroupInfoBody = ({ messages }) => {
               admins?.length === 1 &&
               groupMembers?.length !== 1
             ) {
-              return displayToast({
-                message: `Every group must have atleast 1 admin. Since 
+              return dispatch(
+                displayToast({
+                  message: `Every group must have atleast 1 admin. Since 
                 you're the only group admin, you won't be allowed
                 to exit until you make someone else as the admin.`,
-                type: "warning",
-                duration: 10000,
-                position: "top-center",
-              });
+                  type: "warning",
+                  duration: 10000,
+                  position: "top-center",
+                })
+              );
             }
             openExitGroupConfirmDialog();
           }}
@@ -679,7 +715,6 @@ const GroupInfoBody = ({ messages }) => {
 
       {/* Child dialog */}
       <ChildDialog
-        getChildDialogMethods={getChildDialogMethods}
         showChildDialogActions={showDialogActions}
         showChildDialogClose={showDialogClose}
       />

@@ -1,7 +1,7 @@
-const router = require("express").Router();
-const authorizeUser = require("../middleware/AuthMiddleware");
-const { upload } = require("../utils/multer");
-const {
+import { Router } from "express";
+import authorizeUser from "../middleware/AuthMiddleware.js";
+import { upload } from "../utils/multer.js";
+import {
   createOrRetrieveChat,
   fetchChats,
   createGroupChat,
@@ -13,7 +13,9 @@ const {
   makeGroupAdmin,
   dismissAsAdmin,
   deleteGroupDP,
-} = require("../controllers/ChatController");
+} from "../controllers/ChatController.js";
+
+const router = Router();
 
 /*   Base route: /api/chat   */
 router
@@ -41,4 +43,4 @@ router.put("/group/delete", authorizeUser, deleteGroupChat);
 router.post("/group/make-admin", authorizeUser, makeGroupAdmin);
 router.put("/group/dismiss-admin", authorizeUser, dismissAsAdmin);
 
-module.exports = router;
+export default router;

@@ -1,8 +1,16 @@
 import { Alert, AlertTitle, Snackbar } from "@mui/material";
-import { AppState } from "../../context/ContextProvider";
+import { useDispatch, useSelector } from "react-redux";
+import { hideToast, selectToastState } from "../../redux/slices/ToastSlice";
 
 const AppToast = () => {
-  const { toastData, handleToastClose } = AppState();
+  const { toastData } = useSelector(selectToastState);
+  const dispatch = useDispatch();
+
+  const handleToastClose = (event, reason) => {
+    if (reason === "clickaway") return;
+    dispatch(hideToast());
+  };
+
   const { isOpen, title, message, type, duration, position } = toastData;
   const positions = position.split("-");
   return (

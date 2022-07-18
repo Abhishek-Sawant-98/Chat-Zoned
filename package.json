@@ -7,7 +7,7 @@
   },
   "description": "A MERN stack based chat application",
   "main": "server.js",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js"

@@ -1,6 +1,6 @@
 import { KeyboardArrowDown } from "@mui/icons-material";
-import { Badge, IconButton } from "@mui/material";
-import { AppState } from "../../context/ContextProvider";
+import { useSelector } from "react-redux";
+import { selectAppState } from "../../redux/slices/AppSlice";
 import { truncateString } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 
@@ -18,7 +18,7 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const GroupMemberItem = ({ user, truncateValues }) => {
-  const { loggedInUser } = AppState();
+  const { loggedInUser } = useSelector(selectAppState);
   const { _id, name, email, profilePic } = user;
   const [max, index] = truncateValues;
   const isLoggedInUser = _id === loggedInUser?._id;

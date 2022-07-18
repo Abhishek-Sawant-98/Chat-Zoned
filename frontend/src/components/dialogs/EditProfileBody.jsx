@@ -1,13 +1,20 @@
 import { Edit } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
 import axios from "../../utils/axios";
-import { AppState } from "../../context/ContextProvider";
 import EditNameBody from "./EditNameBody";
 import { CircularProgress, IconButton } from "@mui/material";
 import EditPicMenu from "../menus/EditPicMenu";
 import getCustomTooltip from "../utils/CustomTooltip";
 import { truncateString } from "../../utils/appUtils";
 import ChildDialog from "../utils/ChildDialog";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectFormfieldState,
+  setLoading,
+} from "../../redux/slices/FormfieldSlice";
+import { selectAppState, setLoggedInUser } from "../../redux/slices/AppSlice";
+import { selectChildDialogState } from "../../redux/slices/ChildDialogSlice";
+import { displayToast } from "../../redux/slices/ToastSlice";
 
 const arrowStyles = {
   color: "#111",
@@ -23,16 +30,10 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const EditProfileBody = () => {
-  const {
-    formClassNames,
-    loggedInUser,
-    setLoggedInUser,
-    displayToast,
-    childDialogMethods,
-    getChildDialogMethods,
-  } = AppState();
-
-  const { loading, setLoading, disableIfLoading } = formClassNames;
+  const { loggedInUser } = useSelector(selectAppState);
+  const { loading, disableIfLoading } = useSelector(selectFormfieldState);
+  const { childDialogMethods } = useSelector(selectChildDialogState);
+  const dispatch = useDispatch();
   const { setChildDialogBody, displayChildDialog } = childDialogMethods;
 
   const [profileData, setProfileData] = useState({
@@ -61,7 +62,7 @@ const EditProfileBody = () => {
   const persistUpdatedUser = (updatedUser) => {
     // Session storage persists updated user even after page refresh
     localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
-    setLoggedInUser(updatedUser);
+    dispatch(setLoggedInUser(updatedUser));
   };
 
   // Click a button/icon upon 'Enter' or 'Space' keydown
@@ -78,14 +79,16 @@ const EditProfileBody = () => {
 
     if (image.size >= 2097152) {
       imgInput.current.value = "";
-      return displayToast({
-        message: "Please Select an Image Smaller than 2 MB",
-        type: "warning",
-        duration: 4000,
-        position: "top-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Please Select an Image Smaller than 2 MB",
+          type: "warning",
+          duration: 4000,
+          position: "top-center",
+        })
+      );
     }
-    setLoading(true);
+    dispatch(setLoading(true));
     setUploading(true);
 
     const config = {
@@ -107,13 +110,15 @@ const EditProfileBody = () => {
         config
       );
 
-      displayToast({
-        message: "ProfilePic Updated Successfully.",
-        type: "success",
-        duration: 3000,
-        position: "bottom-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          message: "ProfilePic Updated Successfully.",
+          type: "success",
+          duration: 3000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
       setUploading(false);
       persistUpdatedUser({
         ...data,
@@ -121,20 +126,22 @@ const EditProfileBody = () => {
         expiryTime: loggedInUser.expiryTime,
       });
     } catch (error) {
-      displayToast({
-        title: "ProfilePic Update Failed",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 5000,
-        position: "top-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "ProfilePic Update Failed",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 5000,
+          position: "top-center",
+        })
+      );
+      dispatch(setLoading(false));
       setUploading(false);
     }
   };
 
   const deleteProfilePic = async () => {
-    setLoading(true);
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -153,13 +160,15 @@ const EditProfileBody = () => {
         config
       );
 
-      displayToast({
-        message: "ProfilePic Deleted Successfully.",
-        type: "success",
-        duration: 4000,
-        position: "bottom-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          message: "ProfilePic Deleted Successfully.",
+          type: "success",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      dispatch(setLoading(false));
       persistUpdatedUser({
         ...data,
         token: loggedInUser.token,
@@ -167,14 +176,16 @@ const EditProfileBody = () => {
       });
       return "profileUpdated";
     } catch (error) {
-      displayToast({
-        title: "ProfilePic Deletion Failed",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 5000,
-        position: "top-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "ProfilePic Deletion Failed",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 5000,
+          position: "top-center",
+        })
+      );
+      dispatch(setLoading(false));
     }
   };
 
@@ -187,14 +198,16 @@ const EditProfileBody = () => {
 
   const updateProfileName = async () => {
     if (!editedName) {
-      return displayToast({
-        message: "Please Enter a Valid Name",
-        type: "warning",
-        duration: 3000,
-        position: "top-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Please Enter a Valid Name",
+          type: "warning",
+          duration: 3000,
+          position: "top-center",
+        })
+      );
     }
-    setLoading(true);
+    dispatch(setLoading(true));
 
     const config = {
       headers: {
@@ -210,14 +223,16 @@ const EditProfileBody = () => {
         config
       );
 
-      displayToast({
-        message: "Name Updated Successfully.",
-        type: "success",
-        duration: 3000,
-        position: "bottom-center",
-      });
+      dispatch(
+        displayToast({
+          message: "Name Updated Successfully.",
+          type: "success",
+          duration: 3000,
+          position: "bottom-center",
+        })
+      );
 
-      setLoading(false);
+      dispatch(setLoading(false));
       persistUpdatedUser({
         ...data,
         token: loggedInUser.token,
@@ -225,14 +240,16 @@ const EditProfileBody = () => {
       });
       return "profileUpdated";
     } catch (error) {
-      displayToast({
-        title: "Name Update Failed",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 5000,
-        position: "top-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Name Update Failed",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 5000,
+          position: "top-center",
+        })
+      );
+      dispatch(setLoading(false));
     }
   };
 
@@ -378,7 +395,7 @@ const EditProfileBody = () => {
         </CustomTooltip>
       </section>
       {/* Child confirmation dialog */}
-      <ChildDialog getChildDialogMethods={getChildDialogMethods} />
+      <ChildDialog />
     </>
   );
 };

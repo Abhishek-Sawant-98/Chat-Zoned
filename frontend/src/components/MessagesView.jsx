@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Avatar, IconButton } from "@mui/material";
-import { AppState } from "../context/ContextProvider";
 import { getOneOnOneChatReceiver, truncateString } from "../utils/appUtils";
 import { ArrowBack, AttachFile, Close, Send } from "@mui/icons-material";
 import getCustomTooltip from "./utils/CustomTooltip";
@@ -14,6 +13,22 @@ import FullSizeImage from "./utils/FullSizeImage";
 import Message from "./utils/Message";
 import MsgOptionsMenu from "./menus/MsgOptionsMenu";
 import io from "socket.io-client";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectAppState,
+  setGroupInfo,
+  setSelectedChat,
+  toggleRefresh,
+} from "../redux/slices/AppSlice";
+import {
+  selectFormfieldState,
+  setLoading,
+} from "../redux/slices/FormfieldSlice";
+import { displayToast } from "../redux/slices/ToastSlice";
+import {
+  displayDialog,
+  setShowDialogActions,
+} from "../redux/slices/CustomDialogSlice";
 
 const arrowStyles = {
   color: "#777",
@@ -45,28 +60,16 @@ const MessagesView = ({
   setLoadingMsgs,
   fetchMsgs,
   setFetchMsgs,
+  setDialogBody,
 }) => {
   const letsChatGif = useRef(null);
-
-  const {
-    formClassNames,
-    selectedChat,
-    loggedInUser,
-    displayToast,
-    setSelectedChat,
-    setGroupInfo,
-    refresh,
-    setRefresh,
-    displayDialog,
-    setDialogBody,
-    setShowDialogActions,
-  } = AppState();
-
-  const { disableIfLoading, setLoading } = formClassNames;
+  const { loggedInUser, selectedChat, refresh } = useSelector(selectAppState);
+  const { disableIfLoading } = useSelector(selectFormfieldState);
+  const dispatch = useDispatch();
 
   const closeChat = () => {
     setLoadingMsgs(false);
-    setSelectedChat(null);
+    dispatch(setSelectedChat(null));
     resetMsgInput();
   };
   const [sending, setSending] = useState(false);
@@ -88,20 +91,24 @@ const MessagesView = ({
 
   const viewAudio = (audioSrc, fileName) => {
     if (!audioSrc) return;
-    setShowDialogActions(false);
+    dispatch(setShowDialogActions(false));
     setDialogBody(<FullSizeImage audioSrc={audioSrc} />);
-    displayDialog({
-      title: fileName || "Audio File",
-    });
+    dispatch(
+      displayDialog({
+        title: fileName || "Audio File",
+      })
+    );
   };
 
   const viewVideo = (videoSrc, fileName) => {
     if (!videoSrc) return;
-    setShowDialogActions(false);
+    dispatch(setShowDialogActions(false));
     setDialogBody(<FullSizeImage videoSrc={videoSrc} />);
-    displayDialog({
-      title: fileName || "Video File",
-    });
+    dispatch(
+      displayDialog({
+        title: fileName || "Video File",
+      })
+    );
   };
 
   const fetchMessages = async () => {
@@ -128,13 +135,15 @@ const MessagesView = ({
       if (fetchMsgs) setFetchMsgs(false);
       setSending(false);
     } catch (error) {
-      displayToast({
-        title: "Couldn't Fetch Messages",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 5000,
-        position: "bottom-center",
-      });
+      dispatch(
+        displayToast({
+          title: "Couldn't Fetch Messages",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 5000,
+          position: "bottom-center",
+        })
+      );
       setLoadingMsgs(false);
       if (fetchMsgs) setFetchMsgs(false);
       setSending(false);
@@ -194,21 +203,23 @@ const MessagesView = ({
 
       clientSocket?.emit("new msg sent", data);
       fetchMessages();
-      setRefresh(!refresh);
+      dispatch(toggleRefresh(!refresh));
     } catch (error) {
-      displayToast({
-        title: "Couldn't Send Messages",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 5000,
-        position: "bottom-center",
-      });
+      dispatch(
+        displayToast({
+          title: "Couldn't Send Messages",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 5000,
+          position: "bottom-center",
+        })
+      );
       setSending(false);
     }
   };
 
   const deleteMessage = async () => {
-    setLoading(true);
+    dispatch(setLoading(true));
     setSending(true);
 
     const config = {
@@ -232,25 +243,29 @@ const MessagesView = ({
         senderId: loggedInUser?._id,
         chat: selectedChat,
       });
-      displayToast({
-        message: "Message Deleted Successfully",
-        type: "success",
-        duration: 3000,
-        position: "bottom-center",
-      });
+      dispatch(
+        displayToast({
+          message: "Message Deleted Successfully",
+          type: "success",
+          duration: 3000,
+          position: "bottom-center",
+        })
+      );
       setMessages(messages.filter((msg) => msg?._id !== clickedMsg));
-      setLoading(false);
-      setRefresh(!refresh);
+      dispatch(setLoading(false));
+      dispatch(toggleRefresh(!refresh));
       return "msgActionDone";
     } catch (error) {
-      displayToast({
-        title: "Couldn't Delete Message",
-        message: error.response?.data?.message || error.message,
-        type: "error",
-        duration: 4000,
-        position: "top-center",
-      });
-      setLoading(false);
+      dispatch(
+        displayToast({
+          title: "Couldn't Delete Message",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "top-center",
+        })
+      );
+      dispatch(setLoading(false));
       setSending(false);
     }
   };
@@ -263,12 +278,14 @@ const MessagesView = ({
 
     if (msgFile.size >= 3145728) {
       msgFileInput.current.value = "";
-      return displayToast({
-        message: "Please Select a File Smaller than 3 MB",
-        type: "warning",
-        duration: 4000,
-        position: "top-center",
-      });
+      return dispatch(
+        displayToast({
+          message: "Please Select a File Smaller than 3 MB",
+          type: "warning",
+          duration: 4000,
+          position: "top-center",
+        })
+      );
     }
     setEnableMsgSend(true);
     setNewMsgData({
@@ -309,18 +326,18 @@ const MessagesView = ({
       return console.log("socket not defined : ", clientSocket);
 
     clientSocket.on("new msg received", (newMsg) => {
-      setRefresh(!refresh);
+      dispatch(toggleRefresh(!refresh));
       if (selectedChat) setMessages([newMsg, ...messages]);
     });
 
     clientSocket.on("remove deleted msg", (deletedMsgId) => {
-      setRefresh(!refresh);
+      dispatch(toggleRefresh(!refresh));
       if (selectedChat)
         setMessages(messages.filter((msg) => msg?._id !== deletedMsgId));
     });
 
     clientSocket.on("update updated msg", (updatedMsg) => {
-      setRefresh(!refresh);
+      dispatch(toggleRefresh(!refresh));
       if (selectedChat)
         setMessages(
           messages.map((msg) => {
@@ -342,34 +359,40 @@ const MessagesView = ({
   }, [fetchMsgs]);
 
   const openViewProfileDialog = (props) => {
-    setShowDialogActions(false);
+    dispatch(setShowDialogActions(false));
     setDialogBody(props ? <ViewProfileBody {...props} /> : <ViewProfileBody />);
-    displayDialog({
-      title: "View Profile",
-    });
+    dispatch(
+      displayDialog({
+        title: "View Profile",
+      })
+    );
   };
 
   const openGroupInfoDialog = () => {
     // Open group info dialog
-    setGroupInfo(selectedChat);
-    setShowDialogActions(false);
+    dispatch(setGroupInfo(selectedChat));
+    dispatch(setShowDialogActions(false));
     setDialogBody(<GroupInfoBody messages={messages} />);
-    displayDialog({
-      title: "Group Info",
-    });
+    dispatch(
+      displayDialog({
+        title: "Group Info",
+      })
+    );
   };
 
   // Open delete photo confirm dialog
   const openDeleteMsgConfirmDialog = () => {
-    setShowDialogActions(true);
+    dispatch(setShowDialogActions(true));
     setDialogBody(<>Are you sure you want to delete this message?</>);
-    displayDialog({
-      title: "Delete Message",
-      nolabel: "NO",
-      yeslabel: "YES",
-      loadingYeslabel: "Deleting...",
-      action: deleteMessage,
-    });
+    dispatch(
+      displayDialog({
+        title: "Delete Message",
+        nolabel: "NO",
+        yeslabel: "YES",
+        loadingYeslabel: "Deleting...",
+        action: deleteMessage,
+      })
+    );
   };
 
   const openMsgOptionsMenu = (e) => {
