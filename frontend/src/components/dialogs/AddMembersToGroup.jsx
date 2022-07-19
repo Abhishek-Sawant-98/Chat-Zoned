@@ -191,7 +191,7 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
           }}
         >
           {fetching ? (
-            <LoadingList listOf="Member" dpRadius={"43px"} count={4} />
+            <LoadingList listOf="Member" dpRadius={"43px"} count={6} />
           ) : searchResults.length > 0 ? (
             searchResults.map((user) => (
               <UserListItem

@@ -85,6 +85,12 @@ export const msgDateStringOf = (currDate) => {
       } ${currDate.getFullYear()}`;
 };
 
+export const isImageFile = (filename) =>
+  /(\.png|\.jpg|\.jpeg|\.svg)$/.test(filename);
+
+export const isImageOrGifFile = (filename) =>
+  /(\.png|\.jpg|\.jpeg|\.svg|\.gif)$/.test(filename);
+
 export const DEFAULT_USER_DP =
   "https://res.cloudinary.com/abhi-sawant/image/upload/v1653670527/user_dqzjdz.png";
 

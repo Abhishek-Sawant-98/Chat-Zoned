@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Avatar, IconButton } from "@mui/material";
-import { getOneOnOneChatReceiver, truncateString } from "../utils/appUtils";
+import {
+  getOneOnOneChatReceiver,
+  isImageOrGifFile,
+  truncateString,
+} from "../utils/appUtils";
 import { ArrowBack, AttachFile, Close, Send } from "@mui/icons-material";
 import getCustomTooltip from "./utils/CustomTooltip";
 import animationData from "../animations/letsChatGif.json";
@@ -189,9 +193,7 @@ const MessagesView = ({
 
     try {
       // Upload img/gif to cloudinary, and all other files to aws s3
-      const apiUrl = /(\.png|\.jpg|\.jpeg|\.gif|\.svg)$/.test(
-        msgData.attachment?.name
-      )
+      const apiUrl = isImageOrGifFile(msgData.attachment?.name)
         ? `/api/message`
         : `/api/message/upload-to-s3`;
 

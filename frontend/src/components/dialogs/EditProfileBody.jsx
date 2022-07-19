@@ -5,7 +5,7 @@ import EditNameBody from "./EditNameBody";
 import { CircularProgress, IconButton } from "@mui/material";
 import EditPicMenu from "../menus/EditPicMenu";
 import getCustomTooltip from "../utils/CustomTooltip";
-import { truncateString } from "../../utils/appUtils";
+import { isImageFile, truncateString } from "../../utils/appUtils";
 import ChildDialog from "../utils/ChildDialog";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -76,6 +76,18 @@ const EditProfileBody = () => {
   const handleImgInputChange = async (e) => {
     const image = e.target.files[0];
     if (!image) return;
+
+    if (!isImageFile(image.name)) {
+      return dispatch(
+        displayToast({
+          title: "Invalid Image File",
+          message: "Please Select an Image File (png/jpg/jpeg/svg)",
+          type: "warning",
+          duration: 5000,
+          position: "bottom-center",
+        })
+      );
+    }
 
     if (image.size >= 2097152) {
       imgInput.current.value = "";
@@ -333,7 +345,7 @@ const EditProfileBody = () => {
           />
           <input
             type="file"
-            accept=".png, .jpg, .jpeg .svg"
+            accept=".png, .jpg, .jpeg, .svg"
             onChange={handleImgInputChange}
             name="profilepic"
             id="editProfilePic"
