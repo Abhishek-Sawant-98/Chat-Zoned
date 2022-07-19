@@ -1,6 +1,6 @@
 import { Notifications, Search } from "@mui/icons-material";
 import { Avatar, IconButton } from "@mui/material";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import NotificationsMenu from "./menus/NotificationsMenu";
 import ProfileSettingsMenu from "./menus/ProfileSettingsMenu";
 import SearchUsersDrawer from "./utils/SearchUsersDrawer";
@@ -23,13 +23,8 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-// const SOCKET_ENDPOINT = "http://localhost:5000";
-const SOCKET_ENDPOINT = "https://chat-zoned.herokuapp.com";
-
-const clientSocket = io(SOCKET_ENDPOINT, { transports: ["websocket"] });
-
 const ChatpageHeader = ({ setFetchMsgs, setDialogBody }) => {
-  const { loggedInUser } = useSelector(selectAppState);
+  const { loggedInUser, clientSocket } = useSelector(selectAppState);
   const dispatch = useDispatch();
   const appGif = useRef();
 
@@ -44,6 +39,10 @@ const ChatpageHeader = ({ setFetchMsgs, setDialogBody }) => {
   const openProfileSettingsMenu = (e) => {
     setProfileSettingsMenuAnchor(e.target);
   };
+
+  useEffect(() => {
+    console.log("in chatPageHeader useEffect, clientSocket : ", clientSocket);
+  }, [clientSocket]);
 
   // For opening/closing 'search users' left drawer
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);

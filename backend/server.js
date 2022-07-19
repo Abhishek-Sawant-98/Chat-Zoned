@@ -29,7 +29,7 @@ app.use("/api/user", UserRoutes);
 app.use("/api/chat", ChatRoutes);
 app.use("/api/message", MessageRoutes);
 
-// ------------------ Deployment ----------------------- //
+// ====================  Deployment ========================= //
 if (process.env.NODE_ENV === "production") {
   // Establishes the path to our frontend (most important)
   app.use(express.static(path.join(DIRNAME, "/frontend/build")));
@@ -37,7 +37,7 @@ if (process.env.NODE_ENV === "production") {
     res.sendFile(path.join(DIRNAME, "/frontend/build/index.html"))
   );
 }
-// ------------------ Deployment ----------------------- //
+// ====================  Deployment ========================= //
 
 // Error middlewares
 app.all("*", notFoundHandler);
@@ -69,6 +69,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("new msg sent", (newMsg) => {
+    console.log("new msg sent");
     const { chat } = newMsg;
     if (!chat) return;
 
@@ -81,6 +82,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("msg deleted", (deletedMsgData) => {
+    console.log("msg deleted");
     const { deletedMsgId, senderId, chat } = deletedMsgData;
     if (!deletedMsgId || !senderId || !chat) return;
 
@@ -94,17 +96,19 @@ io.on("connection", (socket) => {
   });
 
   socket.on("msg updated", (updatedMsg) => {
+    console.log("msg updated");
     const { sender, chat } = updatedMsg;
     if (!sender || !chat) return;
 
     chat.users.forEach((user) => {
       if (user._id !== sender._id) {
-        socket.to(user._id).emit("update updated msg", updatedMsg);
+        socket.to(user._id).emit("update modified msg", updatedMsg);
       }
     });
   });
 
   socket.on("new grp created", (newGroup) => {
+    console.log("new grp created");
     const admin = newGroup?.groupAdmins[0];
     if (!admin) return;
 
@@ -116,6 +120,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("grp updated", (updatedGroupData) => {
+    console.log("grp updated");
     const { admin, updatedGroup } = updatedGroupData;
     if (!admin || !updatedGroup) return;
 

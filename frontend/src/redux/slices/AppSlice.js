@@ -14,6 +14,8 @@ const AppSlice = createSlice({
       chatName: "",
       users: [],
     },
+    clientSocket: null,
+    isSocketConnected: false,
   },
   reducers: {
     setLoggedInUser: (state, action) => {
@@ -28,11 +30,23 @@ const AppSlice = createSlice({
     setGroupInfo: (state, action) => {
       state.groupInfo = action.payload;
     },
+    setClientSocket: (state, action) => {
+      state.clientSocket = action.payload;
+    },
+    setSocketConnected: (state, action) => {
+      state.isSocketConnected = action.payload;
+    },
   },
 });
 
-export const { setLoggedInUser, setSelectedChat, toggleRefresh, setGroupInfo } =
-  AppSlice.actions;
+export const {
+  setLoggedInUser,
+  setSelectedChat,
+  toggleRefresh,
+  setGroupInfo,
+  setClientSocket,
+  setSocketConnected,
+} = AppSlice.actions;
 
 export const selectAppState = (state) => state.AppData;
 

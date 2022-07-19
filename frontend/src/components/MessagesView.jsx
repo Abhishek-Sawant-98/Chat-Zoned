@@ -3,6 +3,7 @@ import { Avatar, IconButton } from "@mui/material";
 import {
   getOneOnOneChatReceiver,
   isImageOrGifFile,
+  SOCKET_ENDPOINT,
   truncateString,
 } from "../utils/appUtils";
 import { ArrowBack, AttachFile, Close, Send } from "@mui/icons-material";
@@ -20,8 +21,10 @@ import io from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
+  setClientSocket,
   setGroupInfo,
   setSelectedChat,
+  setSocketConnected,
   toggleRefresh,
 } from "../redux/slices/AppSlice";
 import {
@@ -54,11 +57,6 @@ const iconStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-// const SOCKET_ENDPOINT = "http://localhost:5000";
-const SOCKET_ENDPOINT = "https://chat-zoned.herokuapp.com";
-
-const clientSocket = io(SOCKET_ENDPOINT, { transports: ["websocket"] });
-
 const MessagesView = ({
   loadingMsgs,
   setLoadingMsgs,
@@ -67,7 +65,13 @@ const MessagesView = ({
   setDialogBody,
 }) => {
   const letsChatGif = useRef(null);
-  const { loggedInUser, selectedChat, refresh } = useSelector(selectAppState);
+  const {
+    loggedInUser,
+    selectedChat,
+    refresh,
+    clientSocket,
+    isSocketConnected,
+  } = useSelector(selectAppState);
   const { disableIfLoading } = useSelector(selectFormfieldState);
   const dispatch = useDispatch();
 
@@ -313,39 +317,52 @@ const MessagesView = ({
 
   // Socket client config
   useEffect(() => {
-    if (!clientSocket)
-      return console.log("socket not defined : ", clientSocket);
-
-    clientSocket.emit("init user", loggedInUser?._id);
-    clientSocket.on("user connected", () => {
-      console.log("socket connected");
-    });
+    console.log("SOCKET_ENDPOINT : ", SOCKET_ENDPOINT);
+    dispatch(
+      setClientSocket(io(SOCKET_ENDPOINT, { transports: ["websocket"] }))
+    );
   }, []);
 
   // Listening to socket events
   useEffect(() => {
-    if (!clientSocket)
-      return console.log("socket not defined : ", clientSocket);
+    if (!clientSocket) return;
 
-    clientSocket.on("new msg received", (newMsg) => {
+    if (!isSocketConnected && clientSocket) {
+      clientSocket.emit("init user", loggedInUser?._id);
+      clientSocket.on("user connected", () => {
+        console.log("socket connected");
+        dispatch(setSocketConnected(true));
+      });
+    }
+
+    // .off() prevents .on() to execute multiple times
+    clientSocket.off("new msg received").on("new msg received", (newMsg) => {
       dispatch(toggleRefresh(!refresh));
       if (selectedChat) setMessages([newMsg, ...messages]);
     });
 
-    clientSocket.on("remove deleted msg", (deletedMsgId) => {
-      dispatch(toggleRefresh(!refresh));
-      if (selectedChat)
-        setMessages(messages.filter((msg) => msg?._id !== deletedMsgId));
-    });
+    clientSocket
+      .off("remove deleted msg")
+      .on("remove deleted msg", (deletedMsgId) => {
+        dispatch(toggleRefresh(!refresh));
+        if (selectedChat)
+          setMessages(messages.filter((msg) => msg?._id !== deletedMsgId));
+      });
 
-    clientSocket.on("update updated msg", (updatedMsg) => {
+    clientSocket
+      .off("update modified msg")
+      .on("update modified msg", (updatedMsg) => {
+        dispatch(toggleRefresh(!refresh));
+        if (selectedChat)
+          setMessages(
+            messages.map((msg) => {
+              return msg?._id === updatedMsg?._id ? updatedMsg : msg;
+            })
+          );
+      });
+
+    clientSocket.off("display new grp").on("display new grp", () => {
       dispatch(toggleRefresh(!refresh));
-      if (selectedChat)
-        setMessages(
-          messages.map((msg) => {
-            return msg?._id === updatedMsg?._id ? updatedMsg : msg;
-          })
-        );
     });
   });
 

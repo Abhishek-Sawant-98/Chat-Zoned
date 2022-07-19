@@ -91,6 +91,9 @@ export const isImageFile = (filename) =>
 export const isImageOrGifFile = (filename) =>
   /(\.png|\.jpg|\.jpeg|\.svg|\.gif)$/.test(filename);
 
+// export const SOCKET_ENDPOINT = "http://localhost:5000";
+export const SOCKET_ENDPOINT = "https://chat-zoned.herokuapp.com";
+
 export const DEFAULT_USER_DP =
   "https://res.cloudinary.com/abhi-sawant/image/upload/v1653670527/user_dqzjdz.png";
 

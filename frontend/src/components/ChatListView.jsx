@@ -37,13 +37,9 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-// const SOCKET_ENDPOINT = "http://localhost:5000";
-const SOCKET_ENDPOINT = "https://chat-zoned.herokuapp.com";
-
-const clientSocket = io(SOCKET_ENDPOINT, { transports: ["websocket"] });
-
 const ChatListView = ({ loadingMsgs, setFetchMsgs, setDialogBody }) => {
-  const { loggedInUser, selectedChat, refresh } = useSelector(selectAppState);
+  const { loggedInUser, selectedChat, refresh, clientSocket } =
+    useSelector(selectAppState);
   const dispatch = useDispatch();
 
   const [chats, setChats] = useState([]);
@@ -140,6 +136,10 @@ const ChatListView = ({ loadingMsgs, setFetchMsgs, setDialogBody }) => {
   useEffect(() => {
     fetchChats();
   }, [refresh]);
+
+  useEffect(() => {
+    console.log("in chatListView useEffect, clientSocket : ", clientSocket);
+  }, [clientSocket]);
 
   return (
     <div
