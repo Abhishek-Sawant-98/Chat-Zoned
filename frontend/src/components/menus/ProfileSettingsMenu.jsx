@@ -41,7 +41,7 @@ const ProfileSettingsMenu = ({ anchor, setAnchor, setDialogBody }) => {
           dispatch(
             displayToast({
               message: "Logged Out",
-              type: "info",
+              type: "success",
               duration: 2000,
               position: "bottom-center",
             })

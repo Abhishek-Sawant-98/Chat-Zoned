@@ -337,23 +337,27 @@ const MessagesView = ({
 
     // .off() prevents .on() to execute multiple times
     clientSocket.off("new msg received").on("new msg received", (newMsg) => {
+      const { chat } = newMsg;
       dispatch(toggleRefresh(!refresh));
-      if (selectedChat) setMessages([newMsg, ...messages]);
+      if (selectedChat && chat && selectedChat._id === chat._id)
+        setMessages([newMsg, ...messages]);
     });
 
     clientSocket
       .off("remove deleted msg")
-      .on("remove deleted msg", (deletedMsgId) => {
+      .on("remove deleted msg", (deletedMsgData) => {
+        const { deletedMsgId, chat } = deletedMsgData;
         dispatch(toggleRefresh(!refresh));
-        if (selectedChat)
+        if (selectedChat && chat && selectedChat._id === chat._id)
           setMessages(messages.filter((msg) => msg?._id !== deletedMsgId));
       });
 
     clientSocket
       .off("update modified msg")
       .on("update modified msg", (updatedMsg) => {
+        const { chat } = updatedMsg;
         dispatch(toggleRefresh(!refresh));
-        if (selectedChat)
+        if (selectedChat && chat && selectedChat._id === chat._id)
           setMessages(
             messages.map((msg) => {
               return msg?._id === updatedMsg?._id ? updatedMsg : msg;

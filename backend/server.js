@@ -49,7 +49,7 @@ const server = app.listen(PORT, () =>
 
 // Sockets setup
 const io = new Server(server, {
-  pingTimeout: 90000,
+  pingTimeout: 120000,
   cors: {
     origin: "http://localhost:3000",
   },
@@ -69,7 +69,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("new msg sent", (newMsg) => {
-    console.log("new msg sent");
     const { chat } = newMsg;
     if (!chat) return;
 
@@ -82,7 +81,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("msg deleted", (deletedMsgData) => {
-    console.log("msg deleted");
     const { deletedMsgId, senderId, chat } = deletedMsgData;
     if (!deletedMsgId || !senderId || !chat) return;
 
@@ -90,7 +88,7 @@ io.on("connection", (socket) => {
       // Emit a socket to delete 'deletedMsg' for all chat users
       // except sender of deletedMsg
       if (user._id !== senderId) {
-        socket.to(user._id).emit("remove deleted msg", deletedMsgId);
+        socket.to(user._id).emit("remove deleted msg", deletedMsgData);
       }
     });
   });

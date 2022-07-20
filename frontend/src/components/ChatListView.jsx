@@ -137,10 +137,6 @@ const ChatListView = ({ loadingMsgs, setFetchMsgs, setDialogBody }) => {
     fetchChats();
   }, [refresh]);
 
-  useEffect(() => {
-    console.log("in chatListView useEffect, clientSocket : ", clientSocket);
-  }, [clientSocket]);
-
   return (
     <div
       className={`chatpageDiv chatpageView chatListView text-light ${

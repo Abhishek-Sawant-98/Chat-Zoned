@@ -40,10 +40,6 @@ const ChatpageHeader = ({ setFetchMsgs, setDialogBody }) => {
     setProfileSettingsMenuAnchor(e.target);
   };
 
-  useEffect(() => {
-    console.log("in chatPageHeader useEffect, clientSocket : ", clientSocket);
-  }, [clientSocket]);
-
   // For opening/closing 'search users' left drawer
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 

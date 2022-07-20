@@ -12,20 +12,14 @@
   }
 }
 .footer {
-  position: absolute;
-  @include setPositions($bottom: 0px, $left: 50%);
-  transform: translate(-50%, -50%);
+  position: relative;
+  @include setPositions($top: 40px, $left: 50%);
+  transform: translate(-50%, -30%);
   #footerLink {
-    font-size: 22px;
-    color: #2f95f5;
+    font-size: 23px;
+    color: #95ccff;
     &:hover {
-      color: #95ccff;
+      color: #2f95f5;
     }
-  }
-}
-@media (max-height: 590px) {
-  .footer {
-    position: relative;
-    top: 20px;
   }
 }
