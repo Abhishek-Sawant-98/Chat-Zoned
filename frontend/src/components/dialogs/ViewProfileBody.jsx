@@ -1,7 +1,7 @@
 import { getOneOnOneChatReceiver, truncateString } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 import { useSelector } from "react-redux";
-import { selectAppState } from "../../redux/slices/AppSlice";
+import { selectAppState } from "../../store/slices/AppSlice";
 const arrowStyles = {
   color: "#111",
 };
@@ -45,7 +45,7 @@ const ViewProfileBody = ({ memberProfilePic, memberName, memberEmail }) => {
       <section className={`dialogField text-center mb-2`}>
         <div className="input-group" style={{ marginTop: "-15px" }}>
           <CustomTooltip
-            title={name?.length > 24 ? name : ""}
+            title={name?.length > 20 ? name : ""}
             placement="top"
             arrow
           >
@@ -64,7 +64,7 @@ const ViewProfileBody = ({ memberProfilePic, memberName, memberEmail }) => {
         style={{ marginTop: "-10px" }}
       >
         <CustomTooltip
-          title={email?.length > 24 ? email : ""}
+          title={email?.length > 20 ? email : ""}
           placement="bottom"
           arrow
         >

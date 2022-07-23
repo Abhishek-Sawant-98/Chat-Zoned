@@ -1,6 +1,6 @@
 import { KeyboardArrowDown } from "@mui/icons-material";
 import { useSelector } from "react-redux";
-import { selectAppState } from "../../redux/slices/AppSlice";
+import { selectAppState } from "../../store/slices/AppSlice";
 import { truncateString } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 

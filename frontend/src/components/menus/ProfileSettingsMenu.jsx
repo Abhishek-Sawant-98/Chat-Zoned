@@ -6,13 +6,13 @@ import ChangePasswordBody from "../dialogs/ChangePasswordBody";
 import EditProfileBody from "../dialogs/EditProfileBody";
 import MenuItemText from "../utils/MenuItemText";
 import { useDispatch, useSelector } from "react-redux";
-import { selectAppState, setLoggedInUser } from "../../redux/slices/AppSlice";
-import { setLoading } from "../../redux/slices/FormfieldSlice";
+import { selectAppState, setLoggedInUser } from "../../store/slices/AppSlice";
+import { setLoading } from "../../store/slices/FormfieldSlice";
 import {
   displayDialog,
   setShowDialogActions,
-} from "../../redux/slices/CustomDialogSlice";
-import { displayToast } from "../../redux/slices/ToastSlice";
+} from "../../store/slices/CustomDialogSlice";
+import { displayToast } from "../../store/slices/ToastSlice";
 
 const ProfileSettingsMenu = ({ anchor, setAnchor, setDialogBody }) => {
   const { loggedInUser } = useSelector(selectAppState);

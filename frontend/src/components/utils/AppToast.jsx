@@ -1,6 +1,6 @@
 import { Alert, AlertTitle, Snackbar } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { hideToast, selectToastState } from "../../redux/slices/ToastSlice";
+import { hideToast, selectToastState } from "../../store/slices/ToastSlice";
 
 const AppToast = () => {
   const { toastData } = useSelector(selectToastState);

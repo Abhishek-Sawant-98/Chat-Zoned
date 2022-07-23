@@ -3,7 +3,7 @@ import { ListItemIcon, MenuItem } from "@mui/material";
 import Menu, { menuIconProps, menuItemProps } from "../utils/Menu";
 import MenuItemText from "../utils/MenuItemText";
 import { useDispatch, useSelector } from "react-redux";
-import { selectAppState } from "../../redux/slices/AppSlice";
+import { selectAppState } from "../../store/slices/AppSlice";
 
 const NotificationsMenu = ({ anchor, setAnchor }) => {
   const { loggedInUser } = useSelector(selectAppState);

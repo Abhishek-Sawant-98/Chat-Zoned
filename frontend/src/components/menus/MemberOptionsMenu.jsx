@@ -16,10 +16,10 @@ import {
   setGroupInfo,
   setSelectedChat,
   toggleRefresh,
-} from "../../redux/slices/AppSlice";
-import { displayToast } from "../../redux/slices/ToastSlice";
-import { setLoading } from "../../redux/slices/FormfieldSlice";
-import { hideDialog } from "../../redux/slices/CustomDialogSlice";
+} from "../../store/slices/AppSlice";
+import { displayToast } from "../../store/slices/ToastSlice";
+import { setLoading } from "../../store/slices/FormfieldSlice";
+import { hideDialog } from "../../store/slices/CustomDialogSlice";
 
 const MemberOptionsMenu = ({
   anchor,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { selectFormfieldState } from "../../redux/slices/FormfieldSlice";
+import { selectFormfieldState } from "../../store/slices/FormfieldSlice";
 
 const EditNameBody = ({ originalName, getUpdatedName, placeholder }) => {
   const { loading, formFieldClassName, inputFieldClassName } =

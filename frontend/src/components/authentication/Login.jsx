@@ -4,12 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { CircularProgress } from "@mui/material";
 import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
 import { useDispatch, useSelector } from "react-redux";
-import { setLoggedInUser } from "../../redux/slices/AppSlice";
+import { setLoggedInUser } from "../../store/slices/AppSlice";
 import {
   selectFormfieldState,
   setLoading,
-} from "../../redux/slices/FormfieldSlice";
-import { displayToast } from "../../redux/slices/ToastSlice";
+} from "../../store/slices/FormfieldSlice";
+import { displayToast } from "../../store/slices/ToastSlice";
 
 const Login = () => {
   const {

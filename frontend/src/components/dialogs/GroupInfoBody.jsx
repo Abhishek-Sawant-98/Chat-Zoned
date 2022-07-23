@@ -22,14 +22,14 @@ import {
   setGroupInfo,
   setSelectedChat,
   toggleRefresh,
-} from "../../redux/slices/AppSlice";
+} from "../../store/slices/AppSlice";
 import {
   selectFormfieldState,
   setLoading,
-} from "../../redux/slices/FormfieldSlice";
-import { selectChildDialogState } from "../../redux/slices/ChildDialogSlice";
-import { displayToast } from "../../redux/slices/ToastSlice";
-import { hideDialog } from "../../redux/slices/CustomDialogSlice";
+} from "../../store/slices/FormfieldSlice";
+import { selectChildDialogState } from "../../store/slices/ChildDialogSlice";
+import { displayToast } from "../../store/slices/ToastSlice";
+import { hideDialog } from "../../store/slices/CustomDialogSlice";
 
 const arrowStyles = {
   color: "#111",

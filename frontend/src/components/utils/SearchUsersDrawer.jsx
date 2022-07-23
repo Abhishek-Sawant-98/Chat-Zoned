@@ -7,12 +7,12 @@ import UserListItem from "./UserListItem";
 import LoadingList from "./LoadingList";
 import SearchInput from "./SearchInput";
 import { useDispatch, useSelector } from "react-redux";
-import { selectAppState, setSelectedChat } from "../../redux/slices/AppSlice";
+import { selectAppState, setSelectedChat } from "../../store/slices/AppSlice";
 import {
   selectFormfieldState,
   setLoading,
-} from "../../redux/slices/FormfieldSlice";
-import { displayToast } from "../../redux/slices/ToastSlice";
+} from "../../store/slices/FormfieldSlice";
+import { displayToast } from "../../store/slices/ToastSlice";
 
 const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
   const [searchQuery, setSearchQuery] = useState("");

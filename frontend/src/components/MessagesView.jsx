@@ -3,7 +3,6 @@ import { Avatar, IconButton } from "@mui/material";
 import {
   getOneOnOneChatReceiver,
   isImageOrGifFile,
-  SOCKET_ENDPOINT,
   truncateString,
 } from "../utils/appUtils";
 import { ArrowBack, AttachFile, Close, Send } from "@mui/icons-material";
@@ -26,16 +25,16 @@ import {
   setSelectedChat,
   setSocketConnected,
   toggleRefresh,
-} from "../redux/slices/AppSlice";
+} from "../store/slices/AppSlice";
 import {
   selectFormfieldState,
   setLoading,
-} from "../redux/slices/FormfieldSlice";
-import { displayToast } from "../redux/slices/ToastSlice";
+} from "../store/slices/FormfieldSlice";
+import { displayToast } from "../store/slices/ToastSlice";
 import {
   displayDialog,
   setShowDialogActions,
-} from "../redux/slices/CustomDialogSlice";
+} from "../store/slices/CustomDialogSlice";
 
 const arrowStyles = {
   color: "#777",
@@ -56,6 +55,7 @@ const iconStyles = {
   },
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
+const SOCKET_ENDPOINT = process.env.REACT_APP_SERVER_BASE_URL;
 
 const MessagesView = ({
   loadingMsgs,
@@ -82,6 +82,7 @@ const MessagesView = ({
   };
   const [sending, setSending] = useState(false);
   const [enableMsgSend, setEnableMsgSend] = useState(false);
+  const [fileAttached, setFileAttached] = useState(false);
   const [messages, setMessages] = useState([]);
   const [clickedMsg, setClickedMsg] = useState("");
   const [newMsgData, setNewMsgData] = useState({
@@ -115,6 +116,17 @@ const MessagesView = ({
     dispatch(
       displayDialog({
         title: fileName || "Video File",
+      })
+    );
+  };
+
+  const displayFullSizeImage = (e) => {
+    dispatch(setShowDialogActions(false));
+    setDialogBody(<FullSizeImage event={e} />);
+    dispatch(
+      displayDialog({
+        isFullScreen: true,
+        title: e.target?.alt || "Display Pic",
       })
     );
   };
@@ -293,6 +305,7 @@ const MessagesView = ({
         })
       );
     }
+    setFileAttached(true);
     setEnableMsgSend(true);
     setNewMsgData({
       ...newMsgData,
@@ -306,6 +319,7 @@ const MessagesView = ({
       attachment: null,
       attachmentPreviewUrl: "",
     });
+    setFileAttached(false);
     setEnableMsgSend(false);
     msgContent.current.innerHTML = "";
     msgFileInput.current.value = "";
@@ -317,7 +331,7 @@ const MessagesView = ({
 
   // Socket client config
   useEffect(() => {
-    console.log("SOCKET_ENDPOINT : ", SOCKET_ENDPOINT);
+    console.log("SOCKET_ENDPOINT : ", process.env.REACT_APP_SERVER_BASE_URL);
     dispatch(
       setClientSocket(io(SOCKET_ENDPOINT, { transports: ["websocket"] }))
     );
@@ -506,6 +520,9 @@ const MessagesView = ({
               <div
                 // Event delegation
                 onClick={(e) => {
+                  if (e.target?.dataset?.imageId) {
+                    return displayFullSizeImage(e);
+                  }
                   const senderData = e.target?.dataset?.sender?.split("===");
                   const msgId = e.target?.dataset?.msg;
                   if (senderData?.length) {
@@ -522,7 +539,9 @@ const MessagesView = ({
                     openMsgOptionsMenu(e);
                   }
                 }}
-                className="msgArea overflow-auto d-flex flex-column-reverse"
+                className={`msgArea overflow-auto ${
+                  fileAttached ? "d-none" : "d-flex"
+                } flex-column-reverse`}
               >
                 <div className="msgListBottom" ref={msgListBottom}></div>
                 {loadingMsgs && !sending ? (
@@ -539,6 +558,7 @@ const MessagesView = ({
                 )}
               </div>
             </div>
+            {fileAttached && <></>}
             {/* Edit/Delete Message menu */}
             <MsgOptionsMenu
               anchor={msgOptionsMenuAnchor}
@@ -561,7 +581,7 @@ const MessagesView = ({
                     onClick={() => {
                       msgFileInput.current?.click();
                     }}
-                    className={`d-flex ms-2 my-1`}
+                    className={`d-flex ms-2 my-2`}
                     sx={{ ...iconStyles, transform: "rotateZ(45deg)" }}
                   >
                     <AttachFile style={{ fontSize: 22 }} />
@@ -586,27 +606,29 @@ const MessagesView = ({
                   setEnableMsgSend(Boolean(input));
                 }}
                 ref={msgContent}
-                className={`msgInput border-0 w-100 text-start ${
-                  !enableMsgSend ? "disabledSend" : ""
-                } d-flex bg-dark px-3 py-2 justify-content-start`}
+                className={`msgInput w-100 text-start d-flex bg-dark px-3 justify-content-start`}
                 contentEditable={true}
+                style={{
+                  borderRadius:
+                    enableMsgSend || fileAttached ? "0px" : "0px 7px 7px 0px",
+                }}
               ></div>
               {/* Send button */}
-              <span
-                className={`d-inline-block sendButton ${disableIfLoading} pointer bg-dark`}
-              >
-                {enableMsgSend ? (
+              {enableMsgSend || fileAttached ? (
+                <span
+                  className={`d-inline-block btn btn-dark btn-sm sendButton ${disableIfLoading} pointer`}
+                  onClick={sendMessage}
+                >
                   <IconButton
-                    onClick={sendMessage}
-                    className={`d-flex my-1 mx-2 mx-md-3`}
-                    sx={iconStyles}
+                    className={`d-flex my-1 mx-0 mx-md-0`}
+                    sx={{ margin: "4px 0px", padding: "5px", color: "#999999" }}
                   >
                     <Send style={{ fontSize: 20 }} />
                   </IconButton>
-                ) : (
-                  <></>
-                )}
-              </span>
+                </span>
+              ) : (
+                <></>
+              )}
             </div>
           </section>
         </>

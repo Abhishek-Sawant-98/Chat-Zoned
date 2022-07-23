@@ -41,7 +41,7 @@
       .messages {
         position: absolute;
         width: calc(100% - 17px);
-        height: calc(100% - 80px);
+        height: calc(100% - 85px);
         .msgArea {
           position: absolute;
           @include setPositions(0px, 0px, 0px, 0px);
@@ -66,6 +66,7 @@
           cursor: text;
           caret-color: #6a9bf0;
           line-height: 26px;
+          padding: 12px 0px;
           outline: none;
           overflow-x: hidden;
           overflow-y: auto;
@@ -77,9 +78,6 @@
           }
         }
         .sendButton {
-          border-radius: 0px 7px 7px 0px;
-        }
-        .disabledSend {
           border-radius: 0px 7px 7px 0px;
         }
       }

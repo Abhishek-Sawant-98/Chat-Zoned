@@ -1,6 +1,6 @@
 .msgRow {
   .msgBox {
-    max-width: 80%;
+    max-width: 75%;
     position: relative;
   }
   @media (min-width: 576px) {
@@ -56,8 +56,8 @@
     margin-top: -3px;
   }
   .msgTime {
-    min-width: 90px;
-    margin: -2px -2px -5px -5px;
+    min-width: 80px;
+    margin: -2px -2px -5px auto;
     font-size: 15px;
     color: #c7c7c7;
     .sendStatusIcon {

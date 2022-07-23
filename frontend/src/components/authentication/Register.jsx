@@ -4,14 +4,16 @@ import { useNavigate } from "react-router-dom";
 import axios from "../../utils/axios";
 import { CircularProgress } from "@mui/material";
 import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
-import { DEFAULT_USER_DP, isImageFile } from "../../utils/appUtils";
+import { isImageFile } from "../../utils/appUtils";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectFormfieldState,
   setLoading,
-} from "../../redux/slices/FormfieldSlice";
-import { displayToast } from "../../redux/slices/ToastSlice";
-import { setLoggedInUser } from "../../redux/slices/AppSlice";
+} from "../../store/slices/FormfieldSlice";
+import { displayToast } from "../../store/slices/ToastSlice";
+import { setLoggedInUser } from "../../store/slices/AppSlice";
+
+const DEFAULT_USER_DP = process.env.REACT_APP_DEFAULT_USER_DP;
 
 const Register = () => {
   const {

@@ -14,9 +14,9 @@ import {
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { setSelectedChat } from "../../redux/slices/AppSlice";
-import { hideDialog } from "../../redux/slices/CustomDialogSlice";
-import { selectFormfieldState } from "../../redux/slices/FormfieldSlice";
+import { setSelectedChat } from "../../store/slices/AppSlice";
+import { hideDialog } from "../../store/slices/CustomDialogSlice";
+import { selectFormfieldState } from "../../store/slices/FormfieldSlice";
 
 export const btnHoverStyle = {
   ":hover": { backgroundColor: "#93c2f727" },

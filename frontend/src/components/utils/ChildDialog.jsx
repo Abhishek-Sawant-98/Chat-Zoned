@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { setChildDialogMethods } from "../../redux/slices/ChildDialogSlice";
+import { setChildDialogMethods } from "../../store/slices/ChildDialogSlice";
 import CustomDialog from "./CustomDialog";
 
 const ChildDialog = ({

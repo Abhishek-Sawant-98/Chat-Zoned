@@ -1,10 +1,6 @@
 import { GroupAdd } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
-import {
-  debounce,
-  DEFAULT_GROUP_DP,
-  getOneOnOneChatReceiver,
-} from "../utils/appUtils";
+import { debounce, getOneOnOneChatReceiver } from "../utils/appUtils";
 import axios from "../utils/axios";
 import AddMembersToGroup from "./dialogs/AddMembersToGroup";
 import ChatListItem from "./utils/ChatListItem";
@@ -18,12 +14,14 @@ import {
   selectAppState,
   setGroupInfo,
   setSelectedChat,
-} from "../redux/slices/AppSlice";
+} from "../store/slices/AppSlice";
 import {
   displayDialog,
   setShowDialogActions,
-} from "../redux/slices/CustomDialogSlice";
-import { displayToast } from "../redux/slices/ToastSlice";
+} from "../store/slices/CustomDialogSlice";
+import { displayToast } from "../store/slices/ToastSlice";
+
+const DEFAULT_GROUP_DP = process.env.REACT_APP_DEFAULT_GROUP_DP;
 
 const arrowStyles = {
   color: "#777",

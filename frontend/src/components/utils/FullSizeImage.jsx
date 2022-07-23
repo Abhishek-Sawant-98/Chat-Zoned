@@ -18,7 +18,7 @@ const FullSizeImage = ({ event, audioSrc, videoSrc }) => {
         </video>
       ) : (
         <img
-          src={event.target?.src || "fullSizeImgSrc"}
+          src={event.target?.src || "https://via.placeholder.com/400x400"}
           alt={event.target?.alt || "fullSizeImg"}
           className="img-fluid d-inline-block mx-auto"
           style={{ ...fileStyle, objectFit: "contain" }}

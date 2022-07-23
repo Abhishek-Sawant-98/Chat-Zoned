@@ -5,8 +5,10 @@ import GroupMemberItem from "../utils/GroupMemberItem";
 import MemberOptionsMenu from "../menus/MemberOptionsMenu";
 import ChildDialog from "../utils/ChildDialog";
 import { useSelector } from "react-redux";
-import { selectAppState } from "../../redux/slices/AppSlice";
-import { selectChildDialogState } from "../../redux/slices/ChildDialogSlice";
+import { selectAppState } from "../../store/slices/AppSlice";
+import { selectChildDialogState } from "../../store/slices/ChildDialogSlice";
+
+let filteredMembersCache = [];
 
 const ViewGroupMembers = () => {
   const { loggedInUser, groupInfo } = useSelector(selectAppState);
@@ -37,20 +39,21 @@ const ViewGroupMembers = () => {
 
   // Update the member list whenever groupInfo is updated
   useEffect(() => {
-    setFilteredMembers(sortMembers());
+    filteredMembersCache = sortMembers();
+    setFilteredMembers(filteredMembersCache);
   }, [groupInfo]);
 
   const filterMemberInput = useRef(null);
-  const [filteredMembers, setFilteredMembers] = useState(sortMembers());
+  const [filteredMembers, setFilteredMembers] = useState(filteredMembersCache);
 
   // Debouncing filterMembers method to limit the no. of fn calls
   const filterMembers = debounce((e) => {
     const memberNameInput = e.target?.value?.toLowerCase().trim();
     if (!memberNameInput) {
-      return setFilteredMembers(sortMembers());
+      return setFilteredMembers(filteredMembersCache);
     }
     setFilteredMembers(
-      filteredMembers?.filter(
+      filteredMembersCache?.filter(
         (user) =>
           user?.name?.toLowerCase().includes(memberNameInput) ||
           user?.email?.toLowerCase().includes(memberNameInput)
@@ -78,7 +81,7 @@ const ViewGroupMembers = () => {
           searchHandler={filterMembers}
           autoFocus={false}
           placeholder="Search Member"
-          clearInput={() => setFilteredMembers(sortMembers())}
+          clearInput={() => setFilteredMembers(filteredMembersCache)}
         />
       </section>
       {/* Member list */}

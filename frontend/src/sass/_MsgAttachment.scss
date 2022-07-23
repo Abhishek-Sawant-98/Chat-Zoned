@@ -1,0 +1,10 @@
+.msgImageWrapper {
+  max-width: 500px;
+  .msgImageFile {
+    cursor: pointer;
+    width: clamp(100px, 100%, 500px);
+    object-fit: cover;
+    max-height: 200px;
+    border-radius: 5px;
+  }
+}

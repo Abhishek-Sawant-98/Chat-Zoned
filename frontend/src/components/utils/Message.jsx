@@ -2,13 +2,14 @@ import { DoneAll, KeyboardArrowDown } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
-import { selectAppState } from "../../redux/slices/AppSlice";
+import { selectAppState } from "../../store/slices/AppSlice";
 import {
   msgTimeStringOf,
   msgDateStringOf,
   dateStringOf,
 } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
+import MsgAttachment from "./MsgAttachment";
 
 const arrowStyles = {
   color: "#E6480C",
@@ -76,6 +77,7 @@ const Message = ({ msgSent, currMsg, prevMsg }) => {
           {isLoggedInUser && msgSent && (
             <span
               data-msg={currMsgId}
+              title="Edit/Delete Message"
               className={`msgOptionsIcon text-light position-absolute 
               top-0 end-0 w-25 h-100`}
             >
@@ -85,6 +87,15 @@ const Message = ({ msgSent, currMsg, prevMsg }) => {
                 className="position-absolute top-0 end-0"
               />
             </span>
+          )}
+          {currMsg?.fileUrl && (
+            <MsgAttachment
+              fileData={{
+                fileUrl: currMsg.fileUrl,
+                file_id: currMsg.file_id,
+                file_name: currMsg.file_name,
+              }}
+            />
           )}
           <div data-msg={currMsgId} className="msgContent d-flex">
             <span ref={msgContentRef}></span>

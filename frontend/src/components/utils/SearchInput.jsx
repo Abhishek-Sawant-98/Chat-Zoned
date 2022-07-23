@@ -2,7 +2,7 @@ import { Clear, Search } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import { forwardRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { selectFormfieldState } from "../../redux/slices/FormfieldSlice";
+import { selectFormfieldState } from "../../store/slices/FormfieldSlice";
 
 const SearchInput = forwardRef((props, inputRef) => {
   const { searchHandler, autoFocus, placeholder, clearInput } = props;

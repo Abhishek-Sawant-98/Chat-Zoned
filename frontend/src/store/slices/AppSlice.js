@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { DEFAULT_GROUP_DP } from "../../utils/appUtils.js";
 
 // User and Chat States
 const AppSlice = createSlice({
@@ -10,7 +9,7 @@ const AppSlice = createSlice({
     refresh: false,
     groupInfo: {
       chatDisplayPic: null,
-      chatDisplayPicUrl: DEFAULT_GROUP_DP,
+      chatDisplayPicUrl: process.env.REACT_APP_DEFAULT_GROUP_DP,
       chatName: "",
       users: [],
     },

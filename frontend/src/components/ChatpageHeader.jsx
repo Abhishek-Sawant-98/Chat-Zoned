@@ -9,7 +9,7 @@ import animationData from "../animations/chat-gif.json";
 import LottieAnimation from "./utils/LottieAnimation";
 import io from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
-import { selectAppState } from "../redux/slices/AppSlice";
+import { selectAppState } from "../store/slices/AppSlice";
 
 const arrowStyles = {
   color: "#777",

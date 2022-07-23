@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Edit, KeyboardDoubleArrowLeft } from "@mui/icons-material";
 import getCustomTooltip from "../utils/CustomTooltip";
-import { DEFAULT_GROUP_DP, isImageFile } from "../../utils/appUtils";
+import { isImageFile } from "../../utils/appUtils";
 import EditPicMenu from "../menus/EditPicMenu";
 import axios from "../../utils/axios";
 import { Button, CircularProgress, DialogActions } from "@mui/material";
@@ -11,13 +11,13 @@ import {
   selectAppState,
   setGroupInfo,
   toggleRefresh,
-} from "../../redux/slices/AppSlice";
+} from "../../store/slices/AppSlice";
 import {
   selectFormfieldState,
   setLoading,
-} from "../../redux/slices/FormfieldSlice";
-import { displayToast } from "../../redux/slices/ToastSlice";
-import { hideDialog } from "../../redux/slices/CustomDialogSlice";
+} from "../../store/slices/FormfieldSlice";
+import { displayToast } from "../../store/slices/ToastSlice";
+import { hideDialog } from "../../store/slices/CustomDialogSlice";
 
 const arrowStyles = {
   color: "#111",
@@ -31,6 +31,7 @@ const tooltipStyles = {
   backgroundColor: "#111",
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
+const DEFAULT_GROUP_DP = process.env.REACT_APP_DEFAULT_GROUP_DP;
 
 const NewGroupBody = ({ closeChildDialog }) => {
   const { loggedInUser, refresh, groupInfo } = useSelector(selectAppState);

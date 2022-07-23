@@ -11,10 +11,10 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   selectFormfieldState,
   setLoading,
-} from "../../redux/slices/FormfieldSlice";
-import { selectAppState, setLoggedInUser } from "../../redux/slices/AppSlice";
-import { selectChildDialogState } from "../../redux/slices/ChildDialogSlice";
-import { displayToast } from "../../redux/slices/ToastSlice";
+} from "../../store/slices/FormfieldSlice";
+import { selectAppState, setLoggedInUser } from "../../store/slices/AppSlice";
+import { selectChildDialogState } from "../../store/slices/ChildDialogSlice";
+import { displayToast } from "../../store/slices/ToastSlice";
 
 const arrowStyles = {
   color: "#111",

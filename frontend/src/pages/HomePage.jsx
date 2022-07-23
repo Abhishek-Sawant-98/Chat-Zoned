@@ -5,8 +5,8 @@ import LottieAnimation from "../components/utils/LottieAnimation";
 import { useNavigate } from "react-router-dom";
 import animationData from "../animations/chat-gif.json";
 import { useDispatch, useSelector } from "react-redux";
-import { selectAppState } from "../redux/slices/AppSlice";
-import { selectFormfieldState } from "../redux/slices/FormfieldSlice";
+import { selectAppState } from "../store/slices/AppSlice";
+import { selectFormfieldState } from "../store/slices/FormfieldSlice";
 
 const HomePage = () => {
   const { loggedInUser } = useSelector(selectAppState);

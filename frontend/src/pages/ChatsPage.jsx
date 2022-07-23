@@ -5,16 +5,16 @@ import CustomDialog from "../components/utils/CustomDialog";
 import ChatListView from "../components/ChatListView";
 import MessagesView from "../components/MessagesView";
 import { useDispatch, useSelector } from "react-redux";
-import { displayToast } from "../redux/slices/ToastSlice";
+import { displayToast } from "../store/slices/ToastSlice";
 import {
   selectAppState,
   setLoggedInUser,
   setSelectedChat,
-} from "../redux/slices/AppSlice";
+} from "../store/slices/AppSlice";
 import {
   hideDialog,
   selectCustomDialogState,
-} from "../redux/slices/CustomDialogSlice";
+} from "../store/slices/CustomDialogSlice";
 
 const ChatsPage = () => {
   const { loggedInUser } = useSelector(selectAppState);
