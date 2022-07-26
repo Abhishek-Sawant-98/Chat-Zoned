@@ -383,8 +383,10 @@ const MessagesView = ({
     clientSocket.off("new msg received").on("new msg received", (newMsg) => {
       const { chat } = newMsg;
       dispatch(toggleRefresh(!refresh));
-      if (selectedChat && chat && selectedChat._id === chat._id)
+      if (selectedChat && chat && selectedChat._id === chat._id) {
+        newMsg["sent"] = true;
         setMessages([newMsg, ...messages]);
+      }
     });
 
     clientSocket
@@ -401,12 +403,14 @@ const MessagesView = ({
       .on("update modified msg", (updatedMsg) => {
         const { chat } = updatedMsg;
         dispatch(toggleRefresh(!refresh));
-        if (selectedChat && chat && selectedChat._id === chat._id)
+        if (selectedChat && chat && selectedChat._id === chat._id) {
+          updatedMsg["sent"] = true;
           setMessages(
             messages.map((msg) => {
               return msg?._id === updatedMsg?._id ? updatedMsg : msg;
             })
           );
+        }
       });
 
     clientSocket.off("display new grp").on("display new grp", () => {
