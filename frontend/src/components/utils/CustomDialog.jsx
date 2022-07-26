@@ -22,10 +22,10 @@ export const btnHoverStyle = {
   ":hover": { backgroundColor: "#93c2f727" },
 };
 export const btnCustomStyle = {
-  fontSize: "19px",
+  fontSize: 19,
   color: "#8cc2ff",
   fontFamily: "Mirza",
-  borderRadius: "10px",
+  borderRadius: 10,
 };
 
 const CustomDialog = ({
@@ -86,11 +86,11 @@ const CustomDialog = ({
       onClose={handleDialogClose}
     >
       <DialogTitle
-        style={{ fontSize: "26px", color: "#ffffff", fontFamily: "Mirza" }}
+        style={{ fontSize: 26, color: "#ffffff", fontFamily: "Mirza" }}
       >
         <span
           className="d-flex"
-          style={{ marginTop: "-5px", marginRight: "10px" }}
+          style={{ marginTop: -5, marginRight: 10 }}
         >
           {title}
         </span>
@@ -113,7 +113,7 @@ const CustomDialog = ({
         )}
       </DialogTitle>
       <DialogContent
-        style={{ fontSize: "19px", color: "#e0e0e0", fontFamily: "Mirza" }}
+        style={{ fontSize: 19, color: "#e0e0e0", fontFamily: "Mirza" }}
       >
         {children || <></>}
       </DialogContent>
@@ -147,8 +147,8 @@ const CustomDialog = ({
           >
             {loading && yeslabel !== "Next" ? (
               <>
-                <CircularProgress size={25} style={{ marginRight: "12px" }} />
-                <span style={{ marginRight: "22px" }}>{loadingYeslabel}</span>
+                <CircularProgress size={25} style={{ marginRight: 12 }} />
+                <span style={{ marginRight: 22 }}>{loadingYeslabel}</span>
               </>
             ) : (
               <>
@@ -158,7 +158,7 @@ const CustomDialog = ({
                     <KeyboardDoubleArrowRight
                       className="btnArrowIcons"
                       style={{
-                        marginLeft: "4px",
+                        marginLeft: 4,
                       }}
                     />
                   </span>

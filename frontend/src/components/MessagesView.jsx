@@ -35,6 +35,7 @@ import {
   displayDialog,
   setShowDialogActions,
 } from "../store/slices/CustomDialogSlice";
+import AttachmentPreview from "./utils/AttachmentPreview";
 
 const arrowStyles = {
   color: "#777",
@@ -54,6 +55,8 @@ const iconStyles = {
     backgroundColor: "#aaaaaa20",
   },
 };
+
+const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 const SOCKET_ENDPOINT = process.env.REACT_APP_SERVER_BASE_URL;
 
@@ -74,21 +77,16 @@ const MessagesView = ({
   } = useSelector(selectAppState);
   const { disableIfLoading } = useSelector(selectFormfieldState);
   const dispatch = useDispatch();
-
-  const closeChat = () => {
-    setLoadingMsgs(false);
-    dispatch(setSelectedChat(null));
-    resetMsgInput();
-  };
   const [sending, setSending] = useState(false);
   const [enableMsgSend, setEnableMsgSend] = useState(false);
   const [fileAttached, setFileAttached] = useState(false);
   const [messages, setMessages] = useState([]);
   const [clickedMsg, setClickedMsg] = useState("");
-  const [newMsgData, setNewMsgData] = useState({
+  const [attachmentData, setAttachmentData] = useState({
     attachment: null,
     attachmentPreviewUrl: "",
   });
+
   const msgListBottom = useRef(null);
   const msgFileInput = useRef(null);
   const msgContent = useRef(null);
@@ -98,24 +96,37 @@ const MessagesView = ({
     ? selectedChat?.chatName
     : getOneOnOneChatReceiver(loggedInUser, selectedChat?.users)?.name;
 
-  const viewAudio = (audioSrc, fileName) => {
-    if (!audioSrc) return;
-    dispatch(setShowDialogActions(false));
-    setDialogBody(<FullSizeImage audioSrc={audioSrc} />);
-    dispatch(
-      displayDialog({
-        title: fileName || "Audio File",
-      })
-    );
+  const resetMsgInput = (options) => {
+    setAttachmentData({
+      attachment: null,
+      attachmentPreviewUrl: "",
+    });
+    msgFileInput.current.value = "";
+    setFileAttached(false);
+    if (options?.discardAttachmentOnly) return;
+    setEnableMsgSend(false);
+    msgContent.current.innerHTML = "";
   };
 
-  const viewVideo = (videoSrc, fileName) => {
-    if (!videoSrc) return;
+  const closeChat = () => {
+    setLoadingMsgs(false);
+    dispatch(setSelectedChat(null));
+    resetMsgInput();
+  };
+
+  const viewAudioOrVideo = (src, fileData) => {
+    if (!src || !fileData) return;
+    const { fileName, isAudio } = fileData;
     dispatch(setShowDialogActions(false));
-    setDialogBody(<FullSizeImage videoSrc={videoSrc} />);
+    setDialogBody(
+      <FullSizeImage
+        audioSrc={isAudio ? src : null}
+        videoSrc={!isAudio ? src : null}
+      />
+    );
     dispatch(
       displayDialog({
-        title: fileName || "Video File",
+        title: fileName || `${isAudio ? "Audio" : "Video"} File`,
       })
     );
   };
@@ -130,6 +141,8 @@ const MessagesView = ({
       })
     );
   };
+
+  const downloadFile = (fileId) => {};
 
   const fetchMessages = async () => {
     setLoadingMsgs(true);
@@ -171,14 +184,11 @@ const MessagesView = ({
   };
 
   const sendMessage = async () => {
-    if (!newMsgData.attachment && !msgContent.current?.innerHTML) return;
+    if (!attachmentData.attachment && !msgContent.current?.innerHTML) return;
 
     const msgData = {
-      ...newMsgData,
-      content:
-        msgContent.current?.innerHTML ||
-        newMsgData?.attachment?.name ||
-        "No content",
+      ...attachmentData,
+      content: msgContent.current?.innerHTML || "",
     };
 
     const newMsg = {
@@ -294,35 +304,24 @@ const MessagesView = ({
     const msgFile = e.target.files[0];
     if (!msgFile) return;
 
-    if (msgFile.size >= 3145728) {
+    if (msgFile.size >= FILE_SIZE_LIMIT) {
       msgFileInput.current.value = "";
       return dispatch(
         displayToast({
-          message: "Please Select a File Smaller than 3 MB",
+          message: "Please Select a File Smaller than 5 MB",
           type: "warning",
           duration: 4000,
           position: "top-center",
         })
       );
     }
+
     setFileAttached(true);
-    setEnableMsgSend(true);
-    setNewMsgData({
-      ...newMsgData,
+    setAttachmentData({
+      ...attachmentData,
       attachment: msgFile,
       attachmentPreviewUrl: URL.createObjectURL(msgFile),
     });
-  };
-
-  const resetMsgInput = () => {
-    setNewMsgData({
-      attachment: null,
-      attachmentPreviewUrl: "",
-    });
-    setFileAttached(false);
-    setEnableMsgSend(false);
-    msgContent.current.innerHTML = "";
-    msgFileInput.current.value = "";
   };
 
   const scrollToBottom = () => {
@@ -331,7 +330,6 @@ const MessagesView = ({
 
   // Socket client config
   useEffect(() => {
-    console.log("SOCKET_ENDPOINT : ", process.env.REACT_APP_SERVER_BASE_URL);
     dispatch(
       setClientSocket(io(SOCKET_ENDPOINT, { transports: ["websocket"] }))
     );
@@ -520,6 +518,10 @@ const MessagesView = ({
               <div
                 // Event delegation
                 onClick={(e) => {
+                  const fileId = e.target?.dataset?.download;
+                  if (fileId) {
+                    return downloadFile(fileId);
+                  }
                   if (e.target?.dataset?.imageId) {
                     return displayFullSizeImage(e);
                   }
@@ -558,7 +560,6 @@ const MessagesView = ({
                 )}
               </div>
             </div>
-            {fileAttached && <></>}
             {/* Edit/Delete Message menu */}
             <MsgOptionsMenu
               anchor={msgOptionsMenuAnchor}
@@ -567,6 +568,15 @@ const MessagesView = ({
               openEditMsgDialog={() => {}}
               openDeleteMsgConfirmDialog={openDeleteMsgConfirmDialog}
             />
+            {fileAttached && (
+              <AttachmentPreview
+                attachmentData={attachmentData}
+                discardAttachment={() =>
+                  resetMsgInput({ discardAttachmentOnly: true })
+                }
+                CustomTooltip={CustomTooltip}
+              />
+            )}
             {/* New Message Input */}
             <div className="msgInputDiv d-flex position-absolute">
               <span

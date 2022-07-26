@@ -1,27 +1,23 @@
+const FILE_STYLES = { width: "90vw", height: "82vh" };
+const PLACEHOLDER_IMG = process.env.REACT_APP_PLACEHOLDER_IMG_URL;
+
 const FullSizeImage = ({ event, audioSrc, videoSrc }) => {
-  const fileStyle = { width: "90vw", height: "82vh" };
   return (
     <div className="d-flex justify-content-center">
       {audioSrc ? (
-        <audio style={fileStyle} controls>
-          <source src={audioSrc} type="audio/mpeg"></source>
-          <source src={audioSrc} type="audio/ogg"></source>
-          <source src={audioSrc} type="audio/wav"></source>
+        <audio src={audioSrc} style={FILE_STYLES} controls>
           Your browser does not support the audio tag.
         </audio>
       ) : videoSrc ? (
-        <video style={fileStyle} controls>
-          <source src={videoSrc} type="video/mp4"></source>
-          <source src={videoSrc} type="video/webm"></source>
-          <source src={videoSrc} type="video/ogg"></source>
+        <video src={videoSrc} style={FILE_STYLES} controls>
           Your browser does not support the video tag.
         </video>
       ) : (
         <img
-          src={event.target?.src || "https://via.placeholder.com/400x400"}
+          src={event.target?.src || PLACEHOLDER_IMG}
           alt={event.target?.alt || "fullSizeImg"}
           className="img-fluid d-inline-block mx-auto"
-          style={{ ...fileStyle, objectFit: "contain" }}
+          style={{ ...FILE_STYLES, objectFit: "contain" }}
         />
       )}
     </div>

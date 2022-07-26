@@ -29,7 +29,7 @@ export const memoize = (func) => {
 
 // Truncate a sentence/string
 export const truncateString = memoize((str, limit, index) => {
-  if (!str || !limit || !index) return;
+  if (!str || !limit || !index) return "";
   return str.length > limit ? `${str.substring(0, index)}...` : str;
 });
 

@@ -1,5 +1,4 @@
 .msgImageWrapper {
-  max-width: 500px;
   .msgImageFile {
     cursor: pointer;
     width: clamp(100px, 100%, 500px);
@@ -7,4 +6,66 @@
     max-height: 200px;
     border-radius: 5px;
   }
+}
+.msgFile {
+  position: relative;
+  border-radius: 5px;
+  padding: 10px;
+  word-break: break-all;
+  .sendingFile {
+    position: absolute;
+    @include setPositions($top: 10px, $left: 40%);
+    transform: translateX(-50%);
+    color: lightblue;
+  }
+  & > span {
+    display: inline-block;
+    font-size: 15px;
+    font-weight: 600;
+    max-width: 85%;
+  }
+  & > div {
+    text-align: center;
+    margin-top: 5px;
+    font-size: 14px;
+  }
+  .msgFileOptionsIcon {
+    position: absolute;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 13px;
+    color: lightblue;
+    padding: 3px;
+    @include setPositions($top: 10px, $right: 10px);
+    transition: background-color 0.2s ease;
+    &:hover {
+      border: 1px solid #ddd;
+    }
+    z-index: 3;
+  }
+}
+.previewFile {
+  border-radius: 15px;
+}
+.pdfFile {
+  background-color: #f83333dc;
+  @include setFileSizeColor(#f3d0f7);
+}
+.excelFile {
+  @include setFileSizeColor(#c2f1ef);
+}
+.pptFile {
+  @include setFileSizeColor(#000000);
+}
+.wordFile {
+  @include setFileSizeColor(#c2f1ef);
+}
+.videoFile {
+  @include setFileSizeColor(#f3d0f7);
+}
+.audioFile {
+  @include setFileSizeColor(#f3d0f7);
+}
+.otherFile {
+  @include setFileSizeColor(#f3d0f7);
 }

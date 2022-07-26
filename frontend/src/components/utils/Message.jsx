@@ -90,6 +90,7 @@ const Message = ({ msgSent, currMsg, prevMsg }) => {
           )}
           {currMsg?.fileUrl && (
             <MsgAttachment
+              msgSent={msgSent}
               fileData={{
                 fileUrl: currMsg.fileUrl,
                 file_id: currMsg.file_id,

@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import { selectAppState } from "../../store/slices/AppSlice";
 import {
   dateStringOf,
+  isImageFile,
   msgDateStringOf,
   msgTimeStringOf,
   truncateString,
@@ -50,24 +51,27 @@ const ChatListItem = ({ chat }) => {
     ?.replaceAll("<br>", "\n")
     .replaceAll("&nbsp;", " ")
     .replaceAll("<div>", "\n")
-    .replaceAll("</div>", "\n");
+    .replaceAll("</div>", "\n")
+    .replaceAll("<span>", "")
+    .replaceAll("</span>", "");
 
   const lastMsgDate = new Date(lastMessage?.createdAt);
   const lastMsgDateString = msgDateStringOf(lastMsgDate);
 
   const lastMsgFile = lastMessage?.fileUrl;
+  const lastMsgFileName = lastMessage?.file_name?.split("===")[0];
   let lastMsgFileType;
 
   if (lastMsgFile) {
-    lastMsgFileType = /.png|.jpg|.jpeg|.svg$/.test(lastMsgFile)
+    lastMsgFileType = isImageFile(lastMsgFile)
       ? "image"
-      : /.gif$/.test(lastMsgFile)
+      : /(\.gif)$/.test(lastMsgFile)
       ? "gif"
-      : /.mp4$/.test(lastMsgFile)
+      : /(\.mp4|\.webm)$/.test(lastMsgFile)
       ? "video"
-      : /.mp3$/.test(lastMsgFile)
+      : /(\.mp3|\.wav)$/.test(lastMsgFile)
       ? "audio"
-      : /.pdf$/.test(lastMsgFile)
+      : /(\.pdf)$/.test(lastMsgFile)
       ? "pdf"
       : "otherFile";
   }
@@ -146,28 +150,34 @@ const ChatListItem = ({ chat }) => {
             {lastMsgFile ? (
               <span data-chat={_id}>
                 {lastMsgFileType === "image" ? (
-                  <span data-chat={_id}>
-                    <Image className="fileIcon" /> Photo
+                  <span data-chat={_id} title={lastMsgFileName}>
+                    <Image className="fileIcon" />{" "}
+                    {truncateString(lastMsgContent, 25, 22) || "Photo"}
                   </span>
                 ) : lastMsgFileType === "gif" ? (
-                  <span data-chat={_id}>
-                    <GifBox className="fileIcon" /> Gif
+                  <span data-chat={_id} title={lastMsgFileName}>
+                    <GifBox className="fileIcon" />{" "}
+                    {truncateString(lastMsgContent, 25, 22) || "Gif"}
                   </span>
                 ) : lastMsgFileType === "video" ? (
-                  <span data-chat={_id}>
-                    <VideoFile className="fileIcon" /> Video
+                  <span data-chat={_id} title={lastMsgFileName}>
+                    <VideoFile className="fileIcon" />{" "}
+                    {truncateString(lastMsgContent, 25, 22) || "Video"}
                   </span>
                 ) : lastMsgFileType === "audio" ? (
-                  <span data-chat={_id}>
-                    <AudioFile className="fileIcon" /> Audio
+                  <span data-chat={_id} title={lastMsgFileName}>
+                    <AudioFile className="fileIcon" />{" "}
+                    {truncateString(lastMsgContent, 25, 22) || "Audio"}
                   </span>
                 ) : lastMsgFileType === "pdf" ? (
-                  <span data-chat={_id}>
-                    <PictureAsPdf className="fileIcon" /> Pdf
+                  <span data-chat={_id} title={lastMsgFileName}>
+                    <PictureAsPdf className="fileIcon" />{" "}
+                    {truncateString(lastMsgFileName, 22, 19) || "Pdf"}
                   </span>
                 ) : (
-                  <span data-chat={_id}>
-                    <Article className="fileIcon" /> File
+                  <span data-chat={_id} title={lastMsgFileName}>
+                    <Article className="fileIcon" />{" "}
+                    {truncateString(lastMsgFileName, 22, 19) || "File"}
                   </span>
                 )}
               </span>
@@ -177,7 +187,7 @@ const ChatListItem = ({ chat }) => {
                   ? " Last Message was deleted"
                   : isGroupChat && !lastMessage
                   ? `New Group Created`
-                  : truncateString(lastMsgContent || "", 29, 26)}
+                  : truncateString(lastMsgContent, 25, 22)}
               </span>
             )}
           </p>

@@ -19,7 +19,7 @@ const AppToast = () => {
         vertical: positions[0],
         horizontal: positions[1],
       }}
-      style={{ maxWidth: "340px", margin: "10px auto" }}
+      style={{ maxWidth: 340, margin: "10px auto" }}
       open={isOpen}
       autoHideDuration={duration}
       onClose={handleToastClose}
@@ -32,13 +32,13 @@ const AppToast = () => {
       >
         {title && (
           <AlertTitle
-            style={{ fontFamily: "Mirza", fontSize: "20px", marginTop: "-8px" }}
+            style={{ fontFamily: "Mirza", fontSize: 20, marginTop: -8 }}
             className="fw-bold user-select-none"
           >
             {title}
           </AlertTitle>
         )}
-        <div style={{ fontSize: "17px", marginTop: "-4px" }}>{message}</div>
+        <div style={{ fontSize: 17, marginTop: -4 }}>{message}</div>
       </Alert>
     </Snackbar>
   );
