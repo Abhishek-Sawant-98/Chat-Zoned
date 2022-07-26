@@ -11,7 +11,7 @@
   position: relative;
   border-radius: 5px;
   padding: 10px;
-  word-break: break-all;
+  word-wrap: break-word;
   .sendingFile {
     position: absolute;
     @include setPositions($top: 10px, $left: 40%);
@@ -22,26 +22,32 @@
     display: inline-block;
     font-size: 15px;
     font-weight: 600;
-    max-width: 85%;
+    margin-top: 5px;
+    max-width: 100%;
   }
   & > div {
     text-align: center;
     margin-top: 5px;
     font-size: 14px;
   }
-  .msgFileOptionsIcon {
-    position: absolute;
+  .downloadIcon {
     cursor: pointer;
     border-radius: 50%;
     font-size: 13px;
     color: lightblue;
-    padding: 3px;
-    @include setPositions($top: 10px, $right: 10px);
+    padding: 7px 3px;
+    margin-left: 2px;
     transition: background-color 0.2s ease;
     &:hover {
-      border: 1px solid #ddd;
+      background-color: #aaaaaa60;
     }
     z-index: 3;
+  }
+  .downloading {
+    cursor: progress;
+    &:hover {
+      background-color: transparent;
+    }
   }
 }
 .previewFile {

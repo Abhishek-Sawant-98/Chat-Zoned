@@ -24,7 +24,7 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const Message = ({ msgSent, currMsg, prevMsg }) => {
+const Message = ({ downloadingFileId, msgSent, currMsg, prevMsg }) => {
   const { loggedInUser, selectedChat } = useSelector(selectAppState);
   const msgContentRef = useRef(null);
   const { _id, profilePic, name, email } = currMsg?.sender;
@@ -41,7 +41,8 @@ const Message = ({ msgSent, currMsg, prevMsg }) => {
     (!isSameSender || isOtherDay);
 
   useEffect(() => {
-    msgContentRef.current.innerHTML = currMsg?.content;
+    if (msgContentRef?.current)
+      msgContentRef.current.innerHTML = currMsg?.content;
   }, []);
 
   return (
@@ -91,6 +92,7 @@ const Message = ({ msgSent, currMsg, prevMsg }) => {
           {currMsg?.fileUrl && (
             <MsgAttachment
               msgSent={msgSent}
+              downloadingFileId={downloadingFileId}
               fileData={{
                 fileUrl: currMsg.fileUrl,
                 file_id: currMsg.file_id,
@@ -99,7 +101,7 @@ const Message = ({ msgSent, currMsg, prevMsg }) => {
             />
           )}
           <div data-msg={currMsgId} className="msgContent d-flex">
-            <span ref={msgContentRef}></span>
+            {currMsg?.content && <span ref={msgContentRef}></span>}
             <span
               data-msg={currMsgId}
               className="msgTime text-end d-flex align-items-end justify-content-end"

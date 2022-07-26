@@ -1,11 +1,16 @@
-import { Article, Download, PictureAsPdf } from "@mui/icons-material";
+import {
+  Article,
+  Download,
+  Downloading,
+  PictureAsPdf,
+} from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
 
 const ONE_MB = 1024 * 1024;
 const ONE_KB = 1024;
 const IMG_BASE_URL = process.env.REACT_APP_CLOUDINARY_BASE_URL;
 
-const MsgAttachment = ({ msgSent, isPreview, fileData }) => {
+const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
   const previewStyles = `${
     isPreview
       ? "py-4 px-2 mx-5 border border-4 border-secondary previewFile"
@@ -25,26 +30,36 @@ const MsgAttachment = ({ msgSent, isPreview, fileData }) => {
     ? (fileSize / ONE_KB).toFixed(0) + " KB"
     : fileSize + " B";
 
+  const isDownloadingFile = downloadingFileId === file_id;
   const downloadIcon = (
     <span
       data-download={file_id}
-      className={`msgFileOptionsIcon ${isPreview || !msgSent ? "d-none" : ""}`}
+      className={`downloadIcon ${isDownloadingFile ? "downloading" : ""} ${
+        isPreview || !msgSent ? "d-none" : ""
+      }`}
       title="Download File"
     >
-      <Download />
+      {isDownloadingFile ? (
+        <Downloading />
+      ) : (
+        <Download data-download={file_id} />
+      )}
     </span>
   );
   const attachment = (
     <>
-      <span className={`${isPreview ? "fs-4" : "fs-6"}  position-relative`}>
+      <div>
         {file_name?.endsWith(".pdf") ? (
           <PictureAsPdf className={iconStyles} />
         ) : (
           <Article className={iconStyles} />
         )}
+        {downloadIcon}
+      </div>
+      <span className={`${isPreview ? "fs-4" : "fs-6"}  position-relative`}>
         &nbsp;&nbsp;
         <span className={`${msgSent || isPreview ? "visible" : "invisible"}`}>
-          {file_name}
+          {file_name + ""}
         </span>
       </span>
       <div
@@ -60,7 +75,6 @@ const MsgAttachment = ({ msgSent, isPreview, fileData }) => {
       >
         {fileSize}
       </div>
-      {downloadIcon}
     </>
   );
 

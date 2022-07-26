@@ -90,6 +90,7 @@ const MessagesView = ({
   const msgListBottom = useRef(null);
   const msgFileInput = useRef(null);
   const msgContent = useRef(null);
+  const [downloadingFileId, setDownloadingFileId] = useState("");
   const [msgOptionsMenuAnchor, setMsgOptionsMenuAnchor] = useState(null);
 
   const chatName = selectedChat?.isGroupChat
@@ -142,7 +143,38 @@ const MessagesView = ({
     );
   };
 
-  const downloadFile = (fileId) => {};
+  const downloadFile = async (fileId) => {
+    setDownloadingFileId(fileId);
+    const config = {
+      headers: {
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+      responseType: "blob",
+    };
+
+    try {
+      const { data } = await axios.get(`/api/message/files/${fileId}`, config);
+
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(new Blob([data]));
+      link.setAttribute("download", fileId.split("---")[1] || fileId);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setDownloadingFileId("");
+    } catch (error) {
+      dispatch(
+        displayToast({
+          title: "Couldn't Download File",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      setDownloadingFileId("");
+    }
+  };
 
   const fetchMessages = async () => {
     setLoadingMsgs(true);
@@ -551,6 +583,7 @@ const MessagesView = ({
                 ) : (
                   messages.map((m, i, msgs) => (
                     <Message
+                      downloadingFileId={downloadingFileId}
                       key={m._id}
                       msgSent={m.sent}
                       currMsg={m}
