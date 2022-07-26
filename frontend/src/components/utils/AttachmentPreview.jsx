@@ -8,7 +8,7 @@ const FILE_WRAPPER_CLASS =
 const ATTACHMENT_STYLE = {
   borderRadius: 7,
   width: "clamp(290px, 90%, 700px)",
-  maxHeight: 260,
+  maxHeight: 250,
 };
 const PLACEHOLDER_IMG = process.env.REACT_APP_PLACEHOLDER_IMG_URL;
 
@@ -53,7 +53,7 @@ const AttachmentPreview = ({
         arrow
       >
         <span
-          className={`mt-4 mb-3`}
+          className={`mt-5 mb-2`}
           style={{ color: "lightblue", fontSize: 25, zIndex: 5 }}
         >
           {truncateString(previewTitle || "Attached File", 23, 20)}

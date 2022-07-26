@@ -31,6 +31,7 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
     : fileSize + " B";
 
   const isDownloadingFile = downloadingFileId === file_id;
+  const displayAfterSending = isPreview || msgSent ? "visible" : "invisible";
   const downloadIcon = (
     <span
       data-download={file_id}
@@ -48,7 +49,7 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
   );
   const attachment = (
     <>
-      <div>
+      <div className={`${displayAfterSending}`}>
         {file_name?.endsWith(".pdf") ? (
           <PictureAsPdf className={iconStyles} />
         ) : (
@@ -58,9 +59,7 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
       </div>
       <span className={`${isPreview ? "fs-4" : "fs-6"}  position-relative`}>
         &nbsp;&nbsp;
-        <span className={`${msgSent || isPreview ? "visible" : "invisible"}`}>
-          {file_name + ""}
-        </span>
+        <span className={`${displayAfterSending}`}>{file_name + ""}</span>
       </span>
       <div
         className={`${
