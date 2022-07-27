@@ -101,7 +101,7 @@ const Message = ({ downloadingFileId, msgSent, currMsg, prevMsg }) => {
             />
           )}
           <div data-msg={currMsgId} className="msgContent d-flex">
-            {currMsg?.content && <span ref={msgContentRef}></span>}
+            {currMsg?.content && <span ref={msgContentRef} ></span>}
             <span
               data-msg={currMsgId}
               className="msgTime text-end d-flex align-items-end justify-content-end"

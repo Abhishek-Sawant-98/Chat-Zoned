@@ -70,7 +70,7 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
   return (
     <>
       {fileUrl?.startsWith(IMG_BASE_URL) || isImageOrGifFile(file_name) ? (
-        <span className="d-inline-block msgImageWrapper">
+        <span className="d-inline-block msgImageWrapper mb-2">
           <img
             src={fileUrl}
             alt={file_name}
