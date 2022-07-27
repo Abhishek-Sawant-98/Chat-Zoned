@@ -85,8 +85,14 @@ export const msgDateStringOf = (currDate) => {
       } ${currDate.getFullYear()}`;
 };
 
+// In bytes
+export const ONE_KB = 1024;
+export const ONE_MB = 1048576;
+export const TWO_MB = 2097152;
+export const FIVE_MB = 5242880;
+
 export const isImageFile = (filename) =>
-  /(\.png|\.jpg|\.jpeg|\.svg)$/.test(filename);
+  /(\.png|\.jpg|\.jpeg|\.svg|\.webp)$/.test(filename);
 
 export const isImageOrGifFile = (filename) =>
-  /(\.png|\.jpg|\.jpeg|\.svg|\.gif)$/.test(filename);
+  /(\.png|\.jpg|\.jpeg|\.svg|\.gif|\.webp)$/.test(filename);

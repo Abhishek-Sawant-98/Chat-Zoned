@@ -12,12 +12,6 @@
   border-radius: 5px;
   padding: 10px;
   word-wrap: break-word;
-  .sendingFile {
-    position: absolute;
-    @include setPositions($top: 10px, $left: 40%);
-    transform: translateX(-50%);
-    color: lightblue;
-  }
   & > span {
     display: inline-block;
     font-size: 15px;

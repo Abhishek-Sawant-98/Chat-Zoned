@@ -8,7 +8,7 @@ import {
 } from "@mui/icons-material";
 import { CircularProgress, IconButton } from "@mui/material";
 import axios from "../../utils/axios";
-import { isImageFile, truncateString } from "../../utils/appUtils";
+import { isImageFile, truncateString, TWO_MB } from "../../utils/appUtils";
 import EditPicMenu from "../menus/EditPicMenu";
 import EditNameBody from "./EditNameBody";
 import ChildDialog from "../utils/ChildDialog";
@@ -147,7 +147,7 @@ const GroupInfoBody = ({ messages }) => {
       return dispatch(
         displayToast({
           title: "Invalid Image File",
-          message: "Please Select an Image File (png/jpg/jpeg/svg)",
+          message: "Please Select an Image File (png/jpg/jpeg/svg/webp)",
           type: "warning",
           duration: 5000,
           position: "bottom-center",
@@ -155,7 +155,7 @@ const GroupInfoBody = ({ messages }) => {
       );
     }
 
-    if (image.size >= 2097152) {
+    if (image.size >= TWO_MB) {
       imgInput.current.value = "";
       return dispatch(
         displayToast({
@@ -600,7 +600,7 @@ const GroupInfoBody = ({ messages }) => {
           />
           <input
             type="file"
-            accept=".png, .jpg, .jpeg, .svg"
+            accept="image/*"
             onChange={handleImgInputChange}
             name="displayPic"
             id="groupInfo__displayPic"

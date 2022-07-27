@@ -4,10 +4,8 @@ import {
   Downloading,
   PictureAsPdf,
 } from "@mui/icons-material";
-import { CircularProgress } from "@mui/material";
+import { isImageOrGifFile, ONE_KB, ONE_MB } from "../../utils/appUtils";
 
-const ONE_MB = 1024 * 1024;
-const ONE_KB = 1024;
 const IMG_BASE_URL = process.env.REACT_APP_CLOUDINARY_BASE_URL;
 
 const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
@@ -31,7 +29,6 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
     : fileSize + " B";
 
   const isDownloadingFile = downloadingFileId === file_id;
-  const displayAfterSending = isPreview || msgSent ? "visible" : "invisible";
   const downloadIcon = (
     <span
       data-download={file_id}
@@ -49,7 +46,7 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
   );
   const attachment = (
     <>
-      <div className={`${displayAfterSending}`}>
+      <div>
         {file_name?.endsWith(".pdf") ? (
           <PictureAsPdf className={iconStyles} />
         ) : (
@@ -57,17 +54,10 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
         )}
         {downloadIcon}
       </div>
-      <span className={`${isPreview ? "fs-4" : "fs-6"}  position-relative`}>
+      <span className={`${isPreview ? "fs-4" : "fs-6"}`}>
         &nbsp;&nbsp;
-        <span className={`${displayAfterSending}`}>{file_name + ""}</span>
+        <span>{file_name + ""}</span>
       </span>
-      <div
-        className={`${
-          msgSent || isPreview ? "d-none" : ""
-        } w-100 h-100 position-absolute top-0 start-0`}
-      >
-        <CircularProgress className={`sendingFile`} />
-      </div>
       <div
         className={`${isPreview ? "fs-5 mt-4" : ""}`}
         style={{ marginBottom: isPreview ? -10 : 0 }}
@@ -79,7 +69,7 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
 
   return (
     <>
-      {fileUrl?.startsWith(IMG_BASE_URL) ? (
+      {fileUrl?.startsWith(IMG_BASE_URL) || isImageOrGifFile(file_name) ? (
         <span className="d-inline-block msgImageWrapper">
           <img
             src={fileUrl}
@@ -115,15 +105,15 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
             </div>
           ) : /(\.mp4|\.webm)$/.test(file_name) ? (
             <div className={`${previewStyles} msgFile videoFile`}>
-              {file_name}
+              <video src={""}>{file_name}</video>
             </div>
           ) : /(\.mp3|\.wav)$/.test(file_name) ? (
             <div className={`${previewStyles} msgFile audioFile`}>
-              {file_name}
+              <audio src={""}>{file_name}</audio>
             </div>
           ) : (
             <div className={`${previewStyles} msgFile otherFile`}>
-              {file_name}
+              {attachment}
             </div>
           )}
         </>

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "../../utils/axios";
 import { CircularProgress } from "@mui/material";
 import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
-import { isImageFile } from "../../utils/appUtils";
+import { isImageFile, TWO_MB } from "../../utils/appUtils";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectFormfieldState,
@@ -163,7 +163,7 @@ const Register = () => {
       return dispatch(
         displayToast({
           title: "Invalid Image File",
-          message: "Please Select an Image File (png/jpg/jpeg/svg)",
+          message: "Please Select an Image File (png/jpg/jpeg/svg/webp)",
           type: "warning",
           duration: 5000,
           position: "bottom-center",
@@ -171,7 +171,7 @@ const Register = () => {
       );
     }
 
-    if (image.size >= 2097152) {
+    if (image.size >= TWO_MB) {
       imgInput.current.value = "";
       return dispatch(
         displayToast({
@@ -213,7 +213,7 @@ const Register = () => {
         </i>
         <input
           type="file"
-          accept=".png, .jpg, .jpeg, .svg"
+          accept="image/*"
           onChange={handleImgInputChange}
           name="profilepic"
           id="register__img_input"

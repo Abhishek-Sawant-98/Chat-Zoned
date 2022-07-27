@@ -43,7 +43,7 @@ const sendMessage = asyncHandler(async (req, res) => {
       file_name: null,
     };
   } else if (
-    /(\.png|\.jpg|\.jpeg|\.gif|\.svg)$/.test(attachment.originalname)
+    /(\.png|\.jpg|\.jpeg|\.gif|\.svg|\.webp)$/.test(attachment.originalname)
   ) {
     const uploadResponse = await cloudinary.uploader.upload(attachment.path);
     attachmentData = {
@@ -131,7 +131,9 @@ const updateMessage = asyncHandler(async (req, res) => {
       file_name: null,
     };
   } else if (
-    /(\.png|\.jpg|\.jpeg|\.gif|\.svg)$/.test(updatedAttachment.originalname)
+    /(\.png|\.jpg|\.jpeg|\.gif|\.svg|\.webp)$/.test(
+      updatedAttachment.originalname
+    )
   ) {
     // Updated attachment is of type : image/gif
     if (file_id) deleteExistingAttachment(fileUrl, file_id);

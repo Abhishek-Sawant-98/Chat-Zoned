@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Edit, KeyboardDoubleArrowLeft } from "@mui/icons-material";
 import getCustomTooltip from "../utils/CustomTooltip";
-import { isImageFile } from "../../utils/appUtils";
+import { isImageFile, TWO_MB } from "../../utils/appUtils";
 import EditPicMenu from "../menus/EditPicMenu";
 import axios from "../../utils/axios";
 import { Button, CircularProgress, DialogActions } from "@mui/material";
@@ -131,7 +131,7 @@ const NewGroupBody = ({ closeChildDialog }) => {
       return dispatch(
         displayToast({
           title: "Invalid Image File",
-          message: "Please Select an Image File (png/jpg/jpeg/svg)",
+          message: "Please Select an Image File (png/jpg/jpeg/svg/webp)",
           type: "warning",
           duration: 5000,
           position: "bottom-center",
@@ -139,7 +139,7 @@ const NewGroupBody = ({ closeChildDialog }) => {
       );
     }
 
-    if (image.size >= 2097152) {
+    if (image.size >= TWO_MB) {
       imgInput.current.value = "";
       return dispatch(
         displayToast({
@@ -207,7 +207,7 @@ const NewGroupBody = ({ closeChildDialog }) => {
         />
         <input
           type="file"
-          accept=".png, .jpg, .jpeg, .svg"
+          accept="image/*"
           onChange={handleImgInputChange}
           name="groupdp"
           id="editGroupDp"

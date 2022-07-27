@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Avatar, IconButton } from "@mui/material";
 import {
+  FIVE_MB,
   getOneOnOneChatReceiver,
   isImageOrGifFile,
   truncateString,
@@ -56,7 +57,6 @@ const iconStyles = {
   },
 };
 
-const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 const SOCKET_ENDPOINT = process.env.REACT_APP_SERVER_BASE_URL;
 
@@ -180,9 +180,7 @@ const MessagesView = ({
     setLoadingMsgs(true);
 
     const config = {
-      headers: {
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
+      headers: { Authorization: `Bearer ${loggedInUser.token}` },
     };
 
     try {
@@ -222,9 +220,10 @@ const MessagesView = ({
       ...attachmentData,
       content: msgContent.current?.innerHTML || "",
     };
+    const isNonImageFile = !isImageOrGifFile(msgData.attachment?.name);
 
     const newMsg = {
-      _id: new Date().getTime(),
+      _id: Date.now(),
       sender: {
         _id: loggedInUser?._id,
         profilePic: "",
@@ -233,7 +232,9 @@ const MessagesView = ({
       },
       fileUrl: msgData?.attachmentPreviewUrl,
       file_id: "",
-      file_name: msgData?.attachment?.name,
+      file_name:
+        msgData?.attachment?.name +
+        `${isNonImageFile ? `===${msgData.attachment?.size || ""}` : ""}`,
       content: msgData?.content,
       createdAt: new Date().toISOString(),
       sent: false,
@@ -251,9 +252,9 @@ const MessagesView = ({
 
     try {
       // Upload img/gif to cloudinary, and all other files to aws s3
-      const apiUrl = isImageOrGifFile(msgData.attachment?.name)
-        ? `/api/message`
-        : `/api/message/upload-to-s3`;
+      const apiUrl = isNonImageFile
+        ? `/api/message/upload-to-s3`
+        : `/api/message/`;
 
       const formData = new FormData();
       formData.append("attachment", msgData.attachment);
@@ -267,7 +268,7 @@ const MessagesView = ({
     } catch (error) {
       dispatch(
         displayToast({
-          title: "Couldn't Send Messages",
+          title: "Couldn't Send Message",
           message: error.response?.data?.message || error.message,
           type: "error",
           duration: 5000,
@@ -292,9 +293,7 @@ const MessagesView = ({
     try {
       await axios.put(
         `/api/message/delete`,
-        {
-          messageIds: JSON.stringify([clickedMsg]),
-        },
+        { messageIds: JSON.stringify([clickedMsg]) },
         config
       );
 
@@ -314,6 +313,7 @@ const MessagesView = ({
       setMessages(messages.filter((msg) => msg?._id !== clickedMsg));
       dispatch(setLoading(false));
       dispatch(toggleRefresh(!refresh));
+      setSending(false);
       return "msgActionDone";
     } catch (error) {
       dispatch(
@@ -336,7 +336,7 @@ const MessagesView = ({
     const msgFile = e.target.files[0];
     if (!msgFile) return;
 
-    if (msgFile.size >= FILE_SIZE_LIMIT) {
+    if (msgFile.size >= FIVE_MB) {
       msgFileInput.current.value = "";
       return dispatch(
         displayToast({
@@ -379,7 +379,7 @@ const MessagesView = ({
       });
     }
 
-    // .off() prevents .on() to execute multiple times
+    // off() prevents on() to execute multiple times
     clientSocket.off("new msg received").on("new msg received", (newMsg) => {
       const { chat } = newMsg;
       dispatch(toggleRefresh(!refresh));
@@ -467,6 +467,7 @@ const MessagesView = ({
   };
 
   const openMsgOptionsMenu = (e) => {
+    if (sending) return;
     setMsgOptionsMenuAnchor(e.target);
   };
 
@@ -554,15 +555,18 @@ const MessagesView = ({
               <div
                 // Event delegation
                 onClick={(e) => {
-                  const fileId = e.target?.dataset?.download;
+                  const { dataset } = e.target;
+                  const fileId =
+                    dataset?.download || e.target.parentNode.dataset?.download;
                   if (fileId) {
+                    console.log("downloading...");
                     return downloadFile(fileId);
                   }
-                  if (e.target?.dataset?.imageId) {
+                  if (dataset?.imageId) {
                     return displayFullSizeImage(e);
                   }
-                  const senderData = e.target?.dataset?.sender?.split("===");
-                  const msgId = e.target?.dataset?.msg;
+                  const senderData = dataset?.sender?.split("===");
+                  const msgId = dataset?.msg;
                   if (senderData?.length) {
                     // Open view profile dialog
                     const props = {
