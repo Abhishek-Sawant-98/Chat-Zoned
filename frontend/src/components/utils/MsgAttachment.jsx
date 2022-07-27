@@ -1,41 +1,68 @@
 import {
-  Article,
+  AudioFile,
+  Description,
   Download,
   Downloading,
   PictureAsPdf,
+  PlayCircle,
+  Videocam,
 } from "@mui/icons-material";
-import { isImageOrGifFile, ONE_KB, ONE_MB } from "../../utils/appUtils";
+import {
+  isImageOrGifFile,
+  ONE_KB,
+  ONE_MB,
+  truncateString,
+} from "../../utils/appUtils";
 
 const IMG_BASE_URL = process.env.REACT_APP_CLOUDINARY_BASE_URL;
 
 const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
   const previewStyles = `${
-    isPreview
-      ? "py-4 px-2 mx-5 border border-4 border-secondary previewFile"
-      : ""
+    isPreview ? "py-4 border border-4 border-secondary previewFile" : ""
   }`;
   const iconStyles = `${isPreview ? "fs-1" : "fs-2"}`;
 
   let { fileUrl, file_id, file_name, size } = fileData;
   const fileContents = file_name.split("===");
   file_name = fileContents[0];
-  let fileSize = parseInt(fileContents[1]) || size || "";
-  fileSize = !fileSize
-    ? ""
-    : fileSize > ONE_MB
-    ? (fileSize / ONE_MB).toFixed(1) + " MB"
-    : fileSize > ONE_KB
-    ? (fileSize / ONE_KB).toFixed(0) + " KB"
-    : fileSize + " B";
+  const isVideoDuration = fileContents[1]?.includes(":");
+
+  let fileSize = isVideoDuration
+    ? fileContents[1]
+    : parseInt(fileContents[1]) || size || "";
+
+  if (!isVideoDuration) {
+    fileSize = !fileSize
+      ? ""
+      : fileSize > ONE_MB
+      ? (fileSize / ONE_MB).toFixed(1) + " MB"
+      : fileSize > ONE_KB
+      ? (fileSize / ONE_KB).toFixed(0) + " KB"
+      : fileSize + " B";
+  }
 
   const isDownloadingFile = downloadingFileId === file_id;
+  const fileType = /(\.mp4|\.webm)$/.test(file_name)
+    ? "Video"
+    : /(\.doc|\.docx)$/.test(file_name)
+    ? "Word Doc"
+    : /(\.mp3|\.wav)$/.test(file_name)
+    ? "Audio"
+    : /(\.ppt|\.pptx)$/.test(file_name)
+    ? "PPT"
+    : /(\.xlsx|\.csv|\.xls)$/.test(file_name)
+    ? "Spreadsheet"
+    : /(\.pdf)$/.test(file_name)
+    ? "PDF"
+    : file_name.substring(file_name.lastIndexOf(".") + 1)?.toUpperCase();
+
   const downloadIcon = (
     <span
       data-download={file_id}
       className={`downloadIcon ${isDownloadingFile ? "downloading" : ""} ${
         isPreview || !msgSent ? "d-none" : ""
       }`}
-      title="Download File"
+      title={isDownloadingFile ? "Downloading..." : "Download File"}
     >
       {isDownloadingFile ? (
         <Downloading />
@@ -44,25 +71,17 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
       )}
     </span>
   );
-  const attachment = (
+  const fileInfo = (
     <>
-      <div>
-        {file_name?.endsWith(".pdf") ? (
-          <PictureAsPdf className={iconStyles} />
-        ) : (
-          <Article className={iconStyles} />
-        )}
-        {downloadIcon}
-      </div>
       <span className={`${isPreview ? "fs-4" : "fs-6"}`}>
         &nbsp;&nbsp;
-        <span>{file_name + ""}</span>
+        <span title={file_name}>{truncateString(file_name + "", 40, 37)}</span>
       </span>
       <div
         className={`${isPreview ? "fs-5 mt-4" : ""}`}
         style={{ marginBottom: isPreview ? -10 : 0 }}
       >
-        {fileSize}
+        {`${fileType} : ${fileSize}`}
       </div>
     </>
   );
@@ -80,43 +99,75 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
           />
         </span>
       ) : (
-        <>
-          {file_name?.endsWith(".pdf") ? (
+        <div
+          style={{ width: isPreview ? "clamp(270px, 50vmin, 600px)" : "100%" }}
+        >
+          {fileType === "PDF" ? (
             <div className={`${previewStyles} msgFile pdfFile text-light`}>
-              {attachment}
+              <div>
+                <PictureAsPdf className={iconStyles} />
+                {downloadIcon}
+              </div>
+              {fileInfo}
             </div>
-          ) : /(\.xlsx|\.csv|\.xls)$/.test(file_name) ? (
-            <div
-              className={`${previewStyles} msgFile excelFile bg-success bg-opacity-75`}
-            >
-              {attachment}
+          ) : fileType === "Spreadsheet" ? (
+            <div className={`${previewStyles} msgFile excelFile bg-success`}>
+              <div>
+                <Description className={iconStyles} />
+                {downloadIcon}
+              </div>
+              {fileInfo}
             </div>
-          ) : /(\.ppt|\.pptx)$/.test(file_name) ? (
-            <div
-              className={`${previewStyles} msgFile pptFile bg-warning text-black bg-opacity-75`}
-            >
-              {attachment}
+          ) : fileType === "PPT" ? (
+            <div className={`${previewStyles} msgFile pptFile text-light`}>
+              <div>
+                <Description className={iconStyles} />
+                {downloadIcon}
+              </div>
+              {fileInfo}
             </div>
-          ) : /(\.doc|\.docx)$/.test(file_name) ? (
-            <div
-              className={`${previewStyles} msgFile wordFile bg-primary bg-opacity-75`}
-            >
-              {attachment}
+          ) : fileType === "Word Doc" ? (
+            <div className={`${previewStyles} msgFile wordFile`}>
+              <div>
+                <Description className={iconStyles} />
+                {downloadIcon}
+              </div>
+              {fileInfo}
             </div>
-          ) : /(\.mp4|\.webm)$/.test(file_name) ? (
+          ) : fileType === "Video" ? (
             <div className={`${previewStyles} msgFile videoFile`}>
-              <video src={""}>{file_name}</video>
+              <div
+                title={file_name + "\n(Click to Play)"}
+                className="videoMsg bg-gradient py-5"
+              >
+                <PlayCircle className="playVideo" style={{ fontSize: 40 }} />
+                <span className="videoMsgDuration text-light">
+                  <Videocam />
+                  &nbsp;&nbsp;{fileSize}
+                </span>
+              </div>
+              {/* {fileInfo} */}
             </div>
-          ) : /(\.mp3|\.wav)$/.test(file_name) ? (
-            <div className={`${previewStyles} msgFile audioFile`}>
-              <audio src={""}>{file_name}</audio>
+          ) : fileType === "Audio" ? (
+            <div
+              className={`${previewStyles} msgFile audioFile bg-dark bg-opacity-75`}
+            >
+              <div>
+                <AudioFile className={iconStyles} />
+                {downloadIcon}
+              </div>
+              {/* {fileInfo} */}
             </div>
           ) : (
             <div className={`${previewStyles} msgFile otherFile`}>
-              {attachment}
+              <div>
+                <Description className={iconStyles} />
+                {downloadIcon}
+              </div>
+              {fileInfo}
             </div>
           )}
-        </>
+        </div>
       )}
     </>
   );

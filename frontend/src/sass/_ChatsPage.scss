@@ -57,6 +57,7 @@
       }
       .msgInputDiv {
         @include setPositions($bottom: 10px, $left: 10px, $right: 10px);
+        z-index: 5;
         .attachFile {
           border-radius: 7px 0px 0px 7px;
         }
@@ -76,6 +77,10 @@
             content: "Enter a Message...";
             color: grey;
           }
+        }
+        .addCaption:empty::before {
+          content: "Add a Caption...";
+          color: grey;
         }
         .sendButton {
           border-radius: 0px 7px 7px 0px;

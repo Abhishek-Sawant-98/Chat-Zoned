@@ -28,10 +28,10 @@ export const memoize = (func) => {
 };
 
 // Truncate a sentence/string
-export const truncateString = memoize((str, limit, index) => {
+export const truncateString = (str, limit, index) => {
   if (!str || !limit || !index) return "";
   return str.length > limit ? `${str.substring(0, index)}...` : str;
-});
+};
 
 // Can't memoize as it's an impure function
 export const getOneOnOneChatReceiver = (loggedInUser, chatUsers) => {

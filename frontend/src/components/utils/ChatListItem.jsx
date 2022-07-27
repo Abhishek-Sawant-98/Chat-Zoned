@@ -1,6 +1,6 @@
 import {
-  Article,
   AudioFile,
+  Description,
   DoneAll,
   GifBox,
   Image,
@@ -176,7 +176,7 @@ const ChatListItem = ({ chat }) => {
                   </span>
                 ) : (
                   <span data-chat={_id} title={lastMsgFileName}>
-                    <Article className="fileIcon" />{" "}
+                    <Description className="fileIcon" />{" "}
                     {truncateString(lastMsgFileName, 22, 19) || "File"}
                   </span>
                 )}

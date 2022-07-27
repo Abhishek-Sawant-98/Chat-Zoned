@@ -14,11 +14,11 @@
   word-wrap: break-word;
   margin-bottom: 8px;
   & > span {
-    display: inline-block;
     font-size: 15px;
     font-weight: 600;
     margin-top: 5px;
     width: 100%;
+    display: inline-block;
     text-align: center;
   }
   & > div {
@@ -57,17 +57,50 @@
   @include setFileSizeColor(#c2f1ef);
 }
 .pptFile {
-  @include setFileSizeColor(#000000);
+  background-color: #d1560e;
+  @include setFileSizeColor(#f7e7e7);
 }
 .wordFile {
+  background-color: #1872e7be;
   @include setFileSizeColor(#c2f1ef);
 }
 .videoFile {
+  background-color: #8d0a6cbe;
   @include setFileSizeColor(#f3d0f7);
+  .videoMsg {
+    display: flex;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    min-width: 180px;
+    background-color: #666666aa;
+    color: #fff;
+    &:hover {
+      background-color: #777777aa;
+    }
+    &:active {
+      background-color: #888888aa;
+    }
+    .playVideo {
+      transition: transform 0.2s ease;
+      &:active {
+        color: #d2e9e7;
+        transform: scale(0.8);
+      }
+    }
+    .videoMsgDuration {
+      position: absolute;
+      font-weight: 600;
+      font-size: 16px;
+      @include setPositions($bottom: 0px, $left: 5px);
+    }
+  }
 }
 .audioFile {
   @include setFileSizeColor(#f3d0f7);
 }
 .otherFile {
+  background-color: #666;
   @include setFileSizeColor(#f3d0f7);
 }

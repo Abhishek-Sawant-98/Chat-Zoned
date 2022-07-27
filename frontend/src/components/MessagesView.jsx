@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Avatar, IconButton } from "@mui/material";
 import {
+  debounce,
   FIVE_MB,
   getOneOnOneChatReceiver,
   isImageOrGifFile,
@@ -145,6 +146,7 @@ const MessagesView = ({
 
   const downloadFile = async (fileId) => {
     setDownloadingFileId(fileId);
+    setSending(true);
     const config = {
       headers: {
         Authorization: `Bearer ${loggedInUser.token}`,
@@ -161,7 +163,9 @@ const MessagesView = ({
       document.body.appendChild(link);
       link.click();
       link.remove();
+
       setDownloadingFileId("");
+      setSending(false);
     } catch (error) {
       dispatch(
         displayToast({
@@ -173,6 +177,7 @@ const MessagesView = ({
         })
       );
       setDownloadingFileId("");
+      setSending(false);
     }
   };
 
@@ -234,7 +239,13 @@ const MessagesView = ({
       file_id: "",
       file_name:
         msgData?.attachment?.name +
-        `${isNonImageFile ? `===${msgData.attachment?.size || ""}` : ""}`,
+        `${
+          msgData?.videoDuration
+            ? `===${msgData.videoDuration}`
+            : isNonImageFile
+            ? `===${msgData.attachment?.size || ""}`
+            : ""
+        }`,
       content: msgData?.content,
       createdAt: new Date().toISOString(),
       sent: false,
@@ -258,6 +269,7 @@ const MessagesView = ({
 
       const formData = new FormData();
       formData.append("attachment", msgData.attachment);
+      formData.append("videoDuration", msgData?.videoDuration);
       formData.append("content", msgData.content);
       formData.append("chatId", selectedChat?._id);
       const { data } = await axios.post(apiUrl, formData, config);
@@ -332,6 +344,21 @@ const MessagesView = ({
 
   const updateMessage = async () => {};
 
+  const setVideoDuration = (videoUrl, msgFile) => {
+    const media = new Audio(videoUrl);
+    media.onloadedmetadata = () => {
+      const { duration } = media;
+      const minutes = parseInt(duration / 60);
+      const seconds = parseInt(duration % 60);
+      setAttachmentData({
+        attachment: msgFile,
+        attachmentPreviewUrl: videoUrl,
+        videoDuration: `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`,
+      });
+      setFileAttached(true);
+    };
+  };
+
   const handleMsgFileInputChange = (e) => {
     const msgFile = e.target.files[0];
     if (!msgFile) return;
@@ -347,13 +374,16 @@ const MessagesView = ({
         })
       );
     }
-
-    setFileAttached(true);
-    setAttachmentData({
-      ...attachmentData,
-      attachment: msgFile,
-      attachmentPreviewUrl: URL.createObjectURL(msgFile),
-    });
+    const fileUrl = URL.createObjectURL(msgFile);
+    if (msgFile.type.startsWith("video/")) {
+      setVideoDuration(fileUrl, msgFile);
+    } else {
+      setAttachmentData({
+        attachment: msgFile,
+        attachmentPreviewUrl: fileUrl,
+      });
+      setFileAttached(true);
+    }
   };
 
   const scrollToBottom = () => {
@@ -417,6 +447,24 @@ const MessagesView = ({
       dispatch(toggleRefresh(!refresh));
     });
   });
+
+  // Message input handlers
+  const msgInputHandler = debounce((e) => {
+    const input = e.target.innerHTML
+      ?.replaceAll("<br>", "")
+      .replaceAll("&nbsp;", "")
+      .replaceAll("<div>", "")
+      .replaceAll("</div>", "")
+      .trim();
+    setEnableMsgSend(Boolean(input));
+  }, 500);
+
+  const msgKeydownHandler = (e) => {
+    if (e.key === "Enter" && !e.shiftKey && (enableMsgSend || fileAttached)) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
 
   useEffect(() => {
     scrollToBottom();
@@ -556,27 +604,24 @@ const MessagesView = ({
                 // Event delegation
                 onClick={(e) => {
                   const { dataset } = e.target;
-                  const fileId =
-                    dataset?.download || e.target.parentNode.dataset?.download;
-                  if (fileId) {
-                    console.log("downloading...");
-                    return downloadFile(fileId);
-                  }
-                  if (dataset?.imageId) {
-                    return displayFullSizeImage(e);
-                  }
                   const senderData = dataset?.sender?.split("===");
                   const msgId = dataset?.msg;
-                  if (senderData?.length) {
+                  const fileId =
+                    dataset?.download || e.target.parentNode.dataset?.download;
+
+                  if (fileId) {
+                    downloadFile(fileId);
+                  } else if (dataset?.imageId) {
+                    displayFullSizeImage(e);
+                  } else if (senderData?.length) {
                     // Open view profile dialog
                     const props = {
                       memberProfilePic: senderData[0],
                       memberName: senderData[1],
                       memberEmail: senderData[2],
                     };
-                    return openViewProfileDialog(props);
-                  }
-                  if (msgId) {
+                    openViewProfileDialog(props);
+                  } else if (msgId) {
                     setClickedMsg(msgId);
                     openMsgOptionsMenu(e);
                   }
@@ -619,7 +664,7 @@ const MessagesView = ({
               />
             )}
             {/* New Message Input */}
-            <div className="msgInputDiv d-flex position-absolute">
+            <div className={`msgInputDiv d-flex position-absolute`}>
               <span
                 className={`d-inline-block attachFile ${disableIfLoading} pointer bg-dark`}
               >
@@ -652,12 +697,12 @@ const MessagesView = ({
               </span>
               {/* Content/text input */}
               <div
-                onInput={(e) => {
-                  const input = e.target.innerHTML;
-                  setEnableMsgSend(Boolean(input));
-                }}
+                onInput={msgInputHandler}
+                onKeyDown={msgKeydownHandler}
                 ref={msgContent}
-                className={`msgInput w-100 text-start d-flex bg-dark px-3 justify-content-start`}
+                className={`msgInput ${
+                  fileAttached ? "addCaption" : ""
+                } w-100 text-start d-flex bg-dark px-3 justify-content-start`}
                 contentEditable={true}
                 style={{
                   borderRadius:

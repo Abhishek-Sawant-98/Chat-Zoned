@@ -27,7 +27,7 @@ const fetchMessages = asyncHandler(async (req, res) => {
 
 const sendMessage = asyncHandler(async (req, res) => {
   const attachment = req.file;
-  const { content, chatId } = req.body;
+  const { videoDuration, content, chatId } = req.body;
   const loggedInUser = req.user?._id;
 
   if ((!content && !attachment) || !chatId) {
@@ -57,7 +57,8 @@ const sendMessage = asyncHandler(async (req, res) => {
     attachmentData = {
       fileUrl: attachment.location || "",
       file_id: attachment.key || "",
-      file_name: attachment.originalname + "===" + attachment.size,
+      file_name:
+        attachment.originalname + "===" + videoDuration || attachment.size,
     };
   }
 
