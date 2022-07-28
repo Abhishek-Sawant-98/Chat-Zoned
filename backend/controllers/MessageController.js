@@ -27,7 +27,7 @@ const fetchMessages = asyncHandler(async (req, res) => {
 
 const sendMessage = asyncHandler(async (req, res) => {
   const attachment = req.file;
-  const { videoDuration, content, chatId } = req.body;
+  const { mediaDuration, content, chatId } = req.body;
   const loggedInUser = req.user?._id;
 
   if ((!content && !attachment) || !chatId) {
@@ -58,7 +58,9 @@ const sendMessage = asyncHandler(async (req, res) => {
       fileUrl: attachment.location || "",
       file_id: attachment.key || "",
       file_name:
-        attachment.originalname + "===" + videoDuration || attachment.size,
+        attachment.originalname +
+        "===" +
+        (mediaDuration !== "undefined" ? mediaDuration : attachment.size),
     };
   }
 
@@ -104,7 +106,7 @@ const sendMessage = asyncHandler(async (req, res) => {
 
 const updateMessage = asyncHandler(async (req, res) => {
   const updatedAttachment = req.file;
-  const { updatedContent, messageId } = req.body;
+  const { mediaDuration, updatedContent, messageId } = req.body;
 
   if ((!updatedContent && !updatedAttachment) || !messageId) {
     res.status(400);
@@ -155,7 +157,11 @@ const updateMessage = asyncHandler(async (req, res) => {
       fileUrl: updatedAttachment.location || "",
       file_id: updatedAttachment.key || "",
       file_name:
-        updatedAttachment.originalname + "===" + updatedAttachment.size,
+        updatedAttachment.originalname +
+        "===" +
+        (mediaDuration !== "undefined"
+          ? mediaDuration
+          : updatedAttachment.size),
     };
     if (file_id) deleteExistingAttachment(fileUrl, file_id);
   }

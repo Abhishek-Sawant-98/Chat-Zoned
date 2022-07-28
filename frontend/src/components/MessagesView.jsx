@@ -240,8 +240,8 @@ const MessagesView = ({
       file_name:
         msgData?.attachment?.name +
         `${
-          msgData?.videoDuration
-            ? `===${msgData.videoDuration}`
+          msgData?.mediaDuration
+            ? `===${msgData.mediaDuration}`
             : isNonImageFile
             ? `===${msgData.attachment?.size || ""}`
             : ""
@@ -250,7 +250,6 @@ const MessagesView = ({
       createdAt: new Date().toISOString(),
       sent: false,
     };
-
     setMessages([newMsg, ...messages]);
     resetMsgInput();
     setSending(true);
@@ -269,7 +268,7 @@ const MessagesView = ({
 
       const formData = new FormData();
       formData.append("attachment", msgData.attachment);
-      formData.append("videoDuration", msgData?.videoDuration);
+      formData.append("mediaDuration", msgData?.mediaDuration);
       formData.append("content", msgData.content);
       formData.append("chatId", selectedChat?._id);
       const { data } = await axios.post(apiUrl, formData, config);
@@ -344,16 +343,18 @@ const MessagesView = ({
 
   const updateMessage = async () => {};
 
-  const setVideoDuration = (videoUrl, msgFile) => {
-    const media = new Audio(videoUrl);
+  const setMediaDuration = (mediaUrl, msgFile) => {
+    const media = new Audio(mediaUrl);
     media.onloadedmetadata = () => {
       const { duration } = media;
       const minutes = parseInt(duration / 60);
       const seconds = parseInt(duration % 60);
       setAttachmentData({
         attachment: msgFile,
-        attachmentPreviewUrl: videoUrl,
-        videoDuration: `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`,
+        attachmentPreviewUrl: mediaUrl,
+        mediaDuration: `${minutes}:${
+          seconds < 10 ? `0${seconds}` : seconds
+        }+++${msgFile.type}`,
       });
       setFileAttached(true);
     };
@@ -375,8 +376,8 @@ const MessagesView = ({
       );
     }
     const fileUrl = URL.createObjectURL(msgFile);
-    if (msgFile.type.startsWith("video/")) {
-      setVideoDuration(fileUrl, msgFile);
+    if (/^(video\/|audio\/)/.test(msgFile.type)) {
+      setMediaDuration(fileUrl, msgFile);
     } else {
       setAttachmentData({
         attachment: msgFile,
@@ -606,11 +607,15 @@ const MessagesView = ({
                   const { dataset } = e.target;
                   const senderData = dataset?.sender?.split("===");
                   const msgId = dataset?.msg;
+                  const mediaId =
+                    dataset?.media || e.target.parentNode.dataset?.media;
                   const fileId =
                     dataset?.download || e.target.parentNode.dataset?.download;
 
                   if (fileId) {
                     downloadFile(fileId);
+                  } else if (mediaId) {
+                    console.log("opening video/audio...");
                   } else if (dataset?.imageId) {
                     displayFullSizeImage(e);
                   } else if (senderData?.length) {

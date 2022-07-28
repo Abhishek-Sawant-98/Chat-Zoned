@@ -64,10 +64,10 @@
   background-color: #1872e7be;
   @include setFileSizeColor(#c2f1ef);
 }
-.videoFile {
+.mediaFile {
   background-color: #8d0a6cbe;
   @include setFileSizeColor(#f3d0f7);
-  .videoMsg {
+  .mediaMsg {
     display: flex;
     position: relative;
     justify-content: center;
@@ -75,30 +75,34 @@
     border-radius: 5px;
     min-width: 180px;
     background-color: #666666aa;
+    transition: transform 0.2s ease;
     color: #fff;
     &:hover {
       background-color: #777777aa;
     }
     &:active {
       background-color: #888888aa;
+      transform: scale(0.98);
     }
-    .playVideo {
+    .playMedia {
       transition: transform 0.2s ease;
       &:active {
         color: #d2e9e7;
         transform: scale(0.8);
       }
     }
-    .videoMsgDuration {
+    .mediaDuration {
       position: absolute;
       font-weight: 600;
-      font-size: 16px;
+      font-size: 15px;
+    }
+    .videoDuration {
       @include setPositions($bottom: 0px, $left: 5px);
     }
+    .audioDuration {
+      @include setPositions($bottom: 2px, $left: 3px);
+    }
   }
-}
-.audioFile {
-  @include setFileSizeColor(#f3d0f7);
 }
 .otherFile {
   background-color: #666;
