@@ -60,7 +60,9 @@ const sendMessage = asyncHandler(async (req, res) => {
       file_name:
         attachment.originalname +
         "===" +
-        (mediaDuration !== "undefined" ? mediaDuration : attachment.size),
+        (mediaDuration !== "undefined"
+          ? `${mediaDuration}+++${attachment.size}`
+          : attachment.size),
     };
   }
 
@@ -160,7 +162,7 @@ const updateMessage = asyncHandler(async (req, res) => {
         updatedAttachment.originalname +
         "===" +
         (mediaDuration !== "undefined"
-          ? mediaDuration
+          ? `${mediaDuration}+++${updatedAttachment.size}`
           : updatedAttachment.size),
     };
     if (file_id) deleteExistingAttachment(fileUrl, file_id);

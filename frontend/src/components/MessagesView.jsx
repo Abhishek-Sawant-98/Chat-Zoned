@@ -92,6 +92,7 @@ const MessagesView = ({
   const msgFileInput = useRef(null);
   const msgContent = useRef(null);
   const [downloadingFileId, setDownloadingFileId] = useState("");
+  const [loadingMediaId, setLoadingMediaId] = useState("");
   const [msgOptionsMenuAnchor, setMsgOptionsMenuAnchor] = useState(null);
 
   const chatName = selectedChat?.isGroupChat
@@ -116,7 +117,7 @@ const MessagesView = ({
     resetMsgInput();
   };
 
-  const viewAudioOrVideo = (src, fileData) => {
+  const viewMedia = (src, fileData) => {
     if (!src || !fileData) return;
     const { fileName, isAudio } = fileData;
     dispatch(setShowDialogActions(false));
@@ -128,9 +129,11 @@ const MessagesView = ({
     );
     dispatch(
       displayDialog({
+        isFullScreen: true,
         title: fileName || `${isAudio ? "Audio" : "Video"} File`,
       })
     );
+    setLoadingMediaId("");
   };
 
   const displayFullSizeImage = (e) => {
@@ -144,7 +147,38 @@ const MessagesView = ({
     );
   };
 
+  const loadMedia = async (fileId, options) => {
+    if (!fileId || !options) return;
+    setLoadingMediaId(fileId);
+    const { fileName, isAudio } = options;
+    const config = {
+      headers: {
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+      responseType: "blob",
+    };
+
+    try {
+      const { data } = await axios.get(`/api/message/files/${fileId}`, config);
+
+      const mediaSrc = URL.createObjectURL(new Blob([data]));
+      viewMedia(mediaSrc, { fileName, isAudio });
+    } catch (error) {
+      dispatch(
+        displayToast({
+          title: "Couldn't Load Media",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      setLoadingMediaId("");
+    }
+  };
+
   const downloadFile = async (fileId) => {
+    if (!fileId) return;
     setDownloadingFileId(fileId);
     setSending(true);
     const config = {
@@ -467,6 +501,45 @@ const MessagesView = ({
     }
   };
 
+  // Msgs click handler ('Event Delegation' applied here)
+  const msgsClickHandler = (e) => {
+    const { dataset } = e.target;
+    const senderData = dataset?.sender?.split("===");
+    const msgId = dataset?.msg;
+    const videoId = dataset?.video || e.target.parentNode.dataset?.video;
+    const audioId = dataset?.audio || e.target.parentNode.dataset?.audio;
+    const fileId = dataset?.download || e.target.parentNode.dataset?.download;
+
+    if (fileId) {
+      downloadFile(fileId);
+    } else if (videoId) {
+      // Load video
+      loadMedia(videoId, {
+        fileName: dataset?.videoName || e.target.parentNode.dataset?.videoName,
+        isAudio: false,
+      });
+    } else if (audioId) {
+      // Load audio
+      loadMedia(audioId, {
+        fileName: dataset?.audioName || e.target.parentNode.dataset?.audioName,
+        isAudio: true,
+      });
+    } else if (dataset?.imageId) {
+      displayFullSizeImage(e);
+    } else if (senderData?.length) {
+      // Open view profile dialog
+      const props = {
+        memberProfilePic: senderData[0],
+        memberName: senderData[1],
+        memberEmail: senderData[2],
+      };
+      openViewProfileDialog(props);
+    } else if (msgId) {
+      setClickedMsg(msgId);
+      openMsgOptionsMenu(e);
+    }
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -528,7 +601,7 @@ const MessagesView = ({
     >
       {selectedChat ? (
         <>
-          <section className="messagesHeader d-flex justify-content-start position-relative w-100 fw-bold fs-4 bg-info bg-opacity-10 py-2">
+          <section className="messagesHeader pointer-event d-flex justify-content-start position-relative w-100 fw-bold fs-4 bg-info bg-opacity-10 py-2">
             <CustomTooltip title="Go Back" placement="bottom-start" arrow>
               <IconButton
                 onClick={closeChat}
@@ -598,39 +671,16 @@ const MessagesView = ({
               </IconButton>
             </CustomTooltip>
           </section>
-          <section className="messagesBody m-1 p-2 position-relative d-flex flex-column">
+          <section
+            className={`messagesBody position-relative ${
+              downloadingFileId || loadingMediaId ? "pe-none" : "pe-auto"
+            } d-flex flex-column m-1 p-2`}
+          >
             {/* Messages list */}
             <div className="messages rounded-3 d-flex flex-column">
               <div
                 // Event delegation
-                onClick={(e) => {
-                  const { dataset } = e.target;
-                  const senderData = dataset?.sender?.split("===");
-                  const msgId = dataset?.msg;
-                  const mediaId =
-                    dataset?.media || e.target.parentNode.dataset?.media;
-                  const fileId =
-                    dataset?.download || e.target.parentNode.dataset?.download;
-
-                  if (fileId) {
-                    downloadFile(fileId);
-                  } else if (mediaId) {
-                    console.log("opening video/audio...");
-                  } else if (dataset?.imageId) {
-                    displayFullSizeImage(e);
-                  } else if (senderData?.length) {
-                    // Open view profile dialog
-                    const props = {
-                      memberProfilePic: senderData[0],
-                      memberName: senderData[1],
-                      memberEmail: senderData[2],
-                    };
-                    openViewProfileDialog(props);
-                  } else if (msgId) {
-                    setClickedMsg(msgId);
-                    openMsgOptionsMenu(e);
-                  }
-                }}
+                onClick={msgsClickHandler}
                 className={`msgArea overflow-auto ${
                   fileAttached ? "d-none" : "d-flex"
                 } flex-column-reverse`}
@@ -642,6 +692,7 @@ const MessagesView = ({
                   messages.map((m, i, msgs) => (
                     <Message
                       downloadingFileId={downloadingFileId}
+                      loadingMediaId={loadingMediaId}
                       key={m._id}
                       msgSent={m.sent}
                       currMsg={m}

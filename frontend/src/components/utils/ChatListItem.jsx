@@ -60,7 +60,8 @@ const ChatListItem = ({ chat }) => {
 
   const lastMsgFileUrl = lastMessage?.fileUrl;
   const fileContents = lastMessage?.file_name?.split("===") || [];
-  lastMsgContent = lastMsgContent || fileContents[0] || "";
+  const lastMsgFileName = fileContents[0] || "";
+  const lastMsgData = lastMsgContent || lastMsgFileName;
   const fileType = fileContents[1]?.split("+++")[1];
   let lastMsgFileType;
 
@@ -114,7 +115,7 @@ const ChatListItem = ({ chat }) => {
           {truncateString(chatName, 23, 20)}
         </p>
         {lastMessage && (
-          <span className="lastMsgDate">
+          <span className="lastMsgDate" data-chat={_id}>
             {lastMsgDateString === "Today"
               ? msgTimeStringOf(lastMsgDate)
               : lastMsgDateString !== "Yesterday"
@@ -138,6 +139,7 @@ const ChatListItem = ({ chat }) => {
                       <>You: </>
                     ) : (
                       <DoneAll
+                        data-chat={_id}
                         className="me-1 fs-5"
                         style={{ color: "lightblue" }}
                       />
@@ -155,34 +157,34 @@ const ChatListItem = ({ chat }) => {
             {lastMsgFileUrl ? (
               <span data-chat={_id}>
                 {lastMsgFileType === "image" ? (
-                  <span data-chat={_id} title={lastMsgContent}>
-                    <Image className="fileIcon" />{" "}
+                  <span data-chat={_id} title={lastMsgData}>
+                    <Image data-chat={_id} className="fileIcon" />{" "}
                     {truncateString(lastMsgContent, 25, 22) || "Photo"}
                   </span>
                 ) : lastMsgFileType === "gif" ? (
-                  <span data-chat={_id} title={lastMsgContent}>
-                    <GifBox className="fileIcon" />{" "}
+                  <span data-chat={_id} title={lastMsgData}>
+                    <GifBox data-chat={_id} className="fileIcon" />{" "}
                     {truncateString(lastMsgContent, 25, 22) || "Gif"}
                   </span>
                 ) : lastMsgFileType === "video" ? (
-                  <span data-chat={_id} title={lastMsgContent}>
-                    <VideoFile className="fileIcon" />{" "}
+                  <span data-chat={_id} title={lastMsgData}>
+                    <VideoFile data-chat={_id} className="fileIcon" />{" "}
                     {truncateString(lastMsgContent, 25, 22) || "Video"}
                   </span>
                 ) : lastMsgFileType === "audio" ? (
-                  <span data-chat={_id} title={lastMsgContent}>
-                    <AudioFile className="fileIcon" />{" "}
+                  <span data-chat={_id} title={lastMsgData}>
+                    <AudioFile data-chat={_id} className="fileIcon" />{" "}
                     {truncateString(lastMsgContent, 25, 22) || "Audio"}
                   </span>
                 ) : lastMsgFileType === "pdf" ? (
-                  <span data-chat={_id} title={lastMsgContent}>
-                    <PictureAsPdf className="fileIcon" />{" "}
-                    {truncateString(lastMsgContent, 22, 19) || "Pdf"}
+                  <span data-chat={_id} title={lastMsgData}>
+                    <PictureAsPdf data-chat={_id} className="fileIcon" />{" "}
+                    {truncateString(lastMsgData, 22, 19) || "Pdf"}
                   </span>
                 ) : (
-                  <span data-chat={_id} title={lastMsgContent}>
-                    <Description className="fileIcon" />{" "}
-                    {truncateString(lastMsgContent, 22, 19) || "File"}
+                  <span data-chat={_id} title={lastMsgData}>
+                    <Description data-chat={_id} className="fileIcon" />{" "}
+                    {truncateString(lastMsgData, 22, 19) || "File"}
                   </span>
                 )}
               </span>

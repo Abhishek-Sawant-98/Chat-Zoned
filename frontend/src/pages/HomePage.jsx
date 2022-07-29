@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Login from "../components/authentication/Login";
-import SignUp from "../components/authentication/Register";
+import Register from "../components/authentication/Register";
 import LottieAnimation from "../components/utils/LottieAnimation";
 import { useNavigate } from "react-router-dom";
 import animationData from "../animations/chat-gif.json";
@@ -61,7 +61,7 @@ const HomePage = () => {
             <section
               className={`app__form container text-light p-2 ${disableIfLoading}`}
             >
-              {showLogin ? <Login /> : <SignUp />}
+              {showLogin ? <Login /> : <Register />}
             </section>
           </section>
         </section>

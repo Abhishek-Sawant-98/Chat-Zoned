@@ -12,32 +12,36 @@ export const debounce = (func, delay = 500) => {
 // Optimization method to cache and retrieve the results
 // of pure functions, instead of recalculating again
 export const memoize = (func) => {
+  // Each memoized fn has its own separate cache
   const cachedResults = {};
 
   return (...args) => {
     // To generate a unique key for each input args array
-    const argsKey = JSON.stringify(...args);
+    const argsKey = JSON.stringify(args);
+    // console.log(
+    //   cachedResults[argsKey] ? "Retrieving from cache..." : "Calculating..."
+    // );
 
-    // For the 1st time, calculate and cache the new result
-    if (!cachedResults[argsKey]) {
-      cachedResults[argsKey] = func(...args);
-    }
-    // Else retrieve and return the old cached result
-    return cachedResults[argsKey];
+    // Retrieve result from cache if present, else calculate
+    const result = cachedResults[argsKey] || func(...args);
+
+    // If result isn't saved in cache, save it for later use
+    if (!cachedResults[argsKey]) cachedResults[argsKey] = result;
+
+    return result;
   };
 };
 
 // Truncate a sentence/string
-export const truncateString = (str, limit, index) => {
+export const truncateString = memoize((str, limit, index) => {
   if (!str || !limit || !index) return "";
   return str.length > limit ? `${str.substring(0, index)}...` : str;
-};
+});
 
-// Can't memoize as it's an impure function
-export const getOneOnOneChatReceiver = (loggedInUser, chatUsers) => {
+export const getOneOnOneChatReceiver = memoize((loggedInUser, chatUsers) => {
   if (!chatUsers?.length || !loggedInUser) return;
   return loggedInUser._id !== chatUsers[0]._id ? chatUsers[0] : chatUsers[1];
-};
+});
 
 export const msgTimeStringOf = memoize((msgDate) => {
   if (!msgDate) return "";
@@ -54,7 +58,7 @@ export const dateStringOf = memoize((date) => {
     : "";
 });
 
-// Impure function
+// Impure function, so can't memoize
 export const msgDateStringOf = (currDate) => {
   if (!currDate) return "";
   const months = [
@@ -91,8 +95,20 @@ export const ONE_MB = 1048576;
 export const TWO_MB = 2097152;
 export const FIVE_MB = 5242880;
 
-export const isImageFile = (filename) =>
-  /(\.png|\.jpg|\.jpeg|\.svg|\.webp)$/.test(filename);
+export const getFileSizeString = memoize((fileSize) => {
+  return !fileSize
+    ? ""
+    : fileSize > ONE_MB
+    ? (fileSize / ONE_MB).toFixed(1) + " MB"
+    : fileSize > ONE_KB
+    ? (fileSize / ONE_KB).toFixed(0) + " KB"
+    : fileSize + " B";
+});
 
-export const isImageOrGifFile = (filename) =>
-  /(\.png|\.jpg|\.jpeg|\.svg|\.gif|\.webp)$/.test(filename);
+export const isImageFile = memoize((filename) =>
+  /(\.png|\.jpg|\.jpeg|\.svg|\.webp)$/.test(filename)
+);
+
+export const isImageOrGifFile = memoize((filename) =>
+  /(\.png|\.jpg|\.jpeg|\.svg|\.gif|\.webp)$/.test(filename)
+);

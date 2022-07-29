@@ -1,5 +1,4 @@
 import {
-  AudioFile,
   Audiotrack,
   Description,
   Download,
@@ -10,15 +9,23 @@ import {
   Videocam,
 } from "@mui/icons-material";
 import {
+  getFileSizeString,
   isImageOrGifFile,
-  ONE_KB,
-  ONE_MB,
   truncateString,
 } from "../../utils/appUtils";
+import animationData from "../../animations/app-loading.json";
+import LottieAnimation from "../utils/LottieAnimation";
+import { useRef } from "react";
 
 const IMG_BASE_URL = process.env.REACT_APP_CLOUDINARY_BASE_URL;
 
-const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
+const MsgAttachment = ({
+  msgSent,
+  downloadingFileId,
+  loadingMediaId,
+  isPreview,
+  fileData,
+}) => {
   const previewStyles = `${
     isPreview ? "py-4 border border-4 border-secondary previewFile" : ""
   }`;
@@ -30,17 +37,13 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
   const isMediaFile = fileContents[1]?.includes(":");
   const mediaContents = isMediaFile ? fileContents[1].split("+++") : [];
   const mediaFileType = mediaContents[1];
+  const mediaFileSize = getFileSizeString(mediaContents[2]);
+  const loadingGif = useRef(null);
 
   let fileSize = mediaContents[0] || parseInt(fileContents[1]) || size || "";
 
   if (!isMediaFile) {
-    fileSize = !fileSize
-      ? ""
-      : fileSize > ONE_MB
-      ? (fileSize / ONE_MB).toFixed(1) + " MB"
-      : fileSize > ONE_KB
-      ? (fileSize / ONE_KB).toFixed(0) + " KB"
-      : fileSize + " B";
+    fileSize = getFileSizeString(fileSize);
   }
 
   const isDownloadingFile = downloadingFileId === file_id;
@@ -51,7 +54,7 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
       : mediaFileType?.startsWith("audio/") ||
         /(\.mp3|\.ogg|\.wav)$/.test(file_name)
       ? "Audio"
-      : /^(\.doc|\.docx)$/.test(file_name)
+      : /(\.doc|\.docx)$/.test(file_name)
       ? "Word Doc"
       : /(\.ppt|\.pptx)$/.test(file_name)
       ? "PPT"
@@ -144,22 +147,43 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
             </div>
           ) : fileType === "Video" ? (
             <div className={`${previewStyles} msgFile mediaFile`}>
+              <div>
+                {downloadIcon}
+                {` ${mediaFileSize}`}
+              </div>
               {fileNameWrapper}
               <div
-                data-media={file_id}
+                data-video={file_id}
+                data-video-name={file_name}
                 title="Click to Play"
                 className="mediaMsg bg-gradient py-5"
               >
                 <PlayCircle
-                  data-media={file_id}
-                  className="playMedia"
+                  data-video={file_id}
+                  data-video-name={file_name}
+                  className={`playMedia ${
+                    loadingMediaId === file_id ? "invisible" : "visible"
+                  }`}
                   style={{ fontSize: 40 }}
                 />
+                <LottieAnimation
+                  ref={loadingGif}
+                  className={`position-absolute ${
+                    loadingMediaId === file_id ? "visible" : "invisible"
+                  }`}
+                  style={{
+                    marginBottom: 0,
+                    height: 50,
+                    color: "white",
+                  }}
+                  animationData={animationData}
+                />
                 <span
-                  data-media={file_id}
+                  data-video={file_id}
+                  data-video-name={file_name}
                   className="mediaDuration videoDuration text-light"
                 >
-                  <Videocam data-media={file_id} />
+                  <Videocam data-video={file_id} data-video-name={file_name} />
                   &nbsp;&nbsp;{fileSize}
                 </span>
               </div>
@@ -168,18 +192,46 @@ const MsgAttachment = ({ msgSent, downloadingFileId, isPreview, fileData }) => {
             <div
               className={`${previewStyles} msgFile mediaFile bg-dark bg-opacity-75`}
             >
+              <div>
+                {downloadIcon}
+                {` ${mediaFileSize}`}
+              </div>
               {fileNameWrapper}
               <div
-                data-media={file_id}
+                data-audio={file_id}
+                data-audio-name={file_name}
                 className="mediaMsg bg-gradient px-4 py-2"
                 title="Click to Play"
               >
-                <PlayArrow data-media={file_id} className="playMedia" />
+                <PlayArrow
+                  data-audio={file_id}
+                  data-audio-name={file_name}
+                  className={`playMedia ${
+                    loadingMediaId === file_id ? "invisible" : "visible"
+                  }`}
+                />
+                <LottieAnimation
+                  ref={loadingGif}
+                  className={`position-absolute ${
+                    loadingMediaId === file_id ? "visible" : "invisible"
+                  }`}
+                  style={{
+                    marginBottom: 0,
+                    height: 30,
+                    color: "white",
+                  }}
+                  animationData={animationData}
+                />
                 <span
-                  data-media={file_id}
+                  data-audio={file_id}
+                  data-audio-name={file_name}
                   className="mediaDuration audioDuration text-light"
                 >
-                  <Audiotrack data-media={file_id} style={{ fontSize: 20 }} />
+                  <Audiotrack
+                    data-audio={file_id}
+                    data-audio-name={file_name}
+                    style={{ fontSize: 20 }}
+                  />
                   &nbsp;{fileSize}
                 </span>
               </div>

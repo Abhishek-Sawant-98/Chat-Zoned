@@ -1,6 +1,10 @@
 import { GroupAdd } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
-import { debounce, getOneOnOneChatReceiver } from "../utils/appUtils";
+import {
+  debounce,
+  getOneOnOneChatReceiver,
+  truncateString,
+} from "../utils/appUtils";
 import axios from "../utils/axios";
 import AddMembersToGroup from "./dialogs/AddMembersToGroup";
 import ChatListItem from "./utils/ChatListItem";
@@ -181,10 +185,11 @@ const ChatListView = ({ loadingMsgs, setFetchMsgs, setDialogBody }) => {
             // 'Event delegation' (add only one event listener for
             // parent element instead of adding for each child element)
             onClick={(e) => {
-              const chatId = e.target?.dataset?.chat;
+              const chatId =
+                e.target.dataset?.chat || e.target.parentNode.dataset?.chat;
               if (!chatId) return;
 
-              if (e.target?.className?.includes("chatListAvatar")) {
+              if (e.target.className?.toString().includes("chatListAvatar")) {
                 return displayFullSizeImage(e);
               }
               const clickedChat = filteredChats.find(

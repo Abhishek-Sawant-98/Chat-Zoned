@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { setSelectedChat } from "../../store/slices/AppSlice";
 import { hideDialog } from "../../store/slices/CustomDialogSlice";
 import { selectFormfieldState } from "../../store/slices/FormfieldSlice";
+import { truncateString } from "../../utils/appUtils";
 
 export const btnHoverStyle = {
   ":hover": { backgroundColor: "#93c2f727" },
@@ -90,9 +91,10 @@ const CustomDialog = ({
       >
         <span
           className="d-flex"
+          title={title}
           style={{ marginTop: -5, marginRight: 10 }}
         >
-          {title}
+          {truncateString(title, 24, 21)}
         </span>
         {showDialogClose && (
           <IconButton
