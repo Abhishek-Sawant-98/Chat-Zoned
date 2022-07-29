@@ -49,7 +49,8 @@ const GroupInfoBody = ({ messages }) => {
   const { childDialogMethods } = useSelector(selectChildDialogState);
   const { loading, disableIfLoading } = useSelector(selectFormfieldState);
   const dispatch = useDispatch();
-  const { setChildDialogBody, displayChildDialog } = childDialogMethods;
+  const { setChildDialogBody, displayChildDialog, closeChildDialog } =
+    childDialogMethods;
 
   const groupDP = groupInfo?.chatDisplayPic;
   const groupName = groupInfo?.chatName;
@@ -81,11 +82,12 @@ const GroupInfoBody = ({ messages }) => {
 
   // To retreive added members from `AddMembersToGroup` dialog
   let updatedName = "";
-  const getUpdatedName = (updatedValue) => {
+  const getUpdatedName = (updatedValue, options) => {
     updatedName = updatedValue;
+    if (options?.submitUpdatedName) updateGroupName({ enterKeyClicked: true });
   };
 
-  const updateGroupName = async () => {
+  const updateGroupName = async (options) => {
     if (!updatedName) {
       return dispatch(
         displayToast({
@@ -123,7 +125,8 @@ const GroupInfoBody = ({ messages }) => {
 
       dispatch(setLoading(false));
       updateView(data);
-      return "profileUpdated";
+      if (options?.enterKeyClicked) closeChildDialog();
+      else return "profileUpdated";
     } catch (error) {
       dispatch(
         displayToast({

@@ -31,6 +31,13 @@ const ChangePasswordBody = ({ getUpdatedState }) => {
     getUpdatedState(changePasswordData);
   }, [changePasswordData]);
 
+  const onEnterKeyDown = (e) => {
+    if (e.key === "Enter") {
+      // Submit updated password data
+      getUpdatedState(changePasswordData, { submitUpdatedPassword: true });
+    }
+  };
+
   return (
     <>
       {/* Current Password input */}
@@ -45,6 +52,7 @@ const ChangePasswordBody = ({ getUpdatedState }) => {
             type={showPassword ? "text" : "password"}
             value={currentPassword}
             onChange={handleChangeFor("currentPassword")}
+            onKeyDown={onEnterKeyDown}
             required
             autoFocus
             name="currentPassword"
@@ -72,6 +80,7 @@ const ChangePasswordBody = ({ getUpdatedState }) => {
             type={showPassword ? "text" : "password"}
             value={newPassword}
             onChange={handleChangeFor("newPassword")}
+            onKeyDown={onEnterKeyDown}
             required
             name="newPassword"
             id="new_password"
@@ -101,6 +110,7 @@ const ChangePasswordBody = ({ getUpdatedState }) => {
             type={showPassword ? "text" : "password"}
             value={confirmNewPassword}
             onChange={handleChangeFor("confirmNewPassword")}
+            onKeyDown={onEnterKeyDown}
             required
             name="confirmNewPassword"
             id="confirm_new_password"

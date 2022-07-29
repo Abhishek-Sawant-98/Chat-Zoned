@@ -96,6 +96,11 @@ const MsgAttachment = ({
       </div>
     </>
   );
+  const hideWhileLoadingMedia =
+    loadingMediaId === file_id ? "invisible" : "visible";
+
+  const displayWhileLoadingMedia =
+    loadingMediaId === file_id ? "visible" : "invisible";
 
   return (
     <>
@@ -111,6 +116,7 @@ const MsgAttachment = ({
         </span>
       ) : (
         <div
+          className="pointer"
           style={{ width: isPreview ? "clamp(270px, 50vmin, 600px)" : "100%" }}
         >
           {fileType === "PDF" ? (
@@ -161,16 +167,12 @@ const MsgAttachment = ({
                 <PlayCircle
                   data-video={file_id}
                   data-video-name={file_name}
-                  className={`playMedia ${
-                    loadingMediaId === file_id ? "invisible" : "visible"
-                  }`}
+                  className={`playMedia ${hideWhileLoadingMedia}`}
                   style={{ fontSize: 40 }}
                 />
                 <LottieAnimation
                   ref={loadingGif}
-                  className={`position-absolute ${
-                    loadingMediaId === file_id ? "visible" : "invisible"
-                  }`}
+                  className={`position-absolute ${displayWhileLoadingMedia}`}
                   style={{
                     marginBottom: 0,
                     height: 50,
@@ -206,15 +208,11 @@ const MsgAttachment = ({
                 <PlayArrow
                   data-audio={file_id}
                   data-audio-name={file_name}
-                  className={`playMedia ${
-                    loadingMediaId === file_id ? "invisible" : "visible"
-                  }`}
+                  className={`playMedia ${hideWhileLoadingMedia}`}
                 />
                 <LottieAnimation
                   ref={loadingGif}
-                  className={`position-absolute ${
-                    loadingMediaId === file_id ? "visible" : "invisible"
-                  }`}
+                  className={`position-absolute ${displayWhileLoadingMedia}`}
                   style={{
                     marginBottom: 0,
                     height: 30,

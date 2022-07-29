@@ -804,7 +804,7 @@ const MessagesView = ({
             className="h4 mx-5"
             style={{ marginTop: "-20px", color: "#99C5EE" }}
           >
-            Search or Click a Chat, Search a User, or Create a Group to start or
+            Search or Click a Chat, Create a Group, or Search a User to start or
             open a chat.
           </p>
           <p className="h2" style={{ color: "#99C5EE" }}>

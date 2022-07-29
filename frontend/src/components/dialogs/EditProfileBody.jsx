@@ -35,7 +35,8 @@ const EditProfileBody = () => {
   const { loading, disableIfLoading } = useSelector(selectFormfieldState);
   const { childDialogMethods } = useSelector(selectChildDialogState);
   const dispatch = useDispatch();
-  const { setChildDialogBody, displayChildDialog } = childDialogMethods;
+  const { setChildDialogBody, displayChildDialog, closeChildDialog } =
+    childDialogMethods;
 
   const [profileData, setProfileData] = useState({
     profilePicUrl: loggedInUser?.profilePic,
@@ -205,11 +206,13 @@ const EditProfileBody = () => {
   // Edited Name config
   let editedName;
 
-  const getUpdatedName = (updatedName) => {
-    editedName = updatedName;
+  const getUpdatedName = (updatedValue, options) => {
+    editedName = updatedValue;
+    if (options?.submitUpdatedName)
+      updateProfileName({ enterKeyPressed: true });
   };
 
-  const updateProfileName = async () => {
+  const updateProfileName = async (options) => {
     if (!editedName) {
       return dispatch(
         displayToast({
@@ -251,7 +254,8 @@ const EditProfileBody = () => {
         token: loggedInUser.token,
         expiryTime: loggedInUser.expiryTime,
       });
-      return "profileUpdated";
+      if (options?.enterKeyPressed) closeChildDialog();
+      else return "profileUpdated";
     } catch (error) {
       dispatch(
         displayToast({
