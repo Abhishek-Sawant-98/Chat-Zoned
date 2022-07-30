@@ -89,6 +89,30 @@ export const msgDateStringOf = (currDate) => {
       } ${currDate.getFullYear()}`;
 };
 
+export const parseInnerHTML = (innerHTML) => {
+  return (
+    innerHTML
+      ?.replaceAll("<br>", "")
+      .replaceAll("&nbsp;", "")
+      .replaceAll("<div>", "")
+      .replaceAll("</div>", "")
+      .trim() || ""
+  );
+};
+
+export const setCaretPosition = (node) => {
+  node?.focus();
+  const textNode = node?.firstChild;
+  if (!textNode) return;
+  const caret = parseInnerHTML(node?.innerHTML).length || 0;
+  const range = document.createRange();
+  range.setStart(textNode, caret);
+  range.setEnd(textNode, caret);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+};
+
 // In bytes
 export const ONE_KB = 1024;
 export const ONE_MB = 1048576;

@@ -21,6 +21,8 @@ const IMG_BASE_URL = process.env.REACT_APP_CLOUDINARY_BASE_URL;
 
 const MsgAttachment = ({
   msgSent,
+  msgEditMode,
+  clickedMsgId,
   downloadingFileId,
   loadingMediaId,
   isPreview,
@@ -31,7 +33,7 @@ const MsgAttachment = ({
   }`;
   const iconStyles = `${isPreview ? "fs-1" : "fs-2"}`;
 
-  let { fileUrl, file_id, file_name, size } = fileData;
+  let { msgId, fileUrl, file_id, file_name, size } = fileData;
   const fileContents = file_name.split("===") || [];
   file_name = fileContents[0] || file_name;
   const isMediaFile = fileContents[1]?.includes(":");

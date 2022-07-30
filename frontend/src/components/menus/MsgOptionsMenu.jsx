@@ -6,7 +6,7 @@ import MenuItemText from "../utils/MenuItemText";
 const MsgOptionsMenu = ({
   anchor,
   setAnchor,
-  openEditMsgDialog,
+  editMsgHandler,
   openDeleteMsgConfirmDialog,
 }) => {
   return (
@@ -16,17 +16,17 @@ const MsgOptionsMenu = ({
       transformOrigin={{ vertical: "top", horizontal: "left" }}
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
     >
-      <MenuItem sx={menuItemProps} onClick={openEditMsgDialog}>
+      <MenuItem sx={menuItemProps} onClick={editMsgHandler}>
         <ListItemIcon sx={menuIconProps}>
           <Edit />
         </ListItemIcon>
-        <MenuItemText>Edit Message</MenuItemText>
+        <MenuItemText>Edit</MenuItemText>
       </MenuItem>
       <MenuItem sx={menuItemProps} onClick={openDeleteMsgConfirmDialog}>
         <ListItemIcon sx={menuIconProps}>
           <Delete />
         </ListItemIcon>
-        <MenuItemText>Delete Message</MenuItemText>
+        <MenuItemText>Delete</MenuItemText>
       </MenuItem>
     </Menu>
   );

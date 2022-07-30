@@ -1,5 +1,11 @@
-import { DoneAll, KeyboardArrowDown } from "@mui/icons-material";
-import { CircularProgress } from "@mui/material";
+import {
+  AttachFile,
+  Close,
+  Done,
+  DoneAll,
+  KeyboardArrowDown,
+} from "@mui/icons-material";
+import { CircularProgress, IconButton } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { selectAppState } from "../../store/slices/AppSlice";
@@ -7,12 +13,13 @@ import {
   msgTimeStringOf,
   msgDateStringOf,
   dateStringOf,
+  setCaretPosition,
 } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 import MsgAttachment from "./MsgAttachment";
 
 const arrowStyles = {
-  color: "#E6480C",
+  color: "#111",
 };
 const tooltipStyles = {
   maxWidth: 230,
@@ -20,14 +27,25 @@ const tooltipStyles = {
   fontFamily: "Mirza",
   fontSize: 16,
   borderRadius: 5,
-  backgroundColor: "#E6480C",
+  border: "1px solid #555",
+  backgroundColor: "#111",
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
+const IconButtonSx = {
+  color: "lightblue",
+  ":hover": {
+    backgroundColor: "#cccccc20",
+  },
+};
 
 const Message = ({
   downloadingFileId,
   loadingMediaId,
+  msgEditMode,
+  clickedMsgId,
   msgSent,
+  msgFileInput,
+  discardDraft,
   currMsg,
   prevMsg,
 }) => {
@@ -37,6 +55,7 @@ const Message = ({
   const isLoggedInUser = _id === loggedInUser._id;
   const senderData = `${profilePic}===${name}===${email}`;
   const currMsgId = isLoggedInUser ? currMsg?._id : null;
+  const isClickedMsgCurrMsg = clickedMsgId === currMsgId;
   const isSameSender = _id === prevMsg?.sender._id;
   const currMsgDate = new Date(currMsg.createdAt);
   const prevMsgDate = new Date(prevMsg?.createdAt);
@@ -50,6 +69,14 @@ const Message = ({
     if (msgContentRef?.current)
       msgContentRef.current.innerHTML = currMsg?.content;
   }, []);
+
+  useEffect(() => {
+    if (msgEditMode && isClickedMsgCurrMsg) {
+      setCaretPosition(msgContentRef?.current);
+    }
+  }, [msgEditMode]);
+
+  const updateEditedMsg = () => {};
 
   return (
     <>
@@ -76,12 +103,53 @@ const Message = ({
           mx-2 mx-md-3 ${isLoggedInUser ? "yourMsg" : "receiversMsg"}`}
           data-msg={currMsgId}
         >
+          {msgEditMode && isClickedMsgCurrMsg ? (
+            <div
+              className="d-flex justify-content-end"
+              style={{ margin: "-5px -5px -3px 0px" }}
+            >
+              {!currMsg?.fileUrl && (
+                <CustomTooltip title="Attach File" placement="top-end" arrow>
+                  <IconButton
+                    onClick={() => {
+                      msgFileInput?.click();
+                    }}
+                    className={``}
+                    sx={{ ...IconButtonSx, transform: "rotateZ(45deg)" }}
+                  >
+                    <AttachFile style={{ fontSize: 20 }} />
+                  </IconButton>
+                </CustomTooltip>
+              )}
+
+              <CustomTooltip title="Discard Draft" placement="top-end" arrow>
+                <IconButton
+                  onClick={discardDraft}
+                  className={``}
+                  sx={IconButtonSx}
+                >
+                  <Close style={{ fontSize: 20 }} />
+                </IconButton>
+              </CustomTooltip>
+              <CustomTooltip title="Update Message" placement="top-end" arrow>
+                <IconButton
+                  onClick={updateEditedMsg}
+                  className={`ms-1`}
+                  sx={IconButtonSx}
+                >
+                  <Done style={{ fontSize: 20 }} />
+                </IconButton>
+              </CustomTooltip>
+            </div>
+          ) : (
+            <></>
+          )}
           {showCurrSender && (
             <span data-sender={senderData} className="msgSender pointer">
               {name}
             </span>
           )}
-          {isLoggedInUser && msgSent && (
+          {isLoggedInUser && msgSent && !msgEditMode && (
             <span
               data-msg={currMsgId}
               title="Edit/Delete Message"
@@ -98,9 +166,12 @@ const Message = ({
           {currMsg?.fileUrl && (
             <MsgAttachment
               msgSent={msgSent}
+              msgEditMode={msgEditMode}
+              clickedMsgId={clickedMsgId}
               downloadingFileId={downloadingFileId}
               loadingMediaId={loadingMediaId}
               fileData={{
+                msgId: currMsgId,
                 fileUrl: currMsg.fileUrl,
                 file_id: currMsg.file_id,
                 file_name: currMsg.file_name,
@@ -108,7 +179,12 @@ const Message = ({
             />
           )}
           <div data-msg={currMsgId} className="msgContent d-flex">
-            {currMsg?.content && <span ref={msgContentRef}></span>}
+            <span
+              className="w-100"
+              style={{ outline: "none" }}
+              contentEditable={msgEditMode && isClickedMsgCurrMsg}
+              ref={msgContentRef}
+            ></span>
             <span
               data-msg={currMsgId}
               className="msgTime text-end d-flex align-items-end justify-content-end"
@@ -138,5 +214,4 @@ const Message = ({
     </>
   );
 };
-
 export default Message;

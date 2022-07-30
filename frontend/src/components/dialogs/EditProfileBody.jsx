@@ -370,7 +370,7 @@ const EditProfileBody = () => {
           >
             <div
               className="w-100 h1 fw-bold mx-4 text-info"
-              style={{ fontSize: "35px" }}
+              style={{ fontSize: "35px", wordBreak:"break-all" }}
             >
               {truncateString(name, 25, 21)}
             </div>

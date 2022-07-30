@@ -4,7 +4,7 @@ import { truncateString } from "../../utils/appUtils";
 import MsgAttachment from "./MsgAttachment";
 
 const FILE_WRAPPER_CLASS =
-  "mt-4 h-50 d-flex justify-content-center align-items-center";
+  `mt-4 h-50 d-flex justify-content-center align-items-center`;
 const ATTACHMENT_STYLE = {
   borderRadius: 7,
   width: "clamp(290px, 90%, 700px)",
@@ -13,6 +13,7 @@ const ATTACHMENT_STYLE = {
 const PLACEHOLDER_IMG = process.env.REACT_APP_PLACEHOLDER_IMG_URL;
 
 const AttachmentPreview = ({
+  msgEditMode,
   attachmentData,
   discardAttachment,
   CustomTooltip,
@@ -56,7 +57,7 @@ const AttachmentPreview = ({
           className={`mt-5 mb-2`}
           style={{ color: "lightblue", fontSize: 25, zIndex: 5 }}
         >
-          {truncateString(previewTitle || "Attached File", 23, 20)}
+          {truncateString(previewTitle, 23, 20) || "Attached File"}
         </span>
       </CustomTooltip>
       <>

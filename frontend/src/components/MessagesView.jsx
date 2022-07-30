@@ -5,6 +5,7 @@ import {
   FIVE_MB,
   getOneOnOneChatReceiver,
   isImageOrGifFile,
+  parseInnerHTML,
   truncateString,
 } from "../utils/appUtils";
 import { ArrowBack, AttachFile, Close, Send } from "@mui/icons-material";
@@ -93,6 +94,7 @@ const MessagesView = ({
   const msgContent = useRef(null);
   const [downloadingFileId, setDownloadingFileId] = useState("");
   const [loadingMediaId, setLoadingMediaId] = useState("");
+  const [msgEditMode, setMsgEditMode] = useState(false);
   const [msgOptionsMenuAnchor, setMsgOptionsMenuAnchor] = useState(null);
 
   const chatName = selectedChat?.isGroupChat
@@ -111,10 +113,15 @@ const MessagesView = ({
     msgContent.current.innerHTML = "";
   };
 
+  const discardAttachment = () => {
+    resetMsgInput({ discardAttachmentOnly: true });
+  };
+
   const closeChat = () => {
     setLoadingMsgs(false);
     dispatch(setSelectedChat(null));
     resetMsgInput();
+    setMsgEditMode(false);
   };
 
   const viewMedia = (src, fileData) => {
@@ -375,7 +382,83 @@ const MessagesView = ({
     }
   };
 
-  const updateMessage = async () => {};
+  const updateMessage = async () => {
+    if (!attachmentData.attachment && !msgContent.current?.innerHTML) return;
+
+    const msgData = {
+      ...attachmentData,
+      content: msgContent.current?.innerHTML || "",
+    };
+    const isNonImageFile = !isImageOrGifFile(msgData.attachment?.name);
+
+    const updatedMsg = {
+      _id: Date.now(),
+      sender: {
+        _id: loggedInUser?._id,
+        profilePic: "",
+        name: "",
+        email: "",
+      },
+      fileUrl: msgData?.attachmentPreviewUrl,
+      file_id: "",
+      file_name:
+        msgData?.attachment?.name +
+        `${
+          msgData?.mediaDuration
+            ? `===${msgData.mediaDuration}`
+            : isNonImageFile
+            ? `===${msgData.attachment?.size || ""}`
+            : ""
+        }`,
+      content: msgData?.content,
+      createdAt: new Date().toISOString(),
+      sent: false,
+    };
+    setMessages(
+      messages.map((msg) => (msg._id === clickedMsg ? updatedMsg : msg))
+    );
+    resetMsgInput();
+    setSending(true);
+    const config = {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+    };
+
+    try {
+      // Upload img/gif to cloudinary, and all other files to aws s3
+      const apiUrl = isNonImageFile
+        ? `/api/message/update-in-s3`
+        : `/api/message/update`;
+
+      const formData = new FormData();
+      formData.append("attachment", msgData.attachment);
+      formData.append("mediaDuration", msgData?.mediaDuration);
+      formData.append("updatedContent", msgData.content);
+      formData.append("messageId", clickedMsg);
+      const { data } = await axios.put(apiUrl, formData, config);
+
+      clientSocket?.emit("msg updated", data);
+      fetchMessages();
+      dispatch(toggleRefresh(!refresh));
+    } catch (error) {
+      dispatch(
+        displayToast({
+          title: "Couldn't Update Message",
+          message: error.response?.data?.message || error.message,
+          type: "error",
+          duration: 4000,
+          position: "bottom-center",
+        })
+      );
+      setSending(false);
+    }
+  };
+
+  const editMsgHandler = () => {
+    setMsgEditMode(true);
+  };
 
   const setMediaDuration = (mediaUrl, msgFile) => {
     const media = new Audio(mediaUrl);
@@ -485,12 +568,7 @@ const MessagesView = ({
 
   // Message input handlers
   const msgInputHandler = debounce((e) => {
-    const input = e.target.innerHTML
-      ?.replaceAll("<br>", "")
-      .replaceAll("&nbsp;", "")
-      .replaceAll("<div>", "")
-      .replaceAll("</div>", "")
-      .trim();
+    const input = parseInnerHTML(e.target.innerHTML);
     setEnableMsgSend(Boolean(input));
   }, 500);
 
@@ -504,24 +582,25 @@ const MessagesView = ({
   // Msgs click handler ('Event Delegation' applied here)
   const msgsClickHandler = (e) => {
     const { dataset } = e.target;
+    const parentDataset = e.target.parentNode.dataset;
     const senderData = dataset?.sender?.split("===");
     const msgId = dataset?.msg;
-    const videoId = dataset?.video || e.target.parentNode.dataset?.video;
-    const audioId = dataset?.audio || e.target.parentNode.dataset?.audio;
-    const fileId = dataset?.download || e.target.parentNode.dataset?.download;
+    const videoId = dataset?.video || parentDataset?.video;
+    const audioId = dataset?.audio || parentDataset?.audio;
+    const fileId = dataset?.download || parentDataset?.download;
 
     if (fileId) {
       downloadFile(fileId);
     } else if (videoId) {
       // Load video
       loadMedia(videoId, {
-        fileName: dataset?.videoName || e.target.parentNode.dataset?.videoName,
+        fileName: dataset?.videoName || parentDataset?.videoName,
         isAudio: false,
       });
     } else if (audioId) {
       // Load audio
       loadMedia(audioId, {
-        fileName: dataset?.audioName || e.target.parentNode.dataset?.audioName,
+        fileName: dataset?.audioName || parentDataset?.audioName,
         isAudio: true,
       });
     } else if (dataset?.imageId) {
@@ -534,10 +613,23 @@ const MessagesView = ({
         memberEmail: senderData[2],
       };
       openViewProfileDialog(props);
-    } else if (msgId) {
+    } else if (msgId && !msgEditMode) {
       setClickedMsg(msgId);
       openMsgOptionsMenu(e);
     }
+  };
+
+  // Discard msg update draft
+  const discardMsgDraft = () => {
+    discardAttachment();
+    setMsgEditMode(false);
+    setSending(true);
+    setMessages([]);
+    setTimeout(() => {
+      setMessages(messages);
+      setSending(false);
+    }, 30);
+    return "msgActionDone";
   };
 
   useEffect(() => {
@@ -573,7 +665,7 @@ const MessagesView = ({
     );
   };
 
-  // Open delete photo confirm dialog
+  // Open delete msg confirm dialog
   const openDeleteMsgConfirmDialog = () => {
     dispatch(setShowDialogActions(true));
     setDialogBody(<>Are you sure you want to delete this message?</>);
@@ -584,6 +676,21 @@ const MessagesView = ({
         yeslabel: "YES",
         loadingYeslabel: "Deleting...",
         action: deleteMessage,
+      })
+    );
+  };
+
+  // Open discard draft confirm dialog
+  const openDiscardDraftConfirmDialog = () => {
+    dispatch(setShowDialogActions(true));
+    setDialogBody(<>Are you sure you want to discard this draft?</>);
+    dispatch(
+      displayDialog({
+        title: "Discard Draft",
+        nolabel: "NO",
+        yeslabel: "YES",
+        loadingYeslabel: "Discarding...",
+        action: discardMsgDraft,
       })
     );
   };
@@ -682,7 +789,7 @@ const MessagesView = ({
                 // Event delegation
                 onClick={msgsClickHandler}
                 className={`msgArea overflow-auto ${
-                  fileAttached ? "d-none" : "d-flex"
+                  fileAttached && !msgEditMode ? "d-none" : "d-flex"
                 } flex-column-reverse`}
               >
                 <div className="msgListBottom" ref={msgListBottom}></div>
@@ -693,6 +800,11 @@ const MessagesView = ({
                     <Message
                       downloadingFileId={downloadingFileId}
                       loadingMediaId={loadingMediaId}
+                      msgEditMode={msgEditMode}
+                      clickedMsgId={clickedMsg}
+                      setMsgEditMode={setMsgEditMode}
+                      msgFileInput={msgFileInput.current}
+                      discardDraft={openDiscardDraftConfirmDialog}
                       key={m._id}
                       msgSent={m.sent}
                       currMsg={m}
@@ -707,20 +819,22 @@ const MessagesView = ({
               anchor={msgOptionsMenuAnchor}
               setAnchor={setMsgOptionsMenuAnchor}
               clickedMsg={clickedMsg}
-              openEditMsgDialog={() => {}}
+              editMsgHandler={editMsgHandler}
               openDeleteMsgConfirmDialog={openDeleteMsgConfirmDialog}
             />
-            {fileAttached && (
+            {fileAttached && !msgEditMode && (
               <AttachmentPreview
                 attachmentData={attachmentData}
-                discardAttachment={() =>
-                  resetMsgInput({ discardAttachmentOnly: true })
-                }
+                discardAttachment={discardAttachment}
                 CustomTooltip={CustomTooltip}
               />
             )}
             {/* New Message Input */}
-            <div className={`msgInputDiv d-flex position-absolute`}>
+            <div
+              className={`msgInputDiv d-flex position-absolute ${
+                msgEditMode ? "pe-none" : "pe-auto"
+              }`}
+            >
               <span
                 className={`d-inline-block attachFile ${disableIfLoading} pointer bg-dark`}
               >
@@ -730,9 +844,7 @@ const MessagesView = ({
                   arrow
                 >
                   <IconButton
-                    onClick={() => {
-                      msgFileInput.current?.click();
-                    }}
+                    onClick={() => msgFileInput.current?.click()}
                     className={`d-flex ms-2 my-2`}
                     sx={{ ...iconStyles, transform: "rotateZ(45deg)" }}
                   >
@@ -757,16 +869,18 @@ const MessagesView = ({
                 onKeyDown={msgKeydownHandler}
                 ref={msgContent}
                 className={`msgInput ${
-                  fileAttached ? "addCaption" : ""
+                  fileAttached && !msgEditMode ? "addCaption" : ""
                 } w-100 text-start d-flex bg-dark px-3 justify-content-start`}
                 contentEditable={true}
                 style={{
                   borderRadius:
-                    enableMsgSend || fileAttached ? "0px" : "0px 7px 7px 0px",
+                    enableMsgSend || (fileAttached && !msgEditMode)
+                      ? "0px"
+                      : "0px 7px 7px 0px",
                 }}
               ></div>
               {/* Send button */}
-              {enableMsgSend || fileAttached ? (
+              {enableMsgSend || (fileAttached && !msgEditMode) ? (
                 <span
                   className={`d-inline-block btn btn-dark btn-sm sendButton ${disableIfLoading} pointer`}
                   onClick={sendMessage}
