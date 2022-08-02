@@ -20,13 +20,13 @@ const MsgOptionsMenu = ({
         <ListItemIcon sx={menuIconProps}>
           <Edit />
         </ListItemIcon>
-        <MenuItemText>Edit</MenuItemText>
+        <MenuItemText>Edit Message</MenuItemText>
       </MenuItem>
       <MenuItem sx={menuItemProps} onClick={openDeleteMsgConfirmDialog}>
         <ListItemIcon sx={menuIconProps}>
           <Delete />
         </ListItemIcon>
-        <MenuItemText>Delete</MenuItemText>
+        <MenuItemText>Delete Message</MenuItemText>
       </MenuItem>
     </Menu>
   );

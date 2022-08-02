@@ -61,6 +61,7 @@ const iconStyles = {
 
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 const SOCKET_ENDPOINT = process.env.REACT_APP_SERVER_BASE_URL;
+let msgFileAlreadyExists = false;
 
 const MessagesView = ({
   loadingMsgs,
@@ -80,6 +81,7 @@ const MessagesView = ({
   const { disableIfLoading } = useSelector(selectFormfieldState);
   const dispatch = useDispatch();
   const [sending, setSending] = useState(false);
+  const [msgFileRemoved, setMsgFileRemoved] = useState(false);
   const [enableMsgSend, setEnableMsgSend] = useState(false);
   const [fileAttached, setFileAttached] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -92,6 +94,7 @@ const MessagesView = ({
   const msgListBottom = useRef(null);
   const msgFileInput = useRef(null);
   const msgContent = useRef(null);
+  const editableMsgContent = useRef(null);
   const [downloadingFileId, setDownloadingFileId] = useState("");
   const [loadingMediaId, setLoadingMediaId] = useState("");
   const [msgEditMode, setMsgEditMode] = useState(false);
@@ -113,6 +116,8 @@ const MessagesView = ({
     msgContent.current.innerHTML = "";
   };
 
+  const selectAttachment = () => msgFileInput.current?.click();
+
   const discardAttachment = () => {
     resetMsgInput({ discardAttachmentOnly: true });
   };
@@ -121,6 +126,7 @@ const MessagesView = ({
     setLoadingMsgs(false);
     dispatch(setSelectedChat(null));
     resetMsgInput();
+    setMsgFileRemoved(false);
     setMsgEditMode(false);
   };
 
@@ -382,12 +388,28 @@ const MessagesView = ({
     }
   };
 
-  const updateMessage = async () => {
-    if (!attachmentData.attachment && !msgContent.current?.innerHTML) return;
+  const updateMessage = async (updatedMsgContent, msgDate) => {
+    if (
+      !(
+        attachmentData.attachment ||
+        (msgFileAlreadyExists && !msgFileRemoved)
+      ) &&
+      !parseInnerHTML(updatedMsgContent)
+    ) {
+      return dispatch(
+        displayToast({
+          message: "A Message Must Contain Either a File or some Text Content",
+          type: "warning",
+          duration: 5000,
+          position: "top-center",
+        })
+      );
+    }
+    setMsgEditMode(false);
 
     const msgData = {
       ...attachmentData,
-      content: msgContent.current?.innerHTML || "",
+      content: updatedMsgContent || "",
     };
     const isNonImageFile = !isImageOrGifFile(msgData.attachment?.name);
 
@@ -411,13 +433,13 @@ const MessagesView = ({
             : ""
         }`,
       content: msgData?.content,
-      createdAt: new Date().toISOString(),
+      createdAt: msgDate,
       sent: false,
     };
     setMessages(
       messages.map((msg) => (msg._id === clickedMsg ? updatedMsg : msg))
     );
-    resetMsgInput();
+    discardAttachment();
     setSending(true);
     const config = {
       headers: {
@@ -434,6 +456,7 @@ const MessagesView = ({
 
       const formData = new FormData();
       formData.append("attachment", msgData.attachment);
+      formData.append("msgFileRemoved", msgFileRemoved);
       formData.append("mediaDuration", msgData?.mediaDuration);
       formData.append("updatedContent", msgData.content);
       formData.append("messageId", clickedMsg);
@@ -442,6 +465,7 @@ const MessagesView = ({
       clientSocket?.emit("msg updated", data);
       fetchMessages();
       dispatch(toggleRefresh(!refresh));
+      setMsgFileRemoved(false);
     } catch (error) {
       dispatch(
         displayToast({
@@ -453,6 +477,7 @@ const MessagesView = ({
         })
       );
       setSending(false);
+      setMsgFileRemoved(false);
     }
   };
 
@@ -566,6 +591,35 @@ const MessagesView = ({
     });
   });
 
+  // Discard msg update draft
+  const discardMsgDraft = () => {
+    discardAttachment();
+    setMsgEditMode(false);
+    setSending(true);
+    setMessages([]);
+    setTimeout(() => {
+      setMessages(messages);
+      setSending(false);
+    }, 0);
+    setMsgFileRemoved(false);
+    return "msgActionDone";
+  };
+
+  // Open discard draft confirm dialog
+  const openDiscardDraftConfirmDialog = () => {
+    dispatch(setShowDialogActions(true));
+    setDialogBody(<>Are you sure you want to discard this draft?</>);
+    dispatch(
+      displayDialog({
+        title: "Discard Draft",
+        nolabel: "NO",
+        yeslabel: "YES",
+        loadingYeslabel: "Discarding...",
+        action: discardMsgDraft,
+      })
+    );
+  };
+
   // Message input handlers
   const msgInputHandler = debounce((e) => {
     const input = parseInnerHTML(e.target.innerHTML);
@@ -573,9 +627,20 @@ const MessagesView = ({
   }, 500);
 
   const msgKeydownHandler = (e) => {
-    if (e.key === "Enter" && !e.shiftKey && (enableMsgSend || fileAttached)) {
+    if (
+      e.key === "Enter" &&
+      !e.shiftKey &&
+      (enableMsgSend || fileAttached || msgEditMode)
+    ) {
       e.preventDefault();
-      sendMessage();
+      if (msgEditMode) {
+        const msgDate =
+          e.target.dataset?.msgCreatedAt ||
+          e.target.parentNode.dataset?.msgCreatedAt;
+        updateMessage(editableMsgContent?.current?.innerHTML, msgDate);
+      } else {
+        sendMessage();
+      }
     }
   };
 
@@ -584,10 +649,19 @@ const MessagesView = ({
     const { dataset } = e.target;
     const parentDataset = e.target.parentNode.dataset;
     const senderData = dataset?.sender?.split("===");
-    const msgId = dataset?.msg;
+    const msgId = dataset?.msg || parentDataset?.msg;
     const videoId = dataset?.video || parentDataset?.video;
     const audioId = dataset?.audio || parentDataset?.audio;
     const fileId = dataset?.download || parentDataset?.download;
+    const updateEditedMsg = dataset?.updateMsg || parentDataset?.updateMsg;
+    const attachMsgFileClicked =
+      dataset?.attachMsgFile || parentDataset?.attachMsgFile;
+    const removeMsgFileClicked =
+      dataset?.removeMsgFile || parentDataset?.removeMsgFile;
+    const editMsgFileClicked =
+      dataset?.editMsgFile || parentDataset?.editMsgFile;
+    const discardDraftClicked =
+      dataset?.discardDraft || parentDataset?.discardDraft;
 
     if (fileId) {
       downloadFile(fileId);
@@ -614,22 +688,22 @@ const MessagesView = ({
       };
       openViewProfileDialog(props);
     } else if (msgId && !msgEditMode) {
+      msgFileAlreadyExists = Boolean(
+        dataset?.fileExists || parentDataset?.fileExists
+      );
       setClickedMsg(msgId);
       openMsgOptionsMenu(e);
+    } else if (attachMsgFileClicked || editMsgFileClicked) {
+      selectAttachment();
+    } else if (removeMsgFileClicked) {
+      setMsgFileRemoved(true);
+      discardAttachment();
+    } else if (discardDraftClicked) {
+      openDiscardDraftConfirmDialog();
+    } else if (updateEditedMsg) {
+      const msgDate = dataset?.msgCreatedAt || parentDataset?.msgCreatedAt;
+      updateMessage(editableMsgContent?.current?.innerHTML, msgDate);
     }
-  };
-
-  // Discard msg update draft
-  const discardMsgDraft = () => {
-    discardAttachment();
-    setMsgEditMode(false);
-    setSending(true);
-    setMessages([]);
-    setTimeout(() => {
-      setMessages(messages);
-      setSending(false);
-    }, 30);
-    return "msgActionDone";
   };
 
   useEffect(() => {
@@ -676,21 +750,6 @@ const MessagesView = ({
         yeslabel: "YES",
         loadingYeslabel: "Deleting...",
         action: deleteMessage,
-      })
-    );
-  };
-
-  // Open discard draft confirm dialog
-  const openDiscardDraftConfirmDialog = () => {
-    dispatch(setShowDialogActions(true));
-    setDialogBody(<>Are you sure you want to discard this draft?</>);
-    dispatch(
-      displayDialog({
-        title: "Discard Draft",
-        nolabel: "NO",
-        yeslabel: "YES",
-        loadingYeslabel: "Discarding...",
-        action: discardMsgDraft,
       })
     );
   };
@@ -782,12 +841,22 @@ const MessagesView = ({
             className={`messagesBody position-relative ${
               downloadingFileId || loadingMediaId ? "pe-none" : "pe-auto"
             } d-flex flex-column m-1 p-2`}
+            onClick={(e) => {
+              const { dataset } = e.target;
+              const parentDataset = e.target.parentNode.dataset;
+              const discardFileClicked =
+                dataset?.discardFile || parentDataset?.discardFile;
+              if (discardFileClicked) {
+                discardAttachment();
+              }
+            }}
           >
             {/* Messages list */}
             <div className="messages rounded-3 d-flex flex-column">
               <div
                 // Event delegation
                 onClick={msgsClickHandler}
+                onKeyDown={msgKeydownHandler}
                 className={`msgArea overflow-auto ${
                   fileAttached && !msgEditMode ? "d-none" : "d-flex"
                 } flex-column-reverse`}
@@ -802,9 +871,9 @@ const MessagesView = ({
                       loadingMediaId={loadingMediaId}
                       msgEditMode={msgEditMode}
                       clickedMsgId={clickedMsg}
-                      setMsgEditMode={setMsgEditMode}
-                      msgFileInput={msgFileInput.current}
-                      discardDraft={openDiscardDraftConfirmDialog}
+                      msgFileRemoved={msgFileRemoved}
+                      attachmentData={attachmentData}
+                      ref={editableMsgContent}
                       key={m._id}
                       msgSent={m.sent}
                       currMsg={m}
@@ -832,7 +901,7 @@ const MessagesView = ({
             {/* New Message Input */}
             <div
               className={`msgInputDiv d-flex position-absolute ${
-                msgEditMode ? "pe-none" : "pe-auto"
+                msgEditMode || sending ? "pe-none" : "pe-auto"
               }`}
             >
               <span
@@ -844,7 +913,7 @@ const MessagesView = ({
                   arrow
                 >
                   <IconButton
-                    onClick={() => msgFileInput.current?.click()}
+                    onClick={selectAttachment}
                     className={`d-flex ms-2 my-2`}
                     sx={{ ...iconStyles, transform: "rotateZ(45deg)" }}
                   >

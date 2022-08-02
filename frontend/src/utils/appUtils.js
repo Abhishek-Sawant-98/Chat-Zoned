@@ -93,7 +93,7 @@ export const parseInnerHTML = (innerHTML) => {
   return (
     innerHTML
       ?.replaceAll("<br>", "")
-      .replaceAll("&nbsp;", "")
+      .replaceAll("&nbsp;", " ")
       .replaceAll("<div>", "")
       .replaceAll("</div>", "")
       .trim() || ""
@@ -102,12 +102,12 @@ export const parseInnerHTML = (innerHTML) => {
 
 export const setCaretPosition = (node) => {
   node?.focus();
-  const textNode = node?.firstChild;
-  if (!textNode) return;
-  const caret = parseInnerHTML(node?.innerHTML).length || 0;
+  const lastTextNode = node?.lastChild;
+  if (!lastTextNode) return;
+  const caret = lastTextNode.data.length || 0;
   const range = document.createRange();
-  range.setStart(textNode, caret);
-  range.setEnd(textNode, caret);
+  range.setStart(lastTextNode, caret);
+  range.setEnd(lastTextNode, caret);
   const sel = window.getSelection();
   sel.removeAllRanges();
   sel.addRange(range);

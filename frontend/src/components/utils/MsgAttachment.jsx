@@ -21,19 +21,21 @@ const IMG_BASE_URL = process.env.REACT_APP_CLOUDINARY_BASE_URL;
 
 const MsgAttachment = ({
   msgSent,
-  msgEditMode,
-  clickedMsgId,
+  isEditMode,
+  fileEditIcons,
   downloadingFileId,
   loadingMediaId,
   isPreview,
   fileData,
 }) => {
   const previewStyles = `${
-    isPreview ? "py-4 border border-4 border-secondary previewFile" : ""
+    isPreview && !isEditMode
+      ? "py-4 border border-4 border-secondary previewFile"
+      : "p-2"
   }`;
-  const iconStyles = `${isPreview ? "fs-1" : "fs-2"}`;
+  const iconStyles = `${isPreview && !isEditMode ? "fs-1" : "fs-2"}`;
 
-  let { msgId, fileUrl, file_id, file_name, size } = fileData;
+  let { fileUrl, file_id, file_name, size } = fileData;
   const fileContents = file_name.split("===") || [];
   file_name = fileContents[0] || file_name;
   const isMediaFile = fileContents[1]?.includes(":");
@@ -66,23 +68,34 @@ const MsgAttachment = ({
       ? "PDF"
       : file_name.substring(file_name.lastIndexOf(".") + 1)?.toUpperCase();
 
-  const downloadIcon = (
-    <span
-      data-download={file_id}
-      className={`downloadIcon ${isDownloadingFile ? "downloading" : ""} ${
-        isPreview || !msgSent ? "d-none" : ""
-      }`}
-      title={isDownloadingFile ? "Downloading..." : "Download File"}
-    >
-      {isDownloadingFile ? (
-        <Downloading />
+  const attachmentHeader = (
+    <>
+      {isEditMode ? (
+        <span
+          className="d-flex justify-content-center w-100 mx-auto"
+          style={{ zIndex: 6 }}
+        >
+          {fileEditIcons}
+        </span>
       ) : (
-        <Download data-download={file_id} />
+        <span
+          data-download={file_id}
+          className={`downloadIcon ${isDownloadingFile ? "downloading" : ""} ${
+            isPreview || !msgSent ? "d-none" : ""
+          }`}
+          title={isDownloadingFile ? "Downloading..." : "Download File"}
+        >
+          {isDownloadingFile ? (
+            <Downloading />
+          ) : (
+            <Download data-download={file_id} />
+          )}
+        </span>
       )}
-    </span>
+    </>
   );
   const fileNameWrapper = (
-    <span className={`${isPreview ? "fs-4" : "fs-6"}`}>
+    <span className={`${isPreview && !isEditMode ? "fs-4" : "fs-6"}`}>
       &nbsp;&nbsp;
       <span title={file_name}>{truncateString(file_name + "", 40, 37)}</span>
     </span>
@@ -91,8 +104,8 @@ const MsgAttachment = ({
     <>
       {fileNameWrapper}
       <div
-        className={`${isPreview ? "fs-5 mt-4" : ""}`}
-        style={{ marginBottom: isPreview ? -10 : 0 }}
+        className={`${isPreview && !isEditMode ? "fs-5 mt-4" : ""}`}
+        style={{ marginBottom: isPreview && !isEditMode ? -10 : 0 }}
       >
         {`${fileType} : ${fileSize}`}
       </div>
@@ -107,7 +120,7 @@ const MsgAttachment = ({
   return (
     <>
       {fileUrl?.startsWith(IMG_BASE_URL) || isImageOrGifFile(file_name) ? (
-        <span className="d-inline-block msgImageWrapper mb-2">
+        <span className="d-inline-block msgImageWrapper mb-2 position-relative">
           <img
             src={fileUrl}
             alt={file_name}
@@ -115,49 +128,61 @@ const MsgAttachment = ({
             data-image-id={file_id}
             className={`msgImageFile d-inline-block`}
           />
+          {isEditMode && (
+            <span className="position-absolute top-0 start-0">
+              {fileEditIcons}
+            </span>
+          )}
         </span>
       ) : (
         <div
           className="pointer"
-          style={{ width: isPreview ? "clamp(270px, 50vmin, 600px)" : "100%" }}
+          style={{
+            margin: "0px 0px -8px 0px",
+            width:
+              isPreview && !isEditMode ? "clamp(270px, 50vmin, 600px)" : "100%",
+          }}
         >
           {fileType === "PDF" ? (
             <div className={`${previewStyles} msgFile pdfFile text-light`}>
               <div>
-                <PictureAsPdf className={iconStyles} />
-                {downloadIcon}
+                {!isEditMode && <PictureAsPdf className={iconStyles} />}
+                {attachmentHeader}
               </div>
               {fileInfo}
             </div>
           ) : fileType === "Spreadsheet" ? (
             <div className={`${previewStyles} msgFile excelFile bg-success`}>
               <div>
-                <Description className={iconStyles} />
-                {downloadIcon}
+                {!isEditMode && <Description className={iconStyles} />}
+                {attachmentHeader}
               </div>
               {fileInfo}
             </div>
           ) : fileType === "PPT" ? (
             <div className={`${previewStyles} msgFile pptFile text-light`}>
               <div>
-                <Description className={iconStyles} />
-                {downloadIcon}
+                {!isEditMode && <Description className={iconStyles} />}
+                {attachmentHeader}
               </div>
               {fileInfo}
             </div>
           ) : fileType === "Word Doc" ? (
-            <div className={`${previewStyles} msgFile wordFile`}>
+            <div
+              className={`${previewStyles} msgFile wordFile`}
+              style={{ borderRadius: isEditMode ? 10 : 5 }}
+            >
               <div>
-                <Description className={iconStyles} />
-                {downloadIcon}
+                {!isEditMode && <Description className={iconStyles} />}
+                {attachmentHeader}
               </div>
               {fileInfo}
             </div>
           ) : fileType === "Video" ? (
             <div className={`${previewStyles} msgFile mediaFile`}>
               <div>
-                {downloadIcon}
-                {` ${mediaFileSize}`}
+                {attachmentHeader}
+                {!isEditMode && ` ${mediaFileSize}`}
               </div>
               {fileNameWrapper}
               <div
@@ -197,8 +222,8 @@ const MsgAttachment = ({
               className={`${previewStyles} msgFile mediaFile bg-dark bg-opacity-75`}
             >
               <div>
-                {downloadIcon}
-                {` ${mediaFileSize}`}
+                {attachmentHeader}
+                {!isEditMode && ` ${mediaFileSize}`}
               </div>
               {fileNameWrapper}
               <div
@@ -239,8 +264,8 @@ const MsgAttachment = ({
           ) : (
             <div className={`${previewStyles} msgFile otherFile`}>
               <div>
-                <Description className={iconStyles} />
-                {downloadIcon}
+                {!isEditMode && <Description className={iconStyles} />}
+                {attachmentHeader}
               </div>
               {fileInfo}
             </div>

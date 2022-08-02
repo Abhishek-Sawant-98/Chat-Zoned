@@ -108,13 +108,13 @@ const sendMessage = asyncHandler(async (req, res) => {
 
 const updateMessage = asyncHandler(async (req, res) => {
   const updatedAttachment = req.file;
-  const { mediaDuration, updatedContent, messageId } = req.body;
+  const { msgFileRemoved, mediaDuration, updatedContent, messageId } = req.body;
+  const fileRemoved = msgFileRemoved === "true";
 
-  if ((!updatedContent && !updatedAttachment) || !messageId) {
-    res.status(400);
-    throw new Error("Invalid request params for updating a message");
+  if (!messageId) {
+    res.status(404);
+    throw new Error("Invalid Message Id");
   }
-
   const existingMessage = await MessageModel.findById(messageId);
 
   if (!existingMessage) {
@@ -122,19 +122,26 @@ const updateMessage = asyncHandler(async (req, res) => {
     throw new Error("Message not found");
   }
 
-  let attachmentData;
-  const { file_id, fileUrl } = existingMessage;
+  const { file_id, fileUrl, file_name } = existingMessage;
+  let attachmentData = { fileUrl, file_id, file_name };
+
+  if (!(updatedAttachment || (file_id && !fileRemoved)) && !updatedContent) {
+    res.status(400);
+    throw new Error(
+      "A Message Must Contain Either a File or some Text Content"
+    );
+  }
 
   if (!updatedAttachment) {
     // Attachment already exists but deleted by user while updating
-    if (file_id) deleteExistingAttachment(fileUrl, file_id);
-
-    // Attachment neither already exists nor deleted by user
-    attachmentData = {
-      fileUrl: null,
-      file_id: null,
-      file_name: null,
-    };
+    if (file_id && fileRemoved) {
+      deleteExistingAttachment(fileUrl, file_id);
+      attachmentData = {
+        fileUrl: null,
+        file_id: null,
+        file_name: null,
+      };
+    }
   } else if (
     /(\.png|\.jpg|\.jpeg|\.gif|\.svg|\.webp)$/.test(
       updatedAttachment.originalname

@@ -3,25 +3,32 @@ import { IconButton } from "@mui/material";
 import { truncateString } from "../../utils/appUtils";
 import MsgAttachment from "./MsgAttachment";
 
-const FILE_WRAPPER_CLASS =
-  `mt-4 h-50 d-flex justify-content-center align-items-center`;
-const ATTACHMENT_STYLE = {
-  borderRadius: 7,
-  width: "clamp(290px, 90%, 700px)",
-  maxHeight: 250,
-};
 const PLACEHOLDER_IMG = process.env.REACT_APP_PLACEHOLDER_IMG_URL;
 
 const AttachmentPreview = ({
-  msgEditMode,
+  isEditMode,
   attachmentData,
-  discardAttachment,
   CustomTooltip,
+  fileEditIcons,
 }) => {
   const {
     attachment: { name, type, size },
     attachmentPreviewUrl,
   } = attachmentData;
+
+  const FILE_WRAPPER_CLASS = `${
+    isEditMode ? "h-100" : "mt-4 h-50"
+  } d-flex justify-content-center align-items-center`;
+  const ATTACHMENT_STYLE = {
+    borderRadius: 7,
+    width: "calc(100%)",
+    maxHeight: isEditMode ? 200 : 250,
+  };
+  const editIconsWrapper = (
+    <span className="position-absolute top-0 start-0 m-1" style={{ zIndex: 6 }}>
+      {fileEditIcons}
+    </span>
+  );
 
   const previewTitle = type.startsWith("application/") ? "Attached File" : name;
 
@@ -31,38 +38,49 @@ const AttachmentPreview = ({
       style={{ borderRadius: 10 }}
     >
       {/* Discard Attachment button */}
-      <CustomTooltip title="Discard Attachment" placement="bottom-start" arrow>
-        <IconButton
-          onClick={discardAttachment}
-          sx={{
-            position: "absolute",
-            left: 15,
-            top: 12,
-            color: "#999999",
-            ":hover": {
-              backgroundColor: "#aaaaaa20",
-            },
-          }}
+      {!isEditMode && (
+        <CustomTooltip
+          title="Discard Attachment"
+          placement="bottom-start"
+          arrow
         >
-          <Close />
-        </IconButton>
-      </CustomTooltip>
+          <IconButton
+            data-discard-file={true}
+            sx={{
+              position: "absolute",
+              left: 15,
+              top: 12,
+              color: "#999999",
+              ":hover": {
+                backgroundColor: "#aaaaaa20",
+              },
+            }}
+          >
+            <Close data-discard-file={true} />
+          </IconButton>
+        </CustomTooltip>
+      )}
+
       {/* Attached File Name */}
-      <CustomTooltip
-        title={previewTitle?.length > 23 ? previewTitle : ""}
-        placement="top"
-        arrow
-      >
-        <span
-          className={`mt-5 mb-2`}
-          style={{ color: "lightblue", fontSize: 25, zIndex: 5 }}
+      {!isEditMode && (
+        <CustomTooltip
+          title={previewTitle?.length > 23 ? previewTitle : ""}
+          placement="top"
+          arrow
         >
-          {truncateString(previewTitle, 23, 20) || "Attached File"}
-        </span>
-      </CustomTooltip>
+          <span
+            className={`mt-5 mb-2`}
+            style={{ color: "lightblue", fontSize: 25, zIndex: 5 }}
+          >
+            {truncateString(previewTitle, 23, 20) || "Attached File"}
+          </span>
+        </CustomTooltip>
+      )}
+
       <>
         {type?.startsWith("image/") ? (
-          <div className={`${FILE_WRAPPER_CLASS}`}>
+          <div className={`${FILE_WRAPPER_CLASS} position-relative`}>
+            {editIconsWrapper}
             <img
               style={ATTACHMENT_STYLE}
               src={attachmentPreviewUrl || PLACEHOLDER_IMG}
@@ -70,7 +88,13 @@ const AttachmentPreview = ({
             />
           </div>
         ) : type?.startsWith("audio/") ? (
-          <div className={`${FILE_WRAPPER_CLASS}`} style={{ width: "85%" }}>
+          <div
+            className={`${FILE_WRAPPER_CLASS} flex-column`}
+            style={{ width: "clamp(190px, 48vw, 290px)" }}
+          >
+            <span className="m-2" style={{ zIndex: 6 }}>
+              {fileEditIcons}
+            </span>
             <audio
               src={attachmentPreviewUrl || ""}
               controls
@@ -81,7 +105,8 @@ const AttachmentPreview = ({
             </audio>
           </div>
         ) : type?.startsWith("video/") ? (
-          <div className={`${FILE_WRAPPER_CLASS}`}>
+          <div className={`${FILE_WRAPPER_CLASS} position-relative`}>
+            {editIconsWrapper}
             <video
               src={attachmentPreviewUrl || ""}
               controls
@@ -92,17 +117,17 @@ const AttachmentPreview = ({
             </video>
           </div>
         ) : (
-          <div className={`${FILE_WRAPPER_CLASS}`}>
-            <MsgAttachment
-              isPreview={true}
-              fileData={{
-                fileUrl: attachmentPreviewUrl,
-                file_id: "",
-                file_name: name,
-                size,
-              }}
-            />
-          </div>
+          <MsgAttachment
+            isEditMode={isEditMode}
+            fileEditIcons={fileEditIcons}
+            isPreview={true}
+            fileData={{
+              fileUrl: attachmentPreviewUrl,
+              file_id: "",
+              file_name: name,
+              size,
+            }}
+          />
         )}
       </>
     </div>
