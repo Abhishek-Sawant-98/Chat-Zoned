@@ -25,6 +25,7 @@ import {
   selectAppState,
   setClientSocket,
   setGroupInfo,
+  setLoggedInUser,
   setSelectedChat,
   setSocketConnected,
   toggleRefresh,
@@ -86,6 +87,7 @@ const MessagesView = ({
   const [fileAttached, setFileAttached] = useState(false);
   const [messages, setMessages] = useState([]);
   const [clickedMsg, setClickedMsg] = useState("");
+  const [dontScrollToBottom, setDontScrollToBottom] = useState(false);
   const [attachmentData, setAttachmentData] = useState({
     attachment: null,
     attachmentPreviewUrl: "",
@@ -122,12 +124,19 @@ const MessagesView = ({
     resetMsgInput({ discardAttachmentOnly: true });
   };
 
+  const persistUpdatedUser = (updatedUser) => {
+    // Session storage persists updated user even after page refresh
+    localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
+    dispatch(setLoggedInUser(updatedUser));
+  };
+
   const closeChat = () => {
     setLoadingMsgs(false);
     dispatch(setSelectedChat(null));
     resetMsgInput();
     setMsgFileRemoved(false);
     setMsgEditMode(false);
+    setDontScrollToBottom(false);
   };
 
   const viewMedia = (src, fileData) => {
@@ -297,6 +306,7 @@ const MessagesView = ({
       createdAt: new Date().toISOString(),
       sent: false,
     };
+    setDontScrollToBottom(false);
     setMessages([newMsg, ...messages]);
     resetMsgInput();
     setSending(true);
@@ -406,6 +416,7 @@ const MessagesView = ({
       );
     }
     setMsgEditMode(false);
+    setDontScrollToBottom(true);
 
     const msgData = {
       ...attachmentData,
@@ -553,14 +564,21 @@ const MessagesView = ({
     }
 
     // off() prevents on() to execute multiple times
-    clientSocket.off("new msg received").on("new msg received", (newMsg) => {
-      const { chat } = newMsg;
-      dispatch(toggleRefresh(!refresh));
-      if (selectedChat && chat && selectedChat._id === chat._id) {
-        newMsg["sent"] = true;
-        setMessages([newMsg, ...messages]);
-      }
-    });
+    clientSocket
+      .off("new msg received")
+      .on("new msg received", (newMsg, notifications) => {
+        const updatedUser = {
+          ...loggedInUser,
+          notifications: notifications?.reverse(),
+        };
+        persistUpdatedUser(updatedUser);
+        const { chat } = newMsg;
+        dispatch(toggleRefresh(!refresh));
+        if (selectedChat && chat && selectedChat._id === chat._id) {
+          newMsg["sent"] = true;
+          setMessages([newMsg, ...messages]);
+        }
+      });
 
     clientSocket
       .off("remove deleted msg")
@@ -597,9 +615,14 @@ const MessagesView = ({
     setMsgEditMode(false);
     setSending(true);
     setMessages([]);
+    // To execute after the entire code is run
     setTimeout(() => {
       setMessages(messages);
       setSending(false);
+      // To execute after all the messages have been mapped
+      setTimeout(() => {
+        document.getElementById(clickedMsg)?.scrollIntoView();
+      }, 10);
     }, 0);
     setMsgFileRemoved(false);
     return "msgActionDone";
@@ -707,7 +730,7 @@ const MessagesView = ({
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (!dontScrollToBottom) scrollToBottom();
   }, [messages]);
 
   useEffect(() => {

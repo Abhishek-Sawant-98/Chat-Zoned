@@ -9,8 +9,7 @@ import {
   updateUserPassword,
   updateUserProfilePic,
   deleteUserProfilePic,
-  addNotification,
-  deleteNotification,
+  deleteNotifications,
 } from "../controllers/UserController.js";
 
 const router = Router();
@@ -28,9 +27,6 @@ router.put(
   updateUserProfilePic
 );
 router.put("/delete/profile-pic", authorizeUser, deleteUserProfilePic);
-router.post("/add/notification", authorizeUser, addNotification);
-router.put("/delete/notification", authorizeUser, deleteNotification);
-
-// router.get("/:file", fetchFile);
+router.put("/delete/notifications", authorizeUser, deleteNotifications);
 
 export default router;

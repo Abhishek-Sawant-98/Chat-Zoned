@@ -84,6 +84,11 @@ const authenticateUser = asyncHandler(async (req, res) => {
         path: "chat",
         model: "Chat",
         select: "-groupAdmins -cloudinary_id",
+        populate: {
+          path: "users",
+          model: "User",
+          select: "-password -notifications",
+        },
       },
     ],
   });
@@ -159,6 +164,11 @@ const updateUserName = asyncHandler(async (req, res) => {
           path: "chat",
           model: "Chat",
           select: "-groupAdmins -cloudinary_id",
+          populate: {
+            path: "users",
+            model: "User",
+            select: "-password -notifications",
+          },
         },
       ],
     });
@@ -250,6 +260,11 @@ const updateUserProfilePic = asyncHandler(async (req, res) => {
           path: "chat",
           model: "Chat",
           select: "-groupAdmins -cloudinary_id",
+          populate: {
+            path: "users",
+            model: "User",
+            select: "-password -notifications",
+          },
         },
       ],
     });
@@ -301,6 +316,11 @@ const deleteUserProfilePic = asyncHandler(async (req, res) => {
           path: "chat",
           model: "Chat",
           select: "-groupAdmins -cloudinary_id",
+          populate: {
+            path: "users",
+            model: "User",
+            select: "-password -notifications",
+          },
         },
       ],
     });
@@ -314,91 +334,66 @@ const deleteUserProfilePic = asyncHandler(async (req, res) => {
   res.status(200).json(updatedUser);
 });
 
-const addNotification = asyncHandler(async (req, res) => {
-  // Frontend logic
-  // if(!selectedChat || selectedChat !== newMessage.chat) => add notification to array (if not present)
-  const { notificationId } = req.body;
-  const loggedInUser = req.user?._id;
+const addNotification = async (notificationId, userId) => {
+  let userData = { notifications: [] };
+  try {
+    if (!notificationId || !userId) {
+      throw new Error("Invalid params for adding notification");
+    }
+    userData = await UserModel.findByIdAndUpdate(
+      userId,
+      { $push: { notifications: notificationId } },
+      { new: true }
+    )
+      .select("notifications")
+      .populate({
+        path: "notifications",
+        model: "Message",
+        populate: [
+          {
+            path: "sender",
+            model: "User",
+            select: "name email profilePic",
+          },
+          {
+            path: "chat",
+            model: "Chat",
+            select: "-groupAdmins -cloudinary_id",
+            populate: {
+              path: "users",
+              model: "User",
+              select: "-password -notifications",
+            },
+          },
+        ],
+      });
 
-  if (!notificationId) {
-    res.status(400);
-    throw new Error("Invalid notification id for adding a notification");
+    if (!userData) {
+      throw new Error("User not found while adding notification");
+    }
+  } catch (error) {
+    console.log(error.message);
   }
+  return userData;
+};
 
-  // First check if the notification already exists
-  const existingNotification = await UserModel.findOne({
-    $and: [
-      { _id: loggedInUser },
-      { notifications: { $elemMatch: { $eq: notificationId } } },
-    ],
-  });
-
-  if (existingNotification) {
-    res.status(400);
-    throw new Error("Notification already exists");
-  }
-
-  const updatedUser = await UserModel.findByIdAndUpdate(
-    loggedInUser,
-    { $push: { notifications: notificationId } },
-    { new: true }
-  )
-    .select("-password")
-    .populate({
-      path: "notifications",
-      model: "Message",
-      populate: [
-        {
-          path: "sender",
-          model: "User",
-          select: "name email profilePic",
-        },
-        {
-          path: "chat",
-          model: "Chat",
-          select: "-groupAdmins -cloudinary_id",
-        },
-      ],
-    });
-
-  if (!updatedUser) {
-    res.status(404);
-    throw new Error("User not found while adding notification");
-  }
-
-  res.status(200).json(updatedUser);
-});
-
-const deleteNotification = asyncHandler(async (req, res) => {
+const deleteNotifications = asyncHandler(async (req, res) => {
   // Frontend logic
   // if(selectedChat && selectedChat === newMessage.chat) => delete notification from array (if present)
-  const { notificationId } = req.body;
+  let { notificationIds } = req.body;
+  notificationIds = JSON.parse(notificationIds);
   const loggedInUser = req.user?._id;
 
-  if (!notificationId) {
+  if (!notificationIds?.length) {
     res.status(400);
-    throw new Error("Invalid notification id for deleting a notification");
+    throw new Error("Invalid params for deleting notification/s");
   }
-
-  // First check if the notification exists or not
-  const existingNotification = await UserModel.findOne({
-    $and: [
-      { _id: loggedInUser },
-      { notifications: { $elemMatch: { $eq: notificationId } } },
-    ],
-  });
-
-  if (!existingNotification) {
-    res.status(400);
-    throw new Error("Can't delete notification as it doesn't exist");
-  }
-
-  const updatedUser = await UserModel.findByIdAndUpdate(
+  const notifications = await UserModel.findByIdAndUpdate(
     loggedInUser,
-    { $pull: { notifications: notificationId } },
+    { $pull: { notifications: { $each: notificationIds } } },
     { new: true }
   )
-    .select("-password")
+    .select("notifications")
     .populate({
       path: "notifications",
       model: "Message",
@@ -412,16 +407,20 @@ const deleteNotification = asyncHandler(async (req, res) => {
           path: "chat",
           model: "Chat",
           select: "-groupAdmins -cloudinary_id",
+          populate: {
+            path: "users",
+            model: "User",
+            select: "-password -notifications",
+          },
         },
       ],
     });
 
-  if (!updatedUser) {
+  if (!notifications) {
     res.status(404);
-    throw new Error("User not found while deleting notification");
+    throw new Error("User not found while deleting notification/s");
   }
-
-  res.status(200).json(updatedUser);
+  res.status(200).json(notifications);
 });
 
 export {
@@ -433,5 +432,5 @@ export {
   updateUserProfilePic,
   deleteUserProfilePic,
   addNotification,
-  deleteNotification,
+  deleteNotifications,
 };

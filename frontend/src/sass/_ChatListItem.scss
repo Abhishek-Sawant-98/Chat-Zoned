@@ -21,6 +21,9 @@ $bgColor: $selectedChatBgColor;
       color: #b9b9b9;
       @include setPositions($top: 12px, $right: 15px);
     }
+    .chatNotifCount{
+      
+    }
     .chatListLastMessage {
       margin: 2px 8px 6px 0px;
       .fileIcon {

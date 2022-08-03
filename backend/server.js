@@ -7,11 +7,11 @@ import UserRoutes from "./routes/UserRoutes.js";
 import ChatRoutes from "./routes/ChatRoutes.js";
 import MessageRoutes from "./routes/MessageRoutes.js";
 import path from "path";
-import { Server } from "socket.io";
 import {
   notFoundHandler,
   appErrorHandler,
 } from "./middleware/ErrorMiddleware.js";
+import configureSockets from "./config/sockets.js";
 
 connectToMongoDB();
 
@@ -47,94 +47,5 @@ const server = app.listen(PORT, () =>
   console.log(`📍 Server started at port ${PORT}`)
 );
 
-// Sockets setup
-const io = new Server(server, {
-  pingTimeout: 120000,
-  cors: {
-    origin: "http://localhost:3000",
-  },
-});
-
-io.on("connection", (socket) => {
-  // Socket event listeners
-  socket.on("init user", (userId) => {
-    socket.join(userId);
-    socket.emit(`user connected`);
-    console.log("user initialized: ", userId);
-  });
-
-  socket.on("join chat", (chatId) => {
-    socket.join(chatId);
-    console.log(`User joined chat : ${chatId}`);
-  });
-
-  socket.on("new msg sent", (newMsg) => {
-    const { chat } = newMsg;
-    if (!chat) return;
-
-    chat.users.forEach((userId) => {
-      // Emit 'newMsg' to all other users except the sender of newMsg
-      if (userId !== newMsg.sender._id) {
-        socket.to(userId).emit("new msg received", newMsg);
-      }
-    });
-  });
-
-  socket.on("msg deleted", (deletedMsgData) => {
-    const { deletedMsgId, senderId, chat } = deletedMsgData;
-    if (!deletedMsgId || !senderId || !chat) return;
-
-    chat.users.forEach((user) => {
-      // Emit a socket to delete 'deletedMsg' for all chat users
-      // except sender of deletedMsg
-      if (user._id !== senderId) {
-        socket.to(user._id).emit("remove deleted msg", deletedMsgData);
-      }
-    });
-  });
-
-  socket.on("msg updated", (updatedMsg) => {
-    console.log("msg updated");
-    const { sender, chat } = updatedMsg;
-    if (!sender || !chat) return;
-
-    chat.users.forEach((user) => {
-      if (user._id !== sender._id) {
-        socket.to(user._id).emit("update modified msg", updatedMsg);
-      }
-    });
-  });
-
-  socket.on("new grp created", (newGroup) => {
-    console.log("new grp created");
-    const admin = newGroup?.groupAdmins[0];
-    if (!admin) return;
-
-    newGroup.users.forEach((user) => {
-      if (user._id !== admin._id) {
-        socket.to(user._id).emit("display new grp");
-      }
-    });
-  });
-
-  socket.on("grp updated", (updatedGroupData) => {
-    console.log("grp updated");
-    const { admin, updatedGroup } = updatedGroupData;
-    if (!admin || !updatedGroup) return;
-
-    updatedGroup.users.forEach((user) => {
-      if (user._id !== admin._id) {
-        socket.to(user._id).emit("display updated grp", updatedGroup);
-      }
-    });
-  });
-
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
-  });
-
-  socket.off("init user", (userId) => {
-    console.log("User socket disconnected");
-    socket.leave(userId);
-  });
-});
+// Server socket configuration
+configureSockets(server);

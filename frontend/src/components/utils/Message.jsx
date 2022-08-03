@@ -118,6 +118,7 @@ const Message = forwardRef(
           className={`msgRow d-flex justify-content-${
             isLoggedInUser ? "end" : "start"
           }`}
+          id={currMsgId}
           style={{ marginTop: isSameSender ? "3px" : "10px" }}
         >
           {showCurrSender ? (

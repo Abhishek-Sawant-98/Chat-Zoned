@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import { selectAppState } from "../../store/slices/AppSlice";
 import {
   dateStringOf,
+  getNotifBadgeStyles,
   isImageFile,
   msgDateStringOf,
   msgTimeStringOf,
@@ -32,7 +33,7 @@ const tooltipStyles = {
 
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const ChatListItem = ({ chat }) => {
+const ChatListItem = ({ chat, chatNotifCount }) => {
   const { selectedChat, loggedInUser } = useSelector(selectAppState);
   const {
     _id,
@@ -115,12 +116,39 @@ const ChatListItem = ({ chat }) => {
           {truncateString(chatName, 23, 20)}
         </p>
         {lastMessage && (
-          <span className="lastMsgDate" data-chat={_id}>
+          <span
+            className="lastMsgDate"
+            data-chat={_id}
+            style={{ color: chatNotifCount ? "#50F0B8" : "auto" }}
+          >
             {lastMsgDateString === "Today"
               ? msgTimeStringOf(lastMsgDate)
               : lastMsgDateString !== "Yesterday"
               ? dateStringOf(lastMsgDate)
               : "Yesterday"}
+          </span>
+        )}
+        {lastMessage && (
+          <span
+            className={`badge rounded-circle
+             position-absolute text-black bg-gradient`}
+            data-chat={_id}
+            style={{
+              zIndex: 5,
+              backgroundColor: "#22A96A",
+              fontSize: chatNotifCount > 99 ? 12 : 13,
+              fontFamily: "cambria",
+              right: 17,
+              bottom: chatNotifCount > 9 ? 8 : 9,
+              padding:
+                chatNotifCount > 99
+                  ? "6px 4px"
+                  : chatNotifCount > 9
+                  ? "6px 5px"
+                  : "4px 7px",
+            }}
+          >
+            {chatNotifCount || ""}
           </span>
         )}
         {/* Last Message Data */}

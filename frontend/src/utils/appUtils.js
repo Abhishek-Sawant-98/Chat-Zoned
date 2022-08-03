@@ -113,6 +113,18 @@ export const setCaretPosition = (node) => {
   sel.addRange(range);
 };
 
+export const getNotifBadgeStyles = (notifCount) => {
+  return {
+    zIndex: 5,
+    fontSize: notifCount > 99 ? 12 : 13,
+    top: -2,
+    right: notifCount > 99 ? -11 : notifCount > 9 ? -5 : -2,
+    fontFamily: "cambria",
+    padding:
+      notifCount > 99 ? "6px 5px" : notifCount > 9 ? "4px 5px" : "4px 7px",
+  };
+};
+
 // In bytes
 export const ONE_KB = 1024;
 export const ONE_MB = 1048576;

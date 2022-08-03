@@ -255,9 +255,7 @@ const deleteMessages = asyncHandler(async (req, res) => {
         // Update the lastMessage of current chat with previous message
         const updatedChat = await ChatModel.findByIdAndUpdate(
           deletedMessage.chat._id,
-          {
-            lastMessage: previousMessage._id,
-          },
+          { lastMessage: previousMessage._id },
           { new: true }
         );
 

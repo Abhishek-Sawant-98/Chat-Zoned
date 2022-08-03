@@ -42,6 +42,7 @@ const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 const ChatListView = ({ loadingMsgs, setFetchMsgs, setDialogBody }) => {
   const { loggedInUser, selectedChat, refresh, clientSocket } =
     useSelector(selectAppState);
+  const notifs = loggedInUser?.notifications;
   const dispatch = useDispatch();
 
   const [chats, setChats] = useState([]);
@@ -205,9 +206,19 @@ const ChatListView = ({ loadingMsgs, setFetchMsgs, setDialogBody }) => {
               .filter(
                 (chat) => chat.lastMessage !== undefined || chat.isGroupChat
               )
-              .map((chat) => (
-                <ChatListItem key={chat._id} chat={chat} />
-              ))}
+              .map((chat) => {
+                let chatNotifCount = 0;
+                notifs?.forEach((notif) => {
+                  if (notif.chat._id === chat._id) ++chatNotifCount;
+                });
+                return (
+                  <ChatListItem
+                    key={chat._id}
+                    chat={chat}
+                    chatNotifCount={chatNotifCount}
+                  />
+                );
+              })}
           </div>
         ) : (
           <span className="d-inline-block w-100 text-light h4 mt-5 mx-auto">

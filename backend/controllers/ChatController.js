@@ -317,9 +317,7 @@ const makeGroupAdmin = asyncHandler(async (req, res) => {
 
   const updatedGroup = await ChatModel.findByIdAndUpdate(
     chatId,
-    {
-      $push: { groupAdmins: userId },
-    },
+    { $push: { groupAdmins: userId } },
     { new: true }
   )
     .populate("users", "-password -notifications")
@@ -329,7 +327,6 @@ const makeGroupAdmin = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("Group not found");
   }
-
   res.status(200).json(updatedGroup);
 });
 
@@ -355,7 +352,6 @@ const dismissAsAdmin = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("Group Not Found");
   }
-
   res.status(200).json(updatedGroup);
 });
 

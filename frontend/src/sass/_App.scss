@@ -6,6 +6,9 @@
 header {
   padding: 6px 15px;
 }
+ul.MuiMenu-list {
+  @include scrollbars(2px);
+}
 .btnArrowIcons {
   color: white;
   font-size: 22px;
