@@ -334,6 +334,7 @@ const deleteUserProfilePic = asyncHandler(async (req, res) => {
   res.status(200).json(updatedUser);
 });
 
+// Just a regular method, NOT a route handler
 const addNotification = async (notificationId, userId) => {
   let userData = { notifications: [] };
   try {
@@ -379,18 +380,19 @@ const addNotification = async (notificationId, userId) => {
 
 const deleteNotifications = asyncHandler(async (req, res) => {
   // Frontend logic
-  // if(selectedChat && selectedChat === newMessage.chat) => delete notification from array (if present)
+  // if(selectedChat && selectedChat === newMsg.chat) => delete notification from array (if present)
   let { notificationIds } = req.body;
   notificationIds = JSON.parse(notificationIds);
+  console.log("notificationIds : ", notificationIds);
   const loggedInUser = req.user?._id;
 
   if (!notificationIds?.length) {
     res.status(400);
     throw new Error("Invalid params for deleting notification/s");
   }
-  const notifications = await UserModel.findByIdAndUpdate(
+  const userData = await UserModel.findByIdAndUpdate(
     loggedInUser,
-    { $pull: { notifications: { $each: notificationIds } } },
+    { $pullAll: { notifications: notificationIds } },
     { new: true }
   )
     .select("notifications")
@@ -416,11 +418,11 @@ const deleteNotifications = asyncHandler(async (req, res) => {
       ],
     });
 
-  if (!notifications) {
+  if (!userData) {
     res.status(404);
     throw new Error("User not found while deleting notification/s");
   }
-  res.status(200).json(notifications);
+  res.status(200).json(userData);
 });
 
 export {

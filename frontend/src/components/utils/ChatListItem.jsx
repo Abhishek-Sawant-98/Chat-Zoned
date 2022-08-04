@@ -7,11 +7,11 @@ import {
   PictureAsPdf,
   VideoFile,
 } from "@mui/icons-material";
+import { Avatar } from "@mui/material";
 import { useSelector } from "react-redux";
 import { selectAppState } from "../../store/slices/AppSlice";
 import {
   dateStringOf,
-  getNotifBadgeStyles,
   isImageFile,
   msgDateStringOf,
   msgTimeStringOf,
@@ -85,6 +85,7 @@ const ChatListItem = ({ chat, chatNotifCount }) => {
   return (
     <div
       data-chat={_id}
+      data-has-notifs={chatNotifCount}
       className={`chatListItem user-select-none text-light pointer ${
         selectedChat?._id === _id ? "isSelected" : ""
       } d-flex justify-content-start align-items-center`}
@@ -95,21 +96,24 @@ const ChatListItem = ({ chat, chatNotifCount }) => {
         placement="top-start"
         arrow
       >
-        <img
+        <Avatar
           src={chatDisplayPic}
           alt={chatName}
           data-chat={_id}
-          className={`img-fluid listItemAvatar chatListAvatar rounded-circle`}
+          data-has-notifs={chatNotifCount}
+          className={`listItemAvatar chatListAvatar`}
         />
       </CustomTooltip>
       {/* Chat Data */}
       <div
         data-chat={_id}
+        data-has-notifs={chatNotifCount}
         className="chatListData d-flex flex-column align-items-start px-2"
       >
         {/* Chat Name */}
         <p
           data-chat={_id}
+          data-has-notifs={chatNotifCount}
           title={tooltipTitle}
           className="chatListName fs-5 fw-bold text-info"
         >
@@ -119,7 +123,8 @@ const ChatListItem = ({ chat, chatNotifCount }) => {
           <span
             className="lastMsgDate"
             data-chat={_id}
-            style={{ color: chatNotifCount ? "#50F0B8" : "auto" }}
+            data-has-notifs={chatNotifCount}
+            style={{ color: chatNotifCount ? "#50F0B8" : "#b9b9b9" }}
           >
             {lastMsgDateString === "Today"
               ? msgTimeStringOf(lastMsgDate)
@@ -128,16 +133,14 @@ const ChatListItem = ({ chat, chatNotifCount }) => {
               : "Yesterday"}
           </span>
         )}
-        {lastMessage && (
+        {lastMessage && chatNotifCount && (
           <span
-            className={`badge rounded-circle
+            className={`notifBadge badge rounded-circle
              position-absolute text-black bg-gradient`}
             data-chat={_id}
+            data-has-notifs={chatNotifCount}
             style={{
-              zIndex: 5,
-              backgroundColor: "#22A96A",
               fontSize: chatNotifCount > 99 ? 12 : 13,
-              fontFamily: "cambria",
               right: 17,
               bottom: chatNotifCount > 9 ? 8 : 9,
               padding:
@@ -153,8 +156,16 @@ const ChatListItem = ({ chat, chatNotifCount }) => {
         )}
         {/* Last Message Data */}
         {(lastMessage || lastMessage === null || isGroupChat) && (
-          <p data-chat={_id} className="chatListLastMessage">
-            <span data-chat={_id} className="text-warning">
+          <p
+            data-chat={_id}
+            data-has-notifs={chatNotifCount}
+            className="chatListLastMessage"
+          >
+            <span
+              data-chat={_id}
+              data-has-notifs={chatNotifCount}
+              className="text-warning"
+            >
               <>
                 {lastMessage === null ||
                 (isGroupChat && !lastMessage) ||
@@ -168,6 +179,7 @@ const ChatListItem = ({ chat, chatNotifCount }) => {
                     ) : (
                       <DoneAll
                         data-chat={_id}
+                        data-has-notifs={chatNotifCount}
                         className="me-1 fs-5"
                         style={{ color: "lightblue" }}
                       />
@@ -183,41 +195,93 @@ const ChatListItem = ({ chat, chatNotifCount }) => {
               </>
             </span>
             {lastMsgFileUrl ? (
-              <span data-chat={_id}>
+              <span data-chat={_id} data-has-notifs={chatNotifCount}>
                 {lastMsgFileType === "image" ? (
-                  <span data-chat={_id} title={lastMsgData}>
-                    <Image data-chat={_id} className="fileIcon" />{" "}
+                  <span
+                    data-chat={_id}
+                    data-has-notifs={chatNotifCount}
+                    title={lastMsgData}
+                  >
+                    <Image
+                      data-chat={_id}
+                      data-has-notifs={chatNotifCount}
+                      className="fileIcon"
+                    />{" "}
                     {truncateString(lastMsgContent, 25, 22) || "Photo"}
                   </span>
                 ) : lastMsgFileType === "gif" ? (
-                  <span data-chat={_id} title={lastMsgData}>
-                    <GifBox data-chat={_id} className="fileIcon" />{" "}
+                  <span
+                    data-chat={_id}
+                    data-has-notifs={chatNotifCount}
+                    title={lastMsgData}
+                  >
+                    <GifBox
+                      data-chat={_id}
+                      data-has-notifs={chatNotifCount}
+                      className="fileIcon"
+                    />{" "}
                     {truncateString(lastMsgContent, 25, 22) || "Gif"}
                   </span>
                 ) : lastMsgFileType === "video" ? (
-                  <span data-chat={_id} title={lastMsgData}>
-                    <VideoFile data-chat={_id} className="fileIcon" />{" "}
+                  <span
+                    data-chat={_id}
+                    data-has-notifs={chatNotifCount}
+                    title={lastMsgData}
+                  >
+                    <VideoFile
+                      data-chat={_id}
+                      data-has-notifs={chatNotifCount}
+                      className="fileIcon"
+                    />{" "}
                     {truncateString(lastMsgContent, 25, 22) || "Video"}
                   </span>
                 ) : lastMsgFileType === "audio" ? (
-                  <span data-chat={_id} title={lastMsgData}>
-                    <AudioFile data-chat={_id} className="fileIcon" />{" "}
+                  <span
+                    data-chat={_id}
+                    data-has-notifs={chatNotifCount}
+                    title={lastMsgData}
+                  >
+                    <AudioFile
+                      data-chat={_id}
+                      data-has-notifs={chatNotifCount}
+                      className="fileIcon"
+                    />{" "}
                     {truncateString(lastMsgContent, 25, 22) || "Audio"}
                   </span>
                 ) : lastMsgFileType === "pdf" ? (
-                  <span data-chat={_id} title={lastMsgData}>
-                    <PictureAsPdf data-chat={_id} className="fileIcon" />{" "}
+                  <span
+                    data-chat={_id}
+                    data-has-notifs={chatNotifCount}
+                    title={lastMsgData}
+                  >
+                    <PictureAsPdf
+                      data-chat={_id}
+                      data-has-notifs={chatNotifCount}
+                      className="fileIcon"
+                    />{" "}
                     {truncateString(lastMsgData, 22, 19) || "Pdf"}
                   </span>
                 ) : (
-                  <span data-chat={_id} title={lastMsgData}>
-                    <Description data-chat={_id} className="fileIcon" />{" "}
+                  <span
+                    data-chat={_id}
+                    data-has-notifs={chatNotifCount}
+                    title={lastMsgData}
+                  >
+                    <Description
+                      data-chat={_id}
+                      data-has-notifs={chatNotifCount}
+                      className="fileIcon"
+                    />{" "}
                     {truncateString(lastMsgData, 22, 19) || "File"}
                   </span>
                 )}
               </span>
             ) : (
-              <span data-chat={_id} title={lastMsgContent}>
+              <span
+                data-chat={_id}
+                data-has-notifs={chatNotifCount}
+                title={lastMsgContent}
+              >
                 {lastMessage === null
                   ? " Last Message was deleted"
                   : isGroupChat && !lastMessage

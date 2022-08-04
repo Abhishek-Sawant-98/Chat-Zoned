@@ -266,9 +266,7 @@ const addUsersToGroup = asyncHandler(async (req, res) => {
   }
   const updatedGroup = await ChatModel.findByIdAndUpdate(
     chatId,
-    {
-      $push: { users: { $each: usersToBeAdded } },
-    },
+    { $push: { users: { $each: usersToBeAdded } } },
     { new: true }
   )
     .populate("users", "-password -notifications")
@@ -340,9 +338,7 @@ const dismissAsAdmin = asyncHandler(async (req, res) => {
 
   const updatedGroup = await ChatModel.findByIdAndUpdate(
     chatId,
-    {
-      $pull: { groupAdmins: userId },
-    },
+    { $pull: { groupAdmins: userId } },
     { new: true }
   )
     .populate("users", "-password -notifications")

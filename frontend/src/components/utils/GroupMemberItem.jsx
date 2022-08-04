@@ -1,4 +1,5 @@
 import { KeyboardArrowDown } from "@mui/icons-material";
+import { Avatar } from "@mui/material";
 import { useSelector } from "react-redux";
 import { selectAppState } from "../../store/slices/AppSlice";
 import { truncateString } from "../../utils/appUtils";
@@ -52,11 +53,11 @@ const GroupMemberItem = ({ user, truncateValues }) => {
         placement="top-start"
         arrow
       >
-        <img
+        <Avatar
           src={profilePic}
           alt={_id}
           data-user={_id}
-          className={`img-fluid listItemAvatar groupMemberAvatar rounded-circle`}
+          className={`listItemAvatar groupMemberAvatar`}
         />
       </CustomTooltip>
       <div

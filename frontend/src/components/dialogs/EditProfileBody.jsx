@@ -62,7 +62,7 @@ const EditProfileBody = () => {
   const isGuestUser = loggedInUser?.email === "guest.user@gmail.com";
 
   const persistUpdatedUser = (updatedUser) => {
-    // Session storage persists updated user even after page refresh
+    // Local storage persists updated user even after page refresh
     localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
     dispatch(setLoggedInUser(updatedUser));
   };
@@ -370,7 +370,7 @@ const EditProfileBody = () => {
           >
             <div
               className="w-100 h1 fw-bold mx-4 text-info"
-              style={{ fontSize: "35px", wordBreak:"break-all" }}
+              style={{ fontSize: "35px", wordBreak: "break-all" }}
             >
               {truncateString(name, 25, 21)}
             </div>

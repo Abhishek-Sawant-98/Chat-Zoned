@@ -125,7 +125,7 @@ const MessagesView = ({
   };
 
   const persistUpdatedUser = (updatedUser) => {
-    // Session storage persists updated user even after page refresh
+    // Local storage persists updated user even after page refresh
     localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
     dispatch(setLoggedInUser(updatedUser));
   };
@@ -540,6 +540,24 @@ const MessagesView = ({
     }
   };
 
+  const deletePersistedNotifs = async (notifsToBeDeleted) => {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+    };
+    try {
+      await axios.put(
+        `/api/user/delete/notifications`,
+        { notificationIds: JSON.stringify(notifsToBeDeleted) },
+        config
+      );
+    } catch (error) {
+      console.log("Couldn't Delete Notifications : ", error.message);
+    }
+  };
+
   const scrollToBottom = () => {
     msgListBottom.current?.scrollIntoView({ behaviour: "smooth" });
   };
@@ -558,7 +576,7 @@ const MessagesView = ({
     if (!isSocketConnected && clientSocket) {
       clientSocket.emit("init user", loggedInUser?._id);
       clientSocket.on("user connected", () => {
-        console.log("socket connected");
+        // console.log("socket connected");
         dispatch(setSocketConnected(true));
       });
     }
@@ -567,16 +585,18 @@ const MessagesView = ({
     clientSocket
       .off("new msg received")
       .on("new msg received", (newMsg, notifications) => {
-        const updatedUser = {
-          ...loggedInUser,
-          notifications: notifications?.reverse(),
-        };
-        persistUpdatedUser(updatedUser);
         const { chat } = newMsg;
         dispatch(toggleRefresh(!refresh));
         if (selectedChat && chat && selectedChat._id === chat._id) {
           newMsg["sent"] = true;
           setMessages([newMsg, ...messages]);
+          deletePersistedNotifs([newMsg._id]);
+        } else {
+          const updatedUser = {
+            ...loggedInUser,
+            notifications: notifications?.reverse(),
+          };
+          persistUpdatedUser(updatedUser);
         }
       });
 
@@ -658,8 +678,8 @@ const MessagesView = ({
       e.preventDefault();
       if (msgEditMode) {
         const msgDate =
-          e.target.dataset?.msgCreatedAt ||
-          e.target.parentNode.dataset?.msgCreatedAt;
+          e.target.dataset.msgCreatedAt ||
+          e.target.parentNode.dataset.msgCreatedAt;
         updateMessage(editableMsgContent?.current?.innerHTML, msgDate);
       } else {
         sendMessage();
@@ -671,36 +691,35 @@ const MessagesView = ({
   const msgsClickHandler = (e) => {
     const { dataset } = e.target;
     const parentDataset = e.target.parentNode.dataset;
-    const senderData = dataset?.sender?.split("===");
-    const msgId = dataset?.msg || parentDataset?.msg;
-    const videoId = dataset?.video || parentDataset?.video;
-    const audioId = dataset?.audio || parentDataset?.audio;
-    const fileId = dataset?.download || parentDataset?.download;
-    const updateEditedMsg = dataset?.updateMsg || parentDataset?.updateMsg;
+    const senderData = (dataset.sender || parentDataset.sender)?.split("===");
+    const msgId = dataset.msg || parentDataset.msg;
+    const videoId = dataset.video || parentDataset.video;
+    const audioId = dataset.audio || parentDataset.audio;
+    const fileId = dataset.download || parentDataset.download;
+    const updateEditedMsg = dataset.updateMsg || parentDataset.updateMsg;
     const attachMsgFileClicked =
-      dataset?.attachMsgFile || parentDataset?.attachMsgFile;
+      dataset.attachMsgFile || parentDataset.attachMsgFile;
     const removeMsgFileClicked =
-      dataset?.removeMsgFile || parentDataset?.removeMsgFile;
-    const editMsgFileClicked =
-      dataset?.editMsgFile || parentDataset?.editMsgFile;
+      dataset.removeMsgFile || parentDataset.removeMsgFile;
+    const editMsgFileClicked = dataset.editMsgFile || parentDataset.editMsgFile;
     const discardDraftClicked =
-      dataset?.discardDraft || parentDataset?.discardDraft;
+      dataset.discardDraft || parentDataset.discardDraft;
 
     if (fileId) {
       downloadFile(fileId);
     } else if (videoId) {
       // Load video
       loadMedia(videoId, {
-        fileName: dataset?.videoName || parentDataset?.videoName,
+        fileName: dataset.videoName || parentDataset.videoName,
         isAudio: false,
       });
     } else if (audioId) {
       // Load audio
       loadMedia(audioId, {
-        fileName: dataset?.audioName || parentDataset?.audioName,
+        fileName: dataset.audioName || parentDataset.audioName,
         isAudio: true,
       });
-    } else if (dataset?.imageId) {
+    } else if (dataset.imageId) {
       displayFullSizeImage(e);
     } else if (senderData?.length) {
       // Open view profile dialog
@@ -712,7 +731,7 @@ const MessagesView = ({
       openViewProfileDialog(props);
     } else if (msgId && !msgEditMode) {
       msgFileAlreadyExists = Boolean(
-        dataset?.fileExists || parentDataset?.fileExists
+        dataset.fileExists || parentDataset.fileExists
       );
       setClickedMsg(msgId);
       openMsgOptionsMenu(e);
@@ -724,7 +743,7 @@ const MessagesView = ({
     } else if (discardDraftClicked) {
       openDiscardDraftConfirmDialog();
     } else if (updateEditedMsg) {
-      const msgDate = dataset?.msgCreatedAt || parentDataset?.msgCreatedAt;
+      const msgDate = dataset.msgCreatedAt || parentDataset.msgCreatedAt;
       updateMessage(editableMsgContent?.current?.innerHTML, msgDate);
     }
   };
@@ -868,7 +887,7 @@ const MessagesView = ({
               const { dataset } = e.target;
               const parentDataset = e.target.parentNode.dataset;
               const discardFileClicked =
-                dataset?.discardFile || parentDataset?.discardFile;
+                dataset.discardFile || parentDataset.discardFile;
               if (discardFileClicked) {
                 discardAttachment();
               }

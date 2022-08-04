@@ -1,3 +1,4 @@
+import { Avatar } from "@mui/material";
 import { truncateString } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 
@@ -29,11 +30,11 @@ const UserListItem = ({ user, truncateValues }) => {
         placement="top-start"
         arrow
       >
-        <img
+        <Avatar
           src={profilePic}
           alt={_id}
           data-user={_id}
-          className={`img-fluid listItemAvatar userListAvatar rounded-circle`}
+          className={`listItemAvatar userListAvatar`}
         />
       </CustomTooltip>
       <div

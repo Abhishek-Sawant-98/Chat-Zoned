@@ -28,9 +28,10 @@ const ChatsPage = () => {
   const [fetchMsgs, setFetchMsgs] = useState(false);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [dialogBody, setDialogBody] = useState(<></>);
+  const [chats, setChats] = useState([]);
 
   useEffect(() => {
-    // Session storage persists data even after page refresh, unlike state
+    // Local storage persists data even after page refresh, unlike state
     const user = JSON.parse(localStorage.getItem("loggedInUser"));
     if (!user) return navigate("/");
 
@@ -58,6 +59,7 @@ const ChatsPage = () => {
         <div className={`chatpage`}>
           {/* Header component */}
           <ChatpageHeader
+            chats={chats}
             setFetchMsgs={setFetchMsgs}
             setDialogBody={setDialogBody}
           />
@@ -65,6 +67,8 @@ const ChatsPage = () => {
           <section className={`row g-1`}>
             {/* Chat List component */}
             <ChatListView
+              chats={chats}
+              setChats={setChats}
               loadingMsgs={loadingMsgs}
               setFetchMsgs={setFetchMsgs}
               setDialogBody={setDialogBody}

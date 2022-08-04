@@ -7,7 +7,7 @@ import {
   Edit,
   KeyboardArrowDown,
 } from "@mui/icons-material";
-import { CircularProgress, IconButton } from "@mui/material";
+import { Avatar, CircularProgress, IconButton } from "@mui/material";
 import { forwardRef, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { selectAppState } from "../../store/slices/AppSlice";
@@ -105,10 +105,6 @@ const Message = forwardRef(
     useEffect(() => {
       if (isEditMode) {
         setCaretPosition(editableMsgRef?.current);
-        // console.log(
-        //   "editableMsgRef.current.innerText : ",
-        //   editableMsgRef?.current?.innerText.trim().length
-        // );
       }
     }, [msgEditMode]);
 
@@ -123,11 +119,11 @@ const Message = forwardRef(
         >
           {showCurrSender ? (
             <CustomTooltip title={`View Profile`} placement="top-start" arrow>
-              <img
+              <Avatar
                 src={profilePic}
                 alt={name}
                 data-sender={senderData}
-                className="senderAvatar rounded-circle pointer"
+                className="senderAvatar pointer"
               />
             </CustomTooltip>
           ) : (

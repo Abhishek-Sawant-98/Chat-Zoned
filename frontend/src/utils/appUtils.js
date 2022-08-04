@@ -104,25 +104,13 @@ export const setCaretPosition = (node) => {
   node?.focus();
   const lastTextNode = node?.lastChild;
   if (!lastTextNode) return;
-  const caret = lastTextNode.data.length || 0;
+  const caret = lastTextNode.data?.length || 0;
   const range = document.createRange();
   range.setStart(lastTextNode, caret);
   range.setEnd(lastTextNode, caret);
   const sel = window.getSelection();
   sel.removeAllRanges();
   sel.addRange(range);
-};
-
-export const getNotifBadgeStyles = (notifCount) => {
-  return {
-    zIndex: 5,
-    fontSize: notifCount > 99 ? 12 : 13,
-    top: -2,
-    right: notifCount > 99 ? -11 : notifCount > 9 ? -5 : -2,
-    fontFamily: "cambria",
-    padding:
-      notifCount > 99 ? "6px 5px" : notifCount > 9 ? "4px 5px" : "4px 7px",
-  };
 };
 
 // In bytes

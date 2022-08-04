@@ -10,7 +10,6 @@ import LottieAnimation from "./utils/LottieAnimation";
 import io from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
 import { selectAppState } from "../store/slices/AppSlice";
-import { getNotifBadgeStyles } from "../utils/appUtils";
 
 const arrowStyles = {
   color: "#777",
@@ -24,7 +23,7 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const ChatpageHeader = ({ setFetchMsgs, setDialogBody }) => {
+const ChatpageHeader = ({ chats, setFetchMsgs, setDialogBody }) => {
   const { loggedInUser, clientSocket } = useSelector(selectAppState);
   const dispatch = useDispatch();
   const appGif = useRef();
@@ -96,25 +95,25 @@ const ChatpageHeader = ({ setFetchMsgs, setDialogBody }) => {
               },
             }}
           >
-            <span
-              className={`badge rounded-circle bg-danger 
+            {notifCount && (
+              <span
+                className={`notifBadge badge rounded-circle bg-danger 
                position-absolute`}
-              style={{
-                zIndex: 5,
-                fontSize: notifCount > 99 ? 12 : 13,
-                top: -2,
-                right: notifCount > 99 ? -11 : notifCount > 9 ? -5 : -2,
-                fontFamily: "cambria",
-                padding:
-                  notifCount > 99
-                    ? "6px 5px"
-                    : notifCount > 9
-                    ? "4px 5px"
-                    : "4px 7px",
-              }}
-            >
-              {!notifCount ? "" : notifCount > 99 ? "99+" : notifCount}
-            </span>
+                style={{
+                  fontSize: notifCount > 99 ? 12 : 13,
+                  top: -2,
+                  right: notifCount > 99 ? -11 : notifCount > 9 ? -5 : -2,
+                  padding:
+                    notifCount > 99
+                      ? "6px 5px"
+                      : notifCount > 9
+                      ? "4px 5px"
+                      : "4px 7px",
+                }}
+              >
+                {!notifCount ? "" : notifCount > 99 ? "99+" : notifCount}
+              </span>
+            )}
             <Notifications className={`text-light`} />
           </IconButton>
         </CustomTooltip>
@@ -142,6 +141,8 @@ const ChatpageHeader = ({ setFetchMsgs, setDialogBody }) => {
           </IconButton>
         </CustomTooltip>
         <NotificationsMenu
+          chats={chats}
+          setFetchMsgs={setFetchMsgs}
           anchor={notificationsMenuAnchor}
           setAnchor={setNotificationsMenuAnchor}
         />

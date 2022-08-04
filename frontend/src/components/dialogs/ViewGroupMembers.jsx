@@ -91,7 +91,10 @@ const ViewGroupMembers = () => {
             // 'Event delegation' (add only one event listener for
             // parent element instead of adding for each child element)
             onClick={(e) => {
-              const userId = e.target?.dataset?.user;
+              const userId =
+                e.target?.dataset.user ||
+                e.target.parentNode.dataset.user ||
+                e.target.alt;
               if (userId) {
                 // Don't display member options menu for loggedInUser
                 if (loggedInUser?._id === userId) return;

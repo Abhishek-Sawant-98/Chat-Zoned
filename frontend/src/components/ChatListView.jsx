@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
   setGroupInfo,
+  setLoggedInUser,
   setSelectedChat,
 } from "../store/slices/AppSlice";
 import {
@@ -39,13 +40,18 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const ChatListView = ({ loadingMsgs, setFetchMsgs, setDialogBody }) => {
+const ChatListView = ({
+  chats,
+  setChats,
+  loadingMsgs,
+  setFetchMsgs,
+  setDialogBody,
+}) => {
   const { loggedInUser, selectedChat, refresh, clientSocket } =
     useSelector(selectAppState);
-  const notifs = loggedInUser?.notifications;
+  const notifs = [...loggedInUser?.notifications];
   const dispatch = useDispatch();
 
-  const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filteredChats, setFilteredChats] = useState(chats);
   const searchChatInput = useRef();
@@ -136,6 +142,46 @@ const ChatListView = ({ loadingMsgs, setFetchMsgs, setDialogBody }) => {
     );
   }, 600);
 
+  const deletePersistedNotifs = async (notifsToBeDeleted) => {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loggedInUser.token}`,
+      },
+    };
+
+    try {
+      const notifications = await axios.put(
+        `/api/user/delete/notifications`,
+        { notificationIds: JSON.stringify(notifsToBeDeleted) },
+        config
+      );
+      console.log("notifications after deletion : ", notifications);
+    } catch (error) {
+      console.log("Couldn't Delete Notifications : ", error.message);
+    }
+  };
+
+  const deleteNotifications = (clickedChatId) => {
+    // Delete notifs from global state and localStorage
+    const notifsToBeDeleted = [];
+    for (let i = 0; i < notifs.length; ++i) {
+      if (notifs[i].chat._id === clickedChatId) {
+        const deletedNotif = notifs.splice(i, 1)[0];
+        notifsToBeDeleted.push(deletedNotif._id);
+        // After deleting element at 'i', next element (i+1) shifts back
+        // to 'i' index
+        --i;
+      }
+    }
+    const updatedUser = { ...loggedInUser, notifications: notifs };
+    localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
+    dispatch(setLoggedInUser(updatedUser));
+
+    // Delete notifs that were persisted in mongodb
+    deletePersistedNotifs(notifsToBeDeleted);
+  };
+
   useEffect(() => {
     fetchChats();
   }, [refresh]);
@@ -186,20 +232,25 @@ const ChatListView = ({ loadingMsgs, setFetchMsgs, setDialogBody }) => {
             // 'Event delegation' (add only one event listener for
             // parent element instead of adding for each child element)
             onClick={(e) => {
-              const chatId =
-                e.target.dataset?.chat || e.target.parentNode.dataset?.chat;
-              if (!chatId) return;
+              const { dataset } = e.target;
+              const parentDataset = e.target.parentNode.dataset;
+              const clickedChatId = dataset.chat || parentDataset.chat;
+              const hasNotifs = dataset.hasNotifs || parentDataset.hasNotifs;
+              if (!clickedChatId) return;
 
-              if (e.target.className?.toString().includes("chatListAvatar")) {
+              if (e.target.className?.toString().includes("MuiAvatar-img")) {
                 return displayFullSizeImage(e);
               }
               const clickedChat = filteredChats.find(
-                (chat) => chat._id === chatId
+                (chat) => chat._id === clickedChatId
               );
               if (clickedChat._id === selectedChat?._id) return;
               dispatch(setSelectedChat(clickedChat));
               setFetchMsgs(true); // To fetch selected chat msgs
               if (clickedChat?.isGroupChat) dispatch(setGroupInfo(clickedChat));
+
+              // Delete notifications if notif badge is present
+              if (hasNotifs) deleteNotifications(clickedChatId);
             }}
           >
             {filteredChats
@@ -215,7 +266,7 @@ const ChatListView = ({ loadingMsgs, setFetchMsgs, setDialogBody }) => {
                   <ChatListItem
                     key={chat._id}
                     chat={chat}
-                    chatNotifCount={chatNotifCount}
+                    chatNotifCount={chatNotifCount || ""}
                   />
                 );
               })}

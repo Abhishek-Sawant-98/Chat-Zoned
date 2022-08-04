@@ -6,8 +6,10 @@
 header {
   padding: 6px 15px;
 }
-ul.MuiMenu-list {
-  @include scrollbars(2px);
+.notifBadge {
+  z-index: 5;
+  font-family: cambria;
+  background-color: #22a96a;
 }
 .btnArrowIcons {
   color: white;
