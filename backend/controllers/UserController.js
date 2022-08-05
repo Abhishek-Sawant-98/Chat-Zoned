@@ -383,7 +383,6 @@ const deleteNotifications = asyncHandler(async (req, res) => {
   // if(selectedChat && selectedChat === newMsg.chat) => delete notification from array (if present)
   let { notificationIds } = req.body;
   notificationIds = JSON.parse(notificationIds);
-  console.log("notificationIds : ", notificationIds);
   const loggedInUser = req.user?._id;
 
   if (!notificationIds?.length) {

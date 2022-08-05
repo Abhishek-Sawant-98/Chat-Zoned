@@ -114,7 +114,6 @@ const Message = forwardRef(
           className={`msgRow d-flex justify-content-${
             isLoggedInUser ? "end" : "start"
           }`}
-          id={currMsgId}
           style={{ marginTop: isSameSender ? "3px" : "10px" }}
         >
           {showCurrSender ? (
@@ -252,6 +251,7 @@ const Message = forwardRef(
               }`}
             >
               <span
+                id={`${currMsg?._id}---content`}
                 className="w-100"
                 style={{ outline: "none" }}
                 contentEditable={isEditMode}

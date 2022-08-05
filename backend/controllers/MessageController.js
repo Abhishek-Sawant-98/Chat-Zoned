@@ -4,7 +4,6 @@ import ChatModel from "../models/ChatModel.js";
 import { deleteFile, deleteExistingAttachment } from "../utils/deleteFile.js";
 import cloudinary from "../config/cloudinary.js";
 import { s3, s3_bucket } from "../config/aws_S3.js";
-import path from "path";
 
 const fetchMessages = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
@@ -177,10 +176,7 @@ const updateMessage = asyncHandler(async (req, res) => {
 
   const updatedMessage = await MessageModel.findByIdAndUpdate(
     messageId,
-    {
-      ...attachmentData,
-      content: updatedContent || "",
-    },
+    { ...attachmentData, content: updatedContent || "" },
     { new: true }
   )
     .populate({

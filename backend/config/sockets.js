@@ -56,9 +56,9 @@ const configureSockets = (server) => {
       const { sender, chat } = updatedMsg;
       if (!sender || !chat) return;
 
-      chat.users.forEach((user) => {
-        if (user._id !== sender._id) {
-          socket.to(user._id).emit("update modified msg", updatedMsg);
+      chat.users.forEach((userId) => {
+        if (userId !== sender._id) {
+          socket.to(userId).emit("update modified msg", updatedMsg);
         }
       });
     });

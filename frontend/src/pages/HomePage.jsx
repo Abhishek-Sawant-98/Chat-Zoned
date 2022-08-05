@@ -19,7 +19,7 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Local storage persists data even after page refresh, unlike state
+    // localStorage persists data even after page refresh, unlike state
     const user = JSON.parse(localStorage.getItem("loggedInUser"));
     if (user && Date.now() < parseInt(user.expiryTime)) navigate("/chats");
   }, []);

@@ -62,7 +62,7 @@ const EditProfileBody = () => {
   const isGuestUser = loggedInUser?.email === "guest.user@gmail.com";
 
   const persistUpdatedUser = (updatedUser) => {
-    // Local storage persists updated user even after page refresh
+    // localStorage persists updated user even after page refresh
     localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
     dispatch(setLoggedInUser(updatedUser));
   };

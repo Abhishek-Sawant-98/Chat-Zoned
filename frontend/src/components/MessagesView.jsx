@@ -125,7 +125,7 @@ const MessagesView = ({
   };
 
   const persistUpdatedUser = (updatedUser) => {
-    // Local storage persists updated user even after page refresh
+    // localStorage persists updated user even after page refresh
     localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
     dispatch(setLoggedInUser(updatedUser));
   };
@@ -237,7 +237,7 @@ const MessagesView = ({
     }
   };
 
-  const fetchMessages = async () => {
+  const fetchMessages = async (options) => {
     setLoadingMsgs(true);
 
     const config = {
@@ -255,8 +255,24 @@ const MessagesView = ({
           return msg;
         })
       );
+      console.log(
+        data.map((msg) => {
+          msg["sent"] = true;
+          return msg;
+        })[0]
+      );
       setLoadingMsgs(false);
       if (fetchMsgs) setFetchMsgs(false);
+      if (options?.updatingMsg) {
+        dispatch(
+          displayToast({
+            message: "Message Updated Successfully",
+            type: "success",
+            duration: 1500,
+            position: "bottom-center",
+          })
+        );
+      }
       setSending(false);
     } catch (error) {
       dispatch(
@@ -374,7 +390,7 @@ const MessagesView = ({
         displayToast({
           message: "Message Deleted Successfully",
           type: "success",
-          duration: 3000,
+          duration: 1500,
           position: "bottom-center",
         })
       );
@@ -474,7 +490,7 @@ const MessagesView = ({
       const { data } = await axios.put(apiUrl, formData, config);
 
       clientSocket?.emit("msg updated", data);
-      fetchMessages();
+      fetchMessages({ updatingMsg: true });
       dispatch(toggleRefresh(!refresh));
       setMsgFileRemoved(false);
     } catch (error) {
@@ -605,8 +621,19 @@ const MessagesView = ({
       .on("remove deleted msg", (deletedMsgData) => {
         const { deletedMsgId, chat } = deletedMsgData;
         dispatch(toggleRefresh(!refresh));
-        if (selectedChat && chat && selectedChat._id === chat._id)
-          setMessages(messages.filter((msg) => msg?._id !== deletedMsgId));
+        if (selectedChat && chat && selectedChat._id === chat._id) {
+          setMessages(messages.filter((m) => m?._id !== deletedMsgId));
+        } else {
+          // Remove notification of 'deleted msg' from global state,
+          // localStorage and from mongodb
+          const notifs = loggedInUser.notifications;
+          const updatedUser = {
+            ...loggedInUser,
+            notifications: notifs.filter((n) => n._id !== deletedMsgId),
+          };
+          persistUpdatedUser(updatedUser);
+          deletePersistedNotifs([deletedMsgId]);
+        }
       });
 
     clientSocket
@@ -616,11 +643,16 @@ const MessagesView = ({
         dispatch(toggleRefresh(!refresh));
         if (selectedChat && chat && selectedChat._id === chat._id) {
           updatedMsg["sent"] = true;
-          setMessages(
-            messages.map((msg) => {
-              return msg?._id === updatedMsg?._id ? updatedMsg : msg;
-            })
-          );
+          updatedMsg["chat"] = updatedMsg?.chat?._id;
+          setTimeout(() => {
+            // Only updating msg content using 'document' method
+            // as updating 'messages' state will re-render all
+            // msgs and scroll to bottom, which may prevent the
+            // receiver to edit or view his/her msg, causing bad UX
+            document.getElementById(`${updatedMsg._id}---content`).innerHTML =
+              updatedMsg.content;
+          }, 10);
+          // Updating 'state' is the only way to update attachment
         }
       });
 
