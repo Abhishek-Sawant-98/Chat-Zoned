@@ -83,14 +83,14 @@ const createGroupChat = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Please Enter All the Fields");
   }
-
-  users = JSON.parse(users); // Since users array was stringified before sending it
+  // Since users array was stringified before sending it
+  users = JSON.parse(users);
 
   if (users.length < 2) {
     res.status(400);
     throw new Error("Minimum of 3 Users Needed to Create a Group");
   }
-  // Since group includes currently logged-in user too
+  // Since group includes loggedInUser too
   users = [loggedInUserId, ...users];
 
   let displayPicData;
@@ -98,8 +98,7 @@ const createGroupChat = asyncHandler(async (req, res) => {
   if (!displayPic) {
     displayPicData = {
       cloudinary_id: "",
-      chatDisplayPic:
-        "https://res.cloudinary.com/abhi-sawant/image/upload/v1654599490/group_mbuvht.png",
+      chatDisplayPic: process.env.DEFAULT_GROUP_DP,
     };
   } else {
     const uploadResponse = await cloudinary.uploader.upload(displayPic.path);
@@ -144,8 +143,7 @@ const deleteGroupDP = asyncHandler(async (req, res) => {
     chatId,
     {
       cloudinary_id: "",
-      chatDisplayPic:
-        "https://res.cloudinary.com/abhi-sawant/image/upload/v1654599490/group_mbuvht.png",
+      chatDisplayPic: process.env.DEFAULT_GROUP_DP,
     },
     { new: true }
   )

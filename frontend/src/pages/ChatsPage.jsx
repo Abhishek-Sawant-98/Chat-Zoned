@@ -8,8 +8,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { displayToast } from "../store/slices/ToastSlice";
 import {
   selectAppState,
+  setGroupInfo,
   setLoggedInUser,
   setSelectedChat,
+  toggleRefresh,
 } from "../store/slices/AppSlice";
 import {
   hideDialog,
@@ -17,7 +19,8 @@ import {
 } from "../store/slices/CustomDialogSlice";
 
 const ChatsPage = () => {
-  const { loggedInUser } = useSelector(selectAppState);
+  const { loggedInUser, refresh, clientSocket, selectedChat } =
+    useSelector(selectAppState);
   const { dialogData, showDialogActions } = useSelector(
     selectCustomDialogState
   );
@@ -52,6 +55,51 @@ const ChatsPage = () => {
     dispatch(hideDialog());
     dispatch(setSelectedChat(null));
   }, []);
+
+  // Listening to socket events
+  useEffect(() => {
+    if (!clientSocket) return;
+
+    clientSocket
+      .off("display updated grp")
+      .on("display updated grp", (updatedGroup) => {
+        dispatch(toggleRefresh(!refresh));
+        if (!updatedGroup || !selectedChat) return;
+        if (selectedChat._id === updatedGroup._id) {
+          let groupData = updatedGroup;
+          if (updatedGroup.removedUser?._id === loggedInUser._id) {
+            dispatch(hideDialog());
+            groupData = null;
+          }
+          dispatch(setSelectedChat(groupData));
+          dispatch(setGroupInfo(groupData));
+        }
+      });
+
+    clientSocket
+      .off("remove deleted grp")
+      .on("remove deleted grp", (deletedGroup) => {
+        dispatch(toggleRefresh(!refresh));
+        if (!deletedGroup || !selectedChat) return;
+        if (selectedChat._id === deletedGroup._id) {
+          dispatch(hideDialog());
+          dispatch(setSelectedChat(null));
+          dispatch(setGroupInfo(null));
+          dispatch(
+            displayToast({
+              message: `'${deletedGroup.chatName}' Group Deleted by Admin`,
+              type: "info",
+              duration: 4000,
+              position: "bottom-center",
+            })
+          );
+        }
+      });
+
+    clientSocket.off("display new grp").on("display new grp", () => {
+      dispatch(toggleRefresh(!refresh));
+    });
+  });
 
   return (
     <>

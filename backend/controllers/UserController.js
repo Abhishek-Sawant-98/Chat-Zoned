@@ -297,8 +297,7 @@ const deleteUserProfilePic = asyncHandler(async (req, res) => {
     loggedInUser,
     {
       cloudinary_id: "",
-      profilePic:
-        "https://res.cloudinary.com/abhi-sawant/image/upload/v1653670527/user_dqzjdz.png",
+      profilePic: process.env.DEFAULT_USER_DP,
     },
     { new: true }
   )

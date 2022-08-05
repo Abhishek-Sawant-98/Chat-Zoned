@@ -92,7 +92,6 @@ const MessagesView = ({
     attachment: null,
     attachmentPreviewUrl: "",
   });
-
   const msgListBottom = useRef(null);
   const msgFileInput = useRef(null);
   const msgContent = useRef(null);
@@ -254,12 +253,6 @@ const MessagesView = ({
           msg["sent"] = true;
           return msg;
         })
-      );
-      console.log(
-        data.map((msg) => {
-          msg["sent"] = true;
-          return msg;
-        })[0]
       );
       setLoadingMsgs(false);
       if (fetchMsgs) setFetchMsgs(false);
@@ -655,10 +648,6 @@ const MessagesView = ({
           // Updating 'state' is the only way to update attachment
         }
       });
-
-    clientSocket.off("display new grp").on("display new grp", () => {
-      dispatch(toggleRefresh(!refresh));
-    });
   });
 
   // Discard msg update draft

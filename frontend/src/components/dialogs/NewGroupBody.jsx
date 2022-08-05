@@ -9,6 +9,7 @@ import { btnCustomStyle, btnHoverStyle } from "../utils/CustomDialog";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
+  setClientSocket,
   setGroupInfo,
   toggleRefresh,
 } from "../../store/slices/AppSlice";
@@ -34,7 +35,8 @@ const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 const DEFAULT_GROUP_DP = process.env.REACT_APP_DEFAULT_GROUP_DP;
 
 const NewGroupBody = ({ closeChildDialog }) => {
-  const { loggedInUser, refresh, groupInfo } = useSelector(selectAppState);
+  const { loggedInUser, refresh, groupInfo, clientSocket } =
+    useSelector(selectAppState);
   const {
     loading,
     disableIfLoading,
@@ -94,8 +96,12 @@ const NewGroupBody = ({ closeChildDialog }) => {
       formData.append("chatName", chatName);
       formData.append("users", JSON.stringify(users?.map((user) => user?._id)));
 
-      await axios.post("/api/chat/group", formData, config);
+      const { data } = await axios.post("/api/chat/group", formData, config);
 
+      clientSocket.emit("new grp created", {
+        admin: loggedInUser,
+        newGroup: data,
+      });
       dispatch(
         displayToast({
           message: "Group Created Successfully",
@@ -226,6 +232,9 @@ const NewGroupBody = ({ closeChildDialog }) => {
           value={chatName}
           onChange={(e) => {
             dispatch(setGroupInfo({ ...groupInfo, chatName: e.target.value }));
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") createGroupChat();
           }}
           required
           autoFocus

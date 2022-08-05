@@ -23,6 +23,7 @@ const configureSockets = (server) => {
       console.log(`User joined chat : ${chatId}`);
     });
 
+    // Message event listeners
     socket.on("new msg sent", async (newMsg) => {
       const { chat } = newMsg;
       if (!chat) return;
@@ -52,7 +53,6 @@ const configureSockets = (server) => {
     });
 
     socket.on("msg updated", (updatedMsg) => {
-      console.log("msg updated");
       const { sender, chat } = updatedMsg;
       if (!sender || !chat) return;
 
@@ -63,10 +63,10 @@ const configureSockets = (server) => {
       });
     });
 
-    socket.on("new grp created", (newGroup) => {
-      console.log("new grp created");
-      const admin = newGroup?.groupAdmins[0];
-      if (!admin) return;
+    // Group event listeners
+    socket.on("new grp created", (newGroupData) => {
+      const { admin, newGroup } = newGroupData;
+      if (!admin || !newGroup) return;
 
       newGroup.users.forEach((user) => {
         if (user._id !== admin._id) {
@@ -76,13 +76,25 @@ const configureSockets = (server) => {
     });
 
     socket.on("grp updated", (updatedGroupData) => {
-      console.log("grp updated");
-      const { admin, updatedGroup } = updatedGroupData;
-      if (!admin || !updatedGroup) return;
+      // 'updater' is the one who updated the grp (admin/non-admin)
+      const { updater, updatedGroup } = updatedGroupData;
+      if (!updater || !updatedGroup) return;
 
       updatedGroup.users.forEach((user) => {
-        if (user._id !== admin._id) {
+        if (user._id !== updater._id) {
           socket.to(user._id).emit("display updated grp", updatedGroup);
+        }
+      });
+    });
+
+    socket.on("grp deleted", (deletedGroupData) => {
+      // 'admin' is the one who updated the grp
+      const { admin, deletedGroup } = deletedGroupData;
+      if (!admin || !deletedGroup) return;
+
+      deletedGroup.users.forEach((user) => {
+        if (user._id !== admin._id) {
+          socket.to(user._id).emit("remove deleted grp", deletedGroup);
         }
       });
     });

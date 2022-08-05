@@ -29,7 +29,8 @@ const MemberOptionsMenu = ({
   setShowDialogClose,
   childDialogMethods,
 }) => {
-  const { loggedInUser, refresh, groupInfo } = useSelector(selectAppState);
+  const { loggedInUser, refresh, groupInfo, clientSocket } =
+    useSelector(selectAppState);
   const dispatch = useDispatch();
 
   const { setChildDialogBody, displayChildDialog } = childDialogMethods;
@@ -118,6 +119,10 @@ const MemberOptionsMenu = ({
         config
       );
 
+      clientSocket.emit("grp updated", {
+        updater: loggedInUser,
+        updatedGroup: data,
+      });
       dispatch(
         displayToast({
           message: `${clickedMemberName} is now a Group Admin`,
@@ -160,6 +165,10 @@ const MemberOptionsMenu = ({
         config
       );
 
+      clientSocket.emit("grp updated", {
+        updater: loggedInUser,
+        updatedGroup: data,
+      });
       dispatch(
         displayToast({
           message: `${clickedMemberName} is no longer a Group Admin`,
@@ -208,6 +217,12 @@ const MemberOptionsMenu = ({
         config
       );
 
+      data["users"] = [...data.users, clickedMember];
+      data["removedUser"] = clickedMember._id;
+      clientSocket.emit("grp updated", {
+        updater: loggedInUser,
+        updatedGroup: data,
+      });
       dispatch(
         displayToast({
           message: `${clickedMemberName} removed from Group`,

@@ -45,7 +45,8 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const GroupInfoBody = ({ messages }) => {
-  const { loggedInUser, refresh, groupInfo } = useSelector(selectAppState);
+  const { loggedInUser, refresh, groupInfo, clientSocket } =
+    useSelector(selectAppState);
   const { childDialogMethods } = useSelector(selectChildDialogState);
   const { loading, disableIfLoading } = useSelector(selectFormfieldState);
   const dispatch = useDispatch();
@@ -114,6 +115,10 @@ const GroupInfoBody = ({ messages }) => {
         config
       );
 
+      clientSocket.emit("grp updated", {
+        updater: loggedInUser,
+        updatedGroup: data,
+      });
       dispatch(
         displayToast({
           message: "Group Name Updated Successfully",
@@ -142,7 +147,7 @@ const GroupInfoBody = ({ messages }) => {
   };
 
   // Update Group Display Pic
-  const handleImgInputChange = async (e) => {
+  const updateGroupDp = async (e) => {
     const image = e.target.files[0];
     if (!image) return;
 
@@ -191,6 +196,10 @@ const GroupInfoBody = ({ messages }) => {
         config
       );
 
+      clientSocket.emit("grp updated", {
+        updater: loggedInUser,
+        updatedGroup: data,
+      });
       dispatch(
         displayToast({
           message: "Group DP Updated Successfully",
@@ -238,6 +247,10 @@ const GroupInfoBody = ({ messages }) => {
         config
       );
 
+      clientSocket.emit("grp updated", {
+        updater: loggedInUser,
+        updatedGroup: data,
+      });
       dispatch(
         displayToast({
           message: "Group DP Deleted Successfully",
@@ -267,9 +280,7 @@ const GroupInfoBody = ({ messages }) => {
     if (groupMembers?.length === 1) {
       return deleteGroup();
     }
-
     dispatch(setLoading(true));
-
     const config = {
       headers: {
         "Content-Type": "application/json",
@@ -288,6 +299,10 @@ const GroupInfoBody = ({ messages }) => {
         config
       );
 
+      clientSocket.emit("grp updated", {
+        updater: loggedInUser,
+        updatedGroup: data,
+      });
       dispatch(
         displayToast({
           message: `Exited From '${data?.chatName}' Group`,
@@ -348,6 +363,10 @@ const GroupInfoBody = ({ messages }) => {
       // Parallel execution of independent promises
       await Promise.all([deleteGroupPromise, deleteMessagesPromise]);
 
+      clientSocket.emit("grp deleted", {
+        admin: loggedInUser,
+        deletedGroup: groupInfo,
+      });
       dispatch(
         displayToast({
           message: "Group Deleted Successfully",
@@ -476,14 +495,12 @@ const GroupInfoBody = ({ messages }) => {
       );
     }
     dispatch(setLoading(true));
-
     const config = {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${loggedInUser?.token}`,
       },
     };
-
     try {
       const { data } = await axios.post(
         "/api/chat/group/add",
@@ -494,6 +511,10 @@ const GroupInfoBody = ({ messages }) => {
         config
       );
 
+      clientSocket.emit("grp updated", {
+        updater: loggedInUser,
+        updatedGroup: data,
+      });
       dispatch(
         displayToast({
           message: "Successfully Added Member/s to Group",
@@ -548,6 +569,7 @@ const GroupInfoBody = ({ messages }) => {
     setShowDialogClose(true);
     setChildDialogBody(<FullSizeImage event={e} />);
     displayChildDialog({
+      isFullScreen: true,
       title: e.target?.alt || "Display Pic",
     });
   };
@@ -574,7 +596,6 @@ const GroupInfoBody = ({ messages }) => {
           <CustomTooltip title="View DP" placement="right" arrow>
             <img
               className="img-fluid d-flex mx-auto border border-2 border-primary rounded-circle pointer"
-              id="groupInfo__displayPic"
               src={groupDP || "GroupDp"}
               style={{ width: "120px", height: "120px" }}
               onClick={displayFullSizeImage}
@@ -604,7 +625,7 @@ const GroupInfoBody = ({ messages }) => {
           <input
             type="file"
             accept="image/*"
-            onChange={handleImgInputChange}
+            onChange={updateGroupDp}
             name="displayPic"
             id="groupInfo__displayPic"
             ref={imgInput}

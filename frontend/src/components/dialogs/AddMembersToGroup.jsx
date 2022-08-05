@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import {} from "@mui/icons-material";
 import { Avatar, Chip } from "@mui/material";
 import axios from "../../utils/axios";
 import { debounce, truncateString } from "../../utils/appUtils";
@@ -171,8 +170,7 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
         style={{ flex: "1", marginBottom: "-10px" }}
       >
         <div
-          // 'Event delegation' (add only one event listener for
-          // parent element instead of adding for each child element)
+          // 'Event delegation'
           onClick={(e) => {
             const userId = e.target.dataset.user || e.target.alt;
             if (!userId) return;

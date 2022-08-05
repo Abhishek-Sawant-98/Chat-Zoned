@@ -101,7 +101,7 @@ const ChatListItem = ({ chat, chatNotifCount }) => {
           alt={chatName}
           data-chat={_id}
           data-has-notifs={chatNotifCount}
-          className={`listItemAvatar chatListAvatar`}
+          className={`img-fluid listItemAvatar chatListAvatar rounded-circle`}
         />
       </CustomTooltip>
       {/* Chat Data */}
