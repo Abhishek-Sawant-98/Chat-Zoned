@@ -8,7 +8,13 @@ import {
   parseInnerHTML,
   truncateString,
 } from "../utils/appUtils";
-import { ArrowBack, AttachFile, Close, Send } from "@mui/icons-material";
+import {
+  ArrowBack,
+  AttachFile,
+  Close,
+  EmojiEmotions,
+  Send,
+} from "@mui/icons-material";
 import getCustomTooltip from "./utils/CustomTooltip";
 import animationData from "../animations/letsChatGif.json";
 import LottieAnimation from "./utils/LottieAnimation";
@@ -19,6 +25,7 @@ import LoadingMsgs from "./utils/LoadingMsgs";
 import FullSizeImage from "./utils/FullSizeImage";
 import Message from "./utils/Message";
 import MsgOptionsMenu from "./menus/MsgOptionsMenu";
+import Picker from "emoji-picker-react";
 import io from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -117,7 +124,21 @@ const MessagesView = ({
     msgContent.current.innerHTML = "";
   };
 
-  const selectAttachment = () => msgFileInput.current?.click();
+  // Emoji picker config
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const toggleEmojiPicker = () => setShowEmojiPicker(!showEmojiPicker);
+  const hideEmojiPicker = () => {
+    if (showEmojiPicker) setShowEmojiPicker(false);
+  };
+  const onEmojiClick = (event, emojiObject) => {
+    msgContent.current.innerHTML += emojiObject.emoji;
+    setEnableMsgSend(true);
+  };
+
+  const selectAttachment = () => {
+    hideEmojiPicker();
+    msgFileInput.current?.click();
+  };
 
   const discardAttachment = () => {
     resetMsgInput({ discardAttachmentOnly: true });
@@ -284,6 +305,7 @@ const MessagesView = ({
   };
 
   const sendMessage = async () => {
+    hideEmojiPicker();
     if (!attachmentData.attachment && !msgContent.current?.innerHTML) return;
 
     const msgData = {
@@ -691,6 +713,7 @@ const MessagesView = ({
   }, 500);
 
   const msgKeydownHandler = (e) => {
+    hideEmojiPicker();
     if (
       e.key === "Enter" &&
       !e.shiftKey &&
@@ -726,6 +749,7 @@ const MessagesView = ({
     const discardDraftClicked =
       dataset.discardDraft || parentDataset.discardDraft;
 
+    hideEmojiPicker();
     if (fileId) {
       downloadFile(fileId);
     } else if (videoId) {
@@ -830,7 +854,10 @@ const MessagesView = ({
     >
       {selectedChat ? (
         <>
-          <section className="messagesHeader pointer-event d-flex justify-content-start position-relative w-100 fw-bold fs-4 bg-info bg-opacity-10 py-2">
+          <section
+            className="messagesHeader pointer-event d-flex justify-content-start position-relative w-100 fw-bold fs-4 bg-info bg-opacity-10 py-2"
+            onClick={hideEmojiPicker}
+          >
             <CustomTooltip title="Go Back" placement="bottom-start" arrow>
               <IconButton
                 onClick={closeChat}
@@ -968,21 +995,34 @@ const MessagesView = ({
               }`}
             >
               <span
-                className={`d-inline-block attachFile ${disableIfLoading} pointer bg-dark`}
+                className={`d-flex attachFile ${disableIfLoading} pointer bg-dark`}
               >
-                <CustomTooltip
-                  title="Attach File"
-                  placement="bottom-start"
-                  arrow
-                >
+                <CustomTooltip title="Select Emoji" placement="top-start" arrow>
+                  <IconButton
+                    onClick={toggleEmojiPicker}
+                    className={`d-flex ms-2 me-1 my-2`}
+                    sx={iconStyles}
+                  >
+                    <EmojiEmotions style={{ fontSize: 24 }} />
+                  </IconButton>
+                </CustomTooltip>
+
+                <CustomTooltip title="Attach File" placement="top-start" arrow>
                   <IconButton
                     onClick={selectAttachment}
-                    className={`d-flex ms-2 my-2`}
+                    className={`d-flex my-2`}
                     sx={{ ...iconStyles, transform: "rotateZ(45deg)" }}
                   >
                     <AttachFile style={{ fontSize: 22 }} />
                   </IconButton>
                 </CustomTooltip>
+                {/* Emoji Picker */}
+                {showEmojiPicker && (
+                  <span className="position-absolute bottom-100 start-0">
+                    <Picker onEmojiClick={onEmojiClick} />
+                  </span>
+                )}
+
                 {/* Attachment File input */}
                 <input
                   type="file"
@@ -999,6 +1039,7 @@ const MessagesView = ({
               <div
                 onInput={msgInputHandler}
                 onKeyDown={msgKeydownHandler}
+                onClick={hideEmojiPicker}
                 ref={msgContent}
                 className={`msgInput ${
                   fileAttached && !msgEditMode ? "addCaption" : ""
