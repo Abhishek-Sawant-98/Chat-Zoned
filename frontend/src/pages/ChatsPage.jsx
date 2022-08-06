@@ -56,23 +56,55 @@ const ChatsPage = () => {
     dispatch(setSelectedChat(null));
   }, []);
 
+  const displayInfo = (message) => {
+    dispatch(
+      displayToast({
+        message,
+        type: "info",
+        duration: 5000,
+        position: "bottom-center",
+      })
+    );
+  };
+
   // Listening to socket events
   useEffect(() => {
     if (!clientSocket) return;
 
     clientSocket
       .off("display updated grp")
-      .on("display updated grp", (updatedGroup) => {
+      .on("display updated grp", (updatedGroupData) => {
+        const { updatedGroup, createdAdmin, dismissedAdmin } = updatedGroupData;
         dispatch(toggleRefresh(!refresh));
-        if (!updatedGroup || !selectedChat) return;
-        if (selectedChat._id === updatedGroup._id) {
+        if (!updatedGroup) return;
+        const { _id, chatName, removedUser } = updatedGroup;
+        const isLoggedInUserRemoved = removedUser?._id === loggedInUser?._id;
+        const isGroupInfoDialogOpen =
+          dialogData.isOpen && dialogData.title === "Group Info";
+
+        if (selectedChat?._id === _id) {
           let groupData = updatedGroup;
-          if (updatedGroup.removedUser?._id === loggedInUser._id) {
+          if (isLoggedInUserRemoved) {
             dispatch(hideDialog());
             groupData = null;
           }
           dispatch(setSelectedChat(groupData));
           dispatch(setGroupInfo(groupData));
+          if (
+            isGroupInfoDialogOpen &&
+            createdAdmin?._id === loggedInUser?._id
+          ) {
+            displayInfo(`You are now an Admin of '${chatName}' group`);
+          }
+          if (
+            isGroupInfoDialogOpen &&
+            dismissedAdmin?._id === loggedInUser?._id
+          ) {
+            displayInfo(`You are no longer an Admin of '${chatName}' group`);
+          }
+        }
+        if (isLoggedInUserRemoved) {
+          displayInfo(`You have been removed from '${chatName}' group`);
         }
       });
 
@@ -80,20 +112,13 @@ const ChatsPage = () => {
       .off("remove deleted grp")
       .on("remove deleted grp", (deletedGroup) => {
         dispatch(toggleRefresh(!refresh));
-        if (!deletedGroup || !selectedChat) return;
-        if (selectedChat._id === deletedGroup._id) {
+        if (!deletedGroup) return;
+        if (selectedChat?._id === deletedGroup?._id) {
           dispatch(hideDialog());
           dispatch(setSelectedChat(null));
           dispatch(setGroupInfo(null));
-          dispatch(
-            displayToast({
-              message: `'${deletedGroup.chatName}' Group Deleted by Admin`,
-              type: "info",
-              duration: 4000,
-              position: "bottom-center",
-            })
-          );
         }
+        displayInfo(`'${deletedGroup.chatName}' Group Deleted by Admin`);
       });
 
     clientSocket.off("display new grp").on("display new grp", () => {

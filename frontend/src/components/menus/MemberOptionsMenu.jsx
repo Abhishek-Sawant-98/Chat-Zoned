@@ -122,6 +122,7 @@ const MemberOptionsMenu = ({
       clientSocket.emit("grp updated", {
         updater: loggedInUser,
         updatedGroup: data,
+        createdAdmin: clickedMember,
       });
       dispatch(
         displayToast({
@@ -168,6 +169,7 @@ const MemberOptionsMenu = ({
       clientSocket.emit("grp updated", {
         updater: loggedInUser,
         updatedGroup: data,
+        dismissedAdmin: clickedMember,
       });
       dispatch(
         displayToast({
@@ -217,8 +219,7 @@ const MemberOptionsMenu = ({
         config
       );
 
-      data["users"] = [...data.users, clickedMember];
-      data["removedUser"] = clickedMember._id;
+      data["removedUser"] = clickedMember;
       clientSocket.emit("grp updated", {
         updater: loggedInUser,
         updatedGroup: data,

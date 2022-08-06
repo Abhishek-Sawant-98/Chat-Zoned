@@ -39,6 +39,7 @@ const ViewGroupMembers = () => {
 
   // Update the member list whenever groupInfo is updated
   useEffect(() => {
+    if (!groupInfo) return;
     filteredMembersCache = sortMembers();
     setFilteredMembers(filteredMembersCache);
   }, [groupInfo]);

@@ -79,12 +79,18 @@ const configureSockets = (server) => {
       // 'updater' is the one who updated the grp (admin/non-admin)
       const { updater, updatedGroup } = updatedGroupData;
       if (!updater || !updatedGroup) return;
+      const { removedUser } = updatedGroup;
 
       updatedGroup.users.forEach((user) => {
         if (user._id !== updater._id) {
-          socket.to(user._id).emit("display updated grp", updatedGroup);
+          socket.to(user._id).emit("display updated grp", updatedGroupData);
         }
       });
+      if (removedUser) {
+        socket
+          .to(removedUser._id)
+          .emit("display updated grp", updatedGroupData);
+      }
     });
 
     socket.on("grp deleted", (deletedGroupData) => {

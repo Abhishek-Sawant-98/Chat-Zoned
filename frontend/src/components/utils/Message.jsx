@@ -114,7 +114,7 @@ const Message = forwardRef(
           className={`msgRow d-flex justify-content-${
             isLoggedInUser ? "end" : "start"
           }`}
-          style={{ marginTop: isSameSender ? "3px" : "10px" }}
+          style={{ marginTop: isSameSender ? 3 : 10 }}
         >
           {showCurrSender ? (
             <CustomTooltip title={`View Profile`} placement="top-start" arrow>
@@ -126,7 +126,7 @@ const Message = forwardRef(
               />
             </CustomTooltip>
           ) : (
-            selectedChat?.isGroupChat && <span style={{ width: "31px" }}></span>
+            selectedChat?.isGroupChat && <span style={{ width: 30 }}></span>
           )}
           <div
             className={`msgBox d-flex flex-column text-start p-2 rounded-3

@@ -44,7 +44,7 @@
   .senderAvatar {
     @include getImgDimensions(0.31);
     background-color: transparent;
-    margin: 7px -2px 0px 2px;
+    margin: 7px -3px 0px 2px;
   }
   .msgContent {
     cursor: auto;

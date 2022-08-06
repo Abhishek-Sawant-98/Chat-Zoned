@@ -151,12 +151,11 @@ const ChatListView = ({
     };
 
     try {
-      const notifications = await axios.put(
+      await axios.put(
         `/api/user/delete/notifications`,
         { notificationIds: JSON.stringify(notifsToBeDeleted) },
         config
       );
-      console.log("notifications after deletion : ", notifications);
     } catch (error) {
       console.log("Couldn't Delete Notifications : ", error.message);
     }
