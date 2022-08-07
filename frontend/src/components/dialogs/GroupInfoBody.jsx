@@ -8,7 +8,12 @@ import {
 } from "@mui/icons-material";
 import { CircularProgress, IconButton } from "@mui/material";
 import axios from "../../utils/axios";
-import { isImageFile, truncateString, TWO_MB } from "../../utils/appUtils";
+import {
+  getAxiosConfig,
+  isImageFile,
+  truncateString,
+  TWO_MB,
+} from "../../utils/appUtils";
 import EditPicMenu from "../menus/EditPicMenu";
 import EditNameBody from "./EditNameBody";
 import ChildDialog from "../utils/ChildDialog";
@@ -31,9 +36,7 @@ import { selectChildDialogState } from "../../store/slices/ChildDialogSlice";
 import { displayToast } from "../../store/slices/ToastSlice";
 import { hideDialog } from "../../store/slices/CustomDialogSlice";
 
-const arrowStyles = {
-  color: "#111",
-};
+const arrowStyles = { color: "#111" };
 const tooltipStyles = {
   maxWidth: 250,
   color: "#eee",
@@ -68,6 +71,43 @@ const GroupInfoBody = ({ messages }) => {
   const imgInput = useRef(null);
   const btnClassName = "w-100 btn text-light fs-5";
 
+  const displayWarning = (message = "Warning", duration = 3000) => {
+    dispatch(
+      displayToast({
+        message,
+        type: "warning",
+        duration,
+        position: "top-center",
+      })
+    );
+  };
+
+  const displayError = (
+    error = "Oops! Something went wrong",
+    title = "Operation Failed"
+  ) => {
+    dispatch(
+      displayToast({
+        title,
+        message: error.response?.data?.message || error.message,
+        type: "error",
+        duration: 5000,
+        position: "top-center",
+      })
+    );
+  };
+
+  const displaySuccess = (message = "Operation Successful") => {
+    dispatch(
+      displayToast({
+        message,
+        type: "success",
+        duration: 3000,
+        position: "bottom-center",
+      })
+    );
+  };
+
   const updateView = (data) => {
     dispatch(setGroupInfo(data));
     dispatch(toggleRefresh(!refresh));
@@ -89,25 +129,10 @@ const GroupInfoBody = ({ messages }) => {
   };
 
   const updateGroupName = async (options) => {
-    if (!updatedName) {
-      return dispatch(
-        displayToast({
-          message: "Please Enter Valid Group Name",
-          type: "warning",
-          duration: 3000,
-          position: "top-center",
-        })
-      );
-    }
+    if (!updatedName) return displayWarning("Please Enter Valid Group Name");
+
     dispatch(setLoading(true));
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser?.token}`,
-      },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.put(
         "/api/chat/group/update-name",
@@ -119,29 +144,14 @@ const GroupInfoBody = ({ messages }) => {
         updater: loggedInUser,
         updatedGroup: data,
       });
-      dispatch(
-        displayToast({
-          message: "Group Name Updated Successfully",
-          type: "success",
-          duration: 3000,
-          position: "bottom-center",
-        })
-      );
+      displaySuccess("Group Name Updated Successfully");
 
       dispatch(setLoading(false));
       updateView(data);
       if (options?.enterKeyClicked) closeChildDialog();
       else return "profileUpdated";
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Couldn't Update Group Name",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 4000,
-          position: "top-center",
-        })
-      );
+      displayError(error, "Couldn't Update Group Name");
       dispatch(setLoading(false));
     }
   };
@@ -165,24 +175,11 @@ const GroupInfoBody = ({ messages }) => {
 
     if (image.size >= TWO_MB) {
       imgInput.current.value = "";
-      return dispatch(
-        displayToast({
-          message: "Please Select an Image Smaller than 2 MB",
-          type: "warning",
-          duration: 4000,
-          position: "top-center",
-        })
-      );
+      return displayWarning("Please Select an Image Smaller than 2 MB", 4000);
     }
     dispatch(setLoading(true));
     setUploading(true);
-
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
+    const config = getAxiosConfig({ loggedInUser, formData: true });
 
     const formData = new FormData();
     formData.append("displayPic", image);
@@ -200,27 +197,12 @@ const GroupInfoBody = ({ messages }) => {
         updater: loggedInUser,
         updatedGroup: data,
       });
-      dispatch(
-        displayToast({
-          message: "Group DP Updated Successfully",
-          type: "success",
-          duration: 3000,
-          position: "bottom-center",
-        })
-      );
+      displaySuccess("Group DP Updated Successfully");
       dispatch(setLoading(false));
       setUploading(false);
       updateView(data);
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Couldn't Update Group DP",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 4000,
-          position: "top-center",
-        })
-      );
+      displayError(error, "Couldn't Update Group DP");
       dispatch(setLoading(false));
       setUploading(false);
     }
@@ -228,14 +210,7 @@ const GroupInfoBody = ({ messages }) => {
 
   const deleteGroupDp = async () => {
     dispatch(setLoading(true));
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.put(
         `/api/chat/group/delete-dp`,
@@ -251,43 +226,21 @@ const GroupInfoBody = ({ messages }) => {
         updater: loggedInUser,
         updatedGroup: data,
       });
-      dispatch(
-        displayToast({
-          message: "Group DP Deleted Successfully",
-          type: "success",
-          duration: 3000,
-          position: "bottom-center",
-        })
-      );
+      displaySuccess("Group DP Deleted Successfully");
       dispatch(setLoading(false));
       updateView(data);
       return "profileUpdated";
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Couldn't Delete Group DP",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 4000,
-          position: "top-center",
-        })
-      );
+      displayError(error, "Couldn't Delete Group DP");
       dispatch(setLoading(false));
     }
   };
 
   const exitGroup = async () => {
-    if (groupMembers?.length === 1) {
-      return deleteGroup();
-    }
-    dispatch(setLoading(true));
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
+    if (groupMembers?.length === 1) return deleteGroup();
 
+    dispatch(setLoading(true));
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.put(
         `/api/chat/group/remove`,
@@ -331,14 +284,7 @@ const GroupInfoBody = ({ messages }) => {
 
   const deleteGroup = async () => {
     dispatch(setLoading(true));
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const deleteGroupPromise = axios.put(
         `/api/chat/group/delete`,
@@ -367,27 +313,12 @@ const GroupInfoBody = ({ messages }) => {
         admin: loggedInUser,
         deletedGroup: groupInfo,
       });
-      dispatch(
-        displayToast({
-          message: "Group Deleted Successfully",
-          type: "success",
-          duration: 3000,
-          position: "bottom-center",
-        })
-      );
+      displaySuccess("Group Deleted Successfully");
       dispatch(setLoading(false));
       updateView(null);
       dispatch(hideDialog());
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Couldn't Delete Group",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 4000,
-          position: "top-center",
-        })
-      );
+      displayError(error, "Couldn't Delete Group");
       dispatch(setLoading(false));
     }
   };
@@ -474,33 +405,14 @@ const GroupInfoBody = ({ messages }) => {
   };
 
   const addMembersToGroup = async () => {
-    if (!isUserGroupAdmin) {
-      return dispatch(
-        displayToast({
-          message: "Only Admin Can Add Members to Group",
-          type: "warning",
-          duration: 3000,
-          position: "top-center",
-        })
-      );
-    }
-    if (!addedMembers?.length) {
-      return dispatch(
-        displayToast({
-          message: "Please Select Atleast 1 Member to Add",
-          type: "warning",
-          duration: 3000,
-          position: "top-center",
-        })
-      );
-    }
+    if (!isUserGroupAdmin)
+      return displayWarning("Only Admin Can Add Members to Group");
+
+    if (!addedMembers?.length)
+      return displayWarning("Please Select Atleast 1 Member to Add");
+
     dispatch(setLoading(true));
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser?.token}`,
-      },
-    };
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.post(
         "/api/chat/group/add",
@@ -515,28 +427,12 @@ const GroupInfoBody = ({ messages }) => {
         updater: loggedInUser,
         updatedGroup: data,
       });
-      dispatch(
-        displayToast({
-          message: "Successfully Added Member/s to Group",
-          type: "success",
-          duration: 3000,
-          position: "bottom-center",
-        })
-      );
-
+      displaySuccess("Successfully Added Member/s to Group");
       dispatch(setLoading(false));
       updateView(data);
       return "profileUpdated";
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Couldn't Add Members to Group",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 4000,
-          position: "top-center",
-        })
-      );
+      displayError(error, "Couldn't Add Members to Group");
       dispatch(setLoading(false));
     }
   };
@@ -717,15 +613,11 @@ const GroupInfoBody = ({ messages }) => {
               admins?.length === 1 &&
               groupMembers?.length !== 1
             ) {
-              return dispatch(
-                displayToast({
-                  message: `Every group must have atleast 1 admin. Since 
-                you're the only group admin, you won't be allowed
-                to exit until you make someone else as the admin.`,
-                  type: "warning",
-                  duration: 10000,
-                  position: "top-center",
-                })
+              return displayWarning(
+                `Every group must have atleast 1 admin. Since 
+              you're the only group admin, you won't be allowed
+              to exit until you make someone else as the admin.`,
+                10000
               );
             }
             openExitGroupConfirmDialog();

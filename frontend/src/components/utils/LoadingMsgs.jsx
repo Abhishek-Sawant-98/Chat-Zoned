@@ -1,9 +1,7 @@
 import { Skeleton } from "@mui/material";
 
 const LoadingMsgs = ({ count }) => {
-  const skeletonStyle = {
-    backgroundColor: "#777",
-  };
+  const skeletonStyle = { backgroundColor: "#777" };
   return (
     <>
       {[...Array(count)].map((e, i) => (

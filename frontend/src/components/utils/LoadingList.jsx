@@ -9,11 +9,7 @@ const LoadingList = ({ listOf, dpRadius, count }) => {
           <Skeleton
             variant="circular"
             className="loadingDp rounded-circle"
-            style={{
-              ...skeletonStyle,
-              width: dpRadius,
-              height: dpRadius,
-            }}
+            style={{ ...skeletonStyle, width: dpRadius, height: dpRadius }}
           />
           <Skeleton
             variant="rectangular"

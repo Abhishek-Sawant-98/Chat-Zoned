@@ -21,9 +21,7 @@ import getCustomTooltip from "../utils/CustomTooltip";
 import AttachmentPreview from "./AttachmentPreview";
 import MsgAttachment from "./MsgAttachment";
 
-const arrowStyles = {
-  color: "#111",
-};
+const arrowStyles = { color: "#111" };
 const tooltipStyles = {
   maxWidth: 230,
   color: "#eee",
@@ -36,9 +34,7 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 const IconButtonSx = {
   color: "lightblue",
-  ":hover": {
-    backgroundColor: "#cccccc20",
-  },
+  ":hover": { backgroundColor: "#cccccc20" },
 };
 const fileEditIcons = (
   <>

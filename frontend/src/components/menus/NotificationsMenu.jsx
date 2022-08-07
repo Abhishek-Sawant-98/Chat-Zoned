@@ -8,7 +8,7 @@ import {
   setLoggedInUser,
   setSelectedChat,
 } from "../../store/slices/AppSlice";
-import { getOneOnOneChatReceiver, truncateString } from "../../utils/appUtils";
+import { getAxiosConfig, getOneOnOneChatReceiver, truncateString } from "../../utils/appUtils";
 import axios from "../../utils/axios";
 
 const NotificationsMenu = ({ chats, setFetchMsgs, anchor, setAnchor }) => {
@@ -33,12 +33,7 @@ const NotificationsMenu = ({ chats, setFetchMsgs, anchor, setAnchor }) => {
   });
 
   const deletePersistedNotifs = async (notifsToBeDeleted) => {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
+    const config = getAxiosConfig({ loggedInUser });
     try {
       await axios.put(
         `/api/user/delete/notifications`,

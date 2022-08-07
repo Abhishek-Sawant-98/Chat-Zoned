@@ -62,9 +62,7 @@ const ViewGroupMembers = () => {
     );
   }, 600);
 
-  const openMemberOptionsMenu = (e) => {
-    setMemberOptionsMenuAnchor(e.target);
-  };
+  const openMemberOptionsMenu = (e) => setMemberOptionsMenuAnchor(e.target);
 
   return (
     <div

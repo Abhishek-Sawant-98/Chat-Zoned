@@ -5,9 +5,7 @@ import { selectAppState } from "../../store/slices/AppSlice";
 import { truncateString } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 
-const arrowStyles = {
-  color: "#E6480C",
-};
+const arrowStyles = { color: "#E6480C" };
 const tooltipStyles = {
   maxWidth: 230,
   color: "#eee",

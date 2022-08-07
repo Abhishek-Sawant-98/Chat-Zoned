@@ -2,9 +2,8 @@ import { getOneOnOneChatReceiver, truncateString } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 import { useSelector } from "react-redux";
 import { selectAppState } from "../../store/slices/AppSlice";
-const arrowStyles = {
-  color: "#111",
-};
+
+const arrowStyles = { color: "#111" };
 const tooltipStyles = {
   maxWidth: 250,
   color: "#eee",

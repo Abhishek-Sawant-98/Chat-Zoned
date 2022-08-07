@@ -2,9 +2,7 @@ import { Avatar } from "@mui/material";
 import { truncateString } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 
-const arrowStyles = {
-  color: "#E6480C",
-};
+const arrowStyles = { color: "#E6480C" };
 const tooltipStyles = {
   maxWidth: 230,
   color: "#eee",

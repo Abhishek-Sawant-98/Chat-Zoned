@@ -2,8 +2,8 @@ import { GroupAdd } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
 import {
   debounce,
+  getAxiosConfig,
   getOneOnOneChatReceiver,
-  truncateString,
 } from "../utils/appUtils";
 import axios from "../utils/axios";
 import AddMembersToGroup from "./dialogs/AddMembersToGroup";
@@ -28,9 +28,7 @@ import { displayToast } from "../store/slices/ToastSlice";
 
 const DEFAULT_GROUP_DP = process.env.REACT_APP_DEFAULT_GROUP_DP;
 
-const arrowStyles = {
-  color: "#777",
-};
+const arrowStyles = { color: "#777" };
 const tooltipStyles = {
   maxWidth: 250,
   color: "#eee",
@@ -47,8 +45,7 @@ const ChatListView = ({
   setFetchMsgs,
   setDialogBody,
 }) => {
-  const { loggedInUser, selectedChat, refresh, clientSocket } =
-    useSelector(selectAppState);
+  const { loggedInUser, selectedChat, refresh } = useSelector(selectAppState);
   const notifs = [...loggedInUser?.notifications];
   const dispatch = useDispatch();
 
@@ -89,12 +86,7 @@ const ChatListView = ({
   };
 
   const fetchChats = async () => {
-    const config = {
-      headers: {
-        Authorization: `Bearer ${loggedInUser?.token}`,
-      },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.get(`/api/chat`, config);
 
@@ -143,13 +135,7 @@ const ChatListView = ({
   }, 600);
 
   const deletePersistedNotifs = async (notifsToBeDeleted) => {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       await axios.put(
         `/api/user/delete/notifications`,

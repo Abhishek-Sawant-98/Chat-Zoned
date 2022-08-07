@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Avatar, Chip } from "@mui/material";
 import axios from "../../utils/axios";
-import { debounce, truncateString } from "../../utils/appUtils";
+import { debounce, getAxiosConfig, truncateString } from "../../utils/appUtils";
 import UserListItem from "../utils/UserListItem";
 import SearchInput from "../utils/SearchInput";
 import NewGroupBody from "./NewGroupBody";
@@ -80,12 +80,7 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
     setFetching(true);
     if (isMemberSelected) setIsMemberSelected(false);
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.get(`/api/user?search=${query}`, config);
 

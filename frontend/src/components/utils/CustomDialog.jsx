@@ -19,9 +19,7 @@ import { hideDialog } from "../../store/slices/CustomDialogSlice";
 import { selectFormfieldState } from "../../store/slices/FormfieldSlice";
 import { truncateString } from "../../utils/appUtils";
 
-export const btnHoverStyle = {
-  ":hover": { backgroundColor: "#93c2f727" },
-};
+export const btnHoverStyle = { ":hover": { backgroundColor: "#93c2f727" } };
 export const btnCustomStyle = {
   fontSize: 19,
   color: "#8cc2ff",

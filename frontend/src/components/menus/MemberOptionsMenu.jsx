@@ -8,7 +8,7 @@ import { ListItemIcon, MenuItem } from "@mui/material";
 import Menu, { menuIconProps, menuItemProps } from "../utils/Menu";
 import axios from "../../utils/axios";
 import MenuItemText from "../utils/MenuItemText";
-import { truncateString } from "../../utils/appUtils";
+import { getAxiosConfig, truncateString } from "../../utils/appUtils";
 import ViewProfileBody from "../dialogs/ViewProfileBody";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -52,18 +52,26 @@ const MemberOptionsMenu = ({
     dispatch(setSelectedChat(data));
   };
 
+  const displayError = (
+    error = "Oops! Something went wrong",
+    title = "Operation Failed"
+  ) => {
+    dispatch(
+      displayToast({
+        title,
+        message: error.response?.data?.message || error.message,
+        type: "error",
+        duration: 5000,
+        position: "bottom-center",
+      })
+    );
+  };
+
   // Create/Retreive chat when 'Message Member' is clicked
   const openChat = async () => {
     dispatch(hideDialog()); // Close all dialogs by closing parent dialog
     dispatch(setLoading(true));
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.post(
         `/api/chat`,
@@ -74,15 +82,7 @@ const MemberOptionsMenu = ({
       dispatch(setLoading(false));
       updateView(data);
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Couldn't Create/Retrieve Chat",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 4000,
-          position: "bottom-center",
-        })
-      );
+      displayError(error, "Couldn't Create/Retrieve Chat");
       dispatch(setLoading(false));
     }
   };
@@ -97,21 +97,12 @@ const MemberOptionsMenu = ({
         memberEmail={clickedMember?.email}
       />
     );
-    displayChildDialog({
-      title: "View Profile",
-    });
+    displayChildDialog({ title: "View Profile" });
   };
 
   const makeGroupAdmin = async () => {
     dispatch(setLoading(true));
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.post(
         `/api/chat/group/make-admin`,
@@ -136,29 +127,14 @@ const MemberOptionsMenu = ({
       updateView(data);
       dispatch(setLoading(false));
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Make Group Admin Failed",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 4000,
-          position: "bottom-center",
-        })
-      );
+      displayError(error, "Make Group Admin Failed");
       dispatch(setLoading(false));
     }
   };
 
   const dismissAsAdmin = async () => {
     dispatch(setLoading(true));
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.put(
         `/api/chat/group/dismiss-admin`,
@@ -184,15 +160,7 @@ const MemberOptionsMenu = ({
       updateView(data);
       return "membersUpdated";
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Dismiss As Group Admin Failed",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 4000,
-          position: "bottom-center",
-        })
-      );
+      displayError(error, "Dismiss As Group Admin Failed");
       dispatch(setLoading(false));
       return "membersUpdated";
     }
@@ -200,14 +168,7 @@ const MemberOptionsMenu = ({
 
   const removeFromGroup = async () => {
     dispatch(setLoading(true));
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.put(
         `/api/chat/group/remove`,
@@ -237,15 +198,7 @@ const MemberOptionsMenu = ({
       updateView(data);
       return "membersUpdated";
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Remove From Group Failed",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 4000,
-          position: "bottom-center",
-        })
-      );
+      displayError(error, "Remove From Group Failed");
       dispatch(setLoading(false));
       return "membersUpdated";
     }

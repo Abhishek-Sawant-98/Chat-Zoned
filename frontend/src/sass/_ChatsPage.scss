@@ -61,6 +61,41 @@
         .attachFile {
           border-radius: 7px 0px 0px 7px;
         }
+        .emojiPicker {
+          bottom: calc(100% + 17px);
+        }
+        .emoji-picker-react {
+          box-shadow: 5px -5px 20px #111, 5px 5px 20px #111;
+          border-radius: 10px;
+          border: none;
+          caret-color: #fff;
+          input.emoji-search {
+            width: 95%;
+            margin: 7px 0px 0px 0px;
+            background-color: #555;
+            padding-left: 15px;
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            &::placeholder {
+              color: #bbb;
+            }
+          }
+          & div {
+            background-color: #333;
+          }
+          .skin-tones-list * {
+            margin: 9px 0px 0px 5px;
+            background-color: auto;
+          }
+          .emoji-categories {
+            background-color: #aaa;
+          }
+          .emoji-group::before {
+            background-color: #333;
+            color: #ddd;
+          }
+        }
         .msgInput {
           font-size: 18px;
           max-height: 100px;

@@ -19,11 +19,37 @@ import {
 } from "../../store/slices/CustomDialogSlice";
 import { displayToast } from "../../store/slices/ToastSlice";
 import { useNavigate } from "react-router-dom";
+import { getAxiosConfig } from "../../utils/appUtils";
 
 const ProfileSettingsMenu = ({ anchor, setAnchor, setDialogBody }) => {
   const { loggedInUser } = useSelector(selectAppState);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const displaySuccess = (
+    message = "Operation Successful",
+    duration = 3000
+  ) => {
+    dispatch(
+      displayToast({
+        message,
+        type: "success",
+        duration,
+        position: "bottom-center",
+      })
+    );
+  };
+
+  const displayWarning = (message = "Warning") => {
+    dispatch(
+      displayToast({
+        message,
+        type: "warning",
+        duration: 5000,
+        position: "top-center",
+      })
+    );
+  };
 
   const isGuestUser = loggedInUser?.email === "guest.user@gmail.com";
 
@@ -41,58 +67,25 @@ const ProfileSettingsMenu = ({ anchor, setAnchor, setDialogBody }) => {
       editPasswordData;
 
     if (!currentPassword || !newPassword || !confirmNewPassword) {
-      return dispatch(
-        displayToast({
-          message: "Please Enter All the Fields",
-          type: "warning",
-          duration: 5000,
-          position: "top-center",
-        })
-      );
+      return displayWarning("Please Enter All the Fields");
     }
     if (currentPassword === newPassword) {
-      return dispatch(
-        displayToast({
-          message: "New Password Must Differ from Current Password",
-          type: "warning",
-          duration: 5000,
-          position: "top-center",
-        })
-      );
+      return displayWarning("New Password Must Differ from Current Password");
     }
     if (newPassword !== confirmNewPassword) {
-      return dispatch(
-        displayToast({
-          message: "New Password Must Match Confirm New Password",
-          type: "warning",
-          duration: 5000,
-          position: "top-center",
-        })
-      );
+      return displayWarning("New Password Must Match Confirm New Password");
     }
     dispatch(setLoading(true));
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       await axios.put(
         "/api/user/update/password",
         { currentPassword, newPassword },
         config
       );
-      dispatch(
-        displayToast({
-          message:
-            "Password Updated Successfully. Please Login Again with Updated Password.",
-          type: "success",
-          duration: 5000,
-          position: "bottom-center",
-        })
+      displaySuccess(
+        "Password Updated Successfully. Please Login Again with Updated Password",
+        5000
       );
 
       dispatch(setLoading(false));
@@ -126,7 +119,7 @@ const ProfileSettingsMenu = ({ anchor, setAnchor, setDialogBody }) => {
       displayToast({
         message: "Logged Out",
         type: "success",
-        duration: 2000,
+        duration: 1500,
         position: "bottom-center",
       })
     );

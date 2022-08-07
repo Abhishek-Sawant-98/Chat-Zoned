@@ -3,6 +3,7 @@ import { Avatar, IconButton } from "@mui/material";
 import {
   debounce,
   FIVE_MB,
+  getAxiosConfig,
   getOneOnOneChatReceiver,
   isImageOrGifFile,
   parseInnerHTML,
@@ -16,7 +17,7 @@ import {
   Send,
 } from "@mui/icons-material";
 import getCustomTooltip from "./utils/CustomTooltip";
-import animationData from "../animations/letsChatGif.json";
+import typingAnimData from "../animations/typing.json";
 import LottieAnimation from "./utils/LottieAnimation";
 import axios from "../utils/axios";
 import ViewProfileBody from "./dialogs/ViewProfileBody";
@@ -47,10 +48,10 @@ import {
   setShowDialogActions,
 } from "../store/slices/CustomDialogSlice";
 import AttachmentPreview from "./utils/AttachmentPreview";
+import WelcomeBanner from "./WelcomeBanner";
+import MsgsHeader from "./MsgsHeader";
 
-const arrowStyles = {
-  color: "#777",
-};
+const arrowStyles = { color: "#777" };
 const tooltipStyles = {
   maxWidth: 250,
   color: "#eee",
@@ -62,9 +63,7 @@ const iconStyles = {
   margin: "4px 0px",
   padding: "5px",
   color: "#999999",
-  ":hover": {
-    backgroundColor: "#aaaaaa20",
-  },
+  ":hover": { backgroundColor: "#aaaaaa20" },
 };
 
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
@@ -78,7 +77,7 @@ const MessagesView = ({
   setFetchMsgs,
   setDialogBody,
 }) => {
-  const letsChatGif = useRef(null);
+  const typingGif = useRef(null);
   const {
     loggedInUser,
     selectedChat,
@@ -108,10 +107,6 @@ const MessagesView = ({
   const [msgEditMode, setMsgEditMode] = useState(false);
   const [msgOptionsMenuAnchor, setMsgOptionsMenuAnchor] = useState(null);
 
-  const chatName = selectedChat?.isGroupChat
-    ? selectedChat?.chatName
-    : getOneOnOneChatReceiver(loggedInUser, selectedChat?.users)?.name;
-
   const resetMsgInput = (options) => {
     setAttachmentData({
       attachment: null,
@@ -140,14 +135,39 @@ const MessagesView = ({
     msgFileInput.current?.click();
   };
 
-  const discardAttachment = () => {
+  const discardAttachment = () =>
     resetMsgInput({ discardAttachmentOnly: true });
-  };
 
   const persistUpdatedUser = (updatedUser) => {
     // localStorage persists updated user even after page refresh
     localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
     dispatch(setLoggedInUser(updatedUser));
+  };
+
+  const displayError = (
+    error = "Oops! Something went wrong",
+    title = "Operation Failed"
+  ) => {
+    dispatch(
+      displayToast({
+        title,
+        message: error.response?.data?.message || error.message,
+        type: "error",
+        duration: 5000,
+        position: "bottom-center",
+      })
+    );
+  };
+
+  const displaySuccess = (message = "Operation Successful") => {
+    dispatch(
+      displayToast({
+        message,
+        type: "success",
+        duration: 1500,
+        position: "bottom-center",
+      })
+    );
   };
 
   const closeChat = () => {
@@ -193,28 +213,14 @@ const MessagesView = ({
     if (!fileId || !options) return;
     setLoadingMediaId(fileId);
     const { fileName, isAudio } = options;
-    const config = {
-      headers: {
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-      responseType: "blob",
-    };
-
+    const config = getAxiosConfig({ loggedInUser, blob: true });
     try {
       const { data } = await axios.get(`/api/message/files/${fileId}`, config);
 
       const mediaSrc = URL.createObjectURL(new Blob([data]));
       viewMedia(mediaSrc, { fileName, isAudio });
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Couldn't Load Media",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 4000,
-          position: "bottom-center",
-        })
-      );
+      displayError(error, "Couldn't Load Media");
       setLoadingMediaId("");
     }
   };
@@ -223,13 +229,7 @@ const MessagesView = ({
     if (!fileId) return;
     setDownloadingFileId(fileId);
     setSending(true);
-    const config = {
-      headers: {
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-      responseType: "blob",
-    };
-
+    const config = getAxiosConfig({ loggedInUser, blob: true });
     try {
       const { data } = await axios.get(`/api/message/files/${fileId}`, config);
 
@@ -243,15 +243,7 @@ const MessagesView = ({
       setDownloadingFileId("");
       setSending(false);
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Couldn't Download File",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 4000,
-          position: "bottom-center",
-        })
-      );
+      displayError(error, "Couldn't Download File");
       setDownloadingFileId("");
       setSending(false);
     }
@@ -259,11 +251,7 @@ const MessagesView = ({
 
   const fetchMessages = async (options) => {
     setLoadingMsgs(true);
-
-    const config = {
-      headers: { Authorization: `Bearer ${loggedInUser.token}` },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.get(
         `/api/message/${selectedChat?._id}`,
@@ -277,27 +265,10 @@ const MessagesView = ({
       );
       setLoadingMsgs(false);
       if (fetchMsgs) setFetchMsgs(false);
-      if (options?.updatingMsg) {
-        dispatch(
-          displayToast({
-            message: "Message Updated Successfully",
-            type: "success",
-            duration: 1500,
-            position: "bottom-center",
-          })
-        );
-      }
+      if (options?.updatingMsg) displaySuccess("Message Updated Successfully");
       setSending(false);
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Couldn't Fetch Messages",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 5000,
-          position: "bottom-center",
-        })
-      );
+      displayError(error, "Couldn't Fetch Messages");
       setLoadingMsgs(false);
       if (fetchMsgs) setFetchMsgs(false);
       setSending(false);
@@ -341,12 +312,7 @@ const MessagesView = ({
     setMessages([newMsg, ...messages]);
     resetMsgInput();
     setSending(true);
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
+    const config = getAxiosConfig({ loggedInUser, formData: true });
 
     try {
       // Upload img/gif to cloudinary, and all other files to aws s3
@@ -365,15 +331,7 @@ const MessagesView = ({
       fetchMessages();
       dispatch(toggleRefresh(!refresh));
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Couldn't Send Message",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 5000,
-          position: "bottom-center",
-        })
-      );
+      displayError(error, "Couldn't Send Message");
       setSending(false);
     }
   };
@@ -381,13 +339,7 @@ const MessagesView = ({
   const deleteMessage = async () => {
     dispatch(setLoading(true));
     setSending(true);
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
+    const config = getAxiosConfig({ loggedInUser });
 
     try {
       await axios.put(
@@ -401,29 +353,14 @@ const MessagesView = ({
         senderId: loggedInUser?._id,
         chat: selectedChat,
       });
-      dispatch(
-        displayToast({
-          message: "Message Deleted Successfully",
-          type: "success",
-          duration: 1500,
-          position: "bottom-center",
-        })
-      );
+      displaySuccess("Message Deleted Successfully");
       setMessages(messages.filter((msg) => msg?._id !== clickedMsg));
       dispatch(setLoading(false));
       dispatch(toggleRefresh(!refresh));
       setSending(false);
       return "msgActionDone";
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Couldn't Delete Message",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 4000,
-          position: "top-center",
-        })
-      );
+      displayError(error, "Couldn't Delete Message");
       dispatch(setLoading(false));
       setSending(false);
     }
@@ -483,12 +420,7 @@ const MessagesView = ({
     );
     discardAttachment();
     setSending(true);
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
+    const config = getAxiosConfig({ loggedInUser, formData: true });
 
     try {
       // Upload img/gif to cloudinary, and all other files to aws s3
@@ -509,23 +441,13 @@ const MessagesView = ({
       dispatch(toggleRefresh(!refresh));
       setMsgFileRemoved(false);
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Couldn't Update Message",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 4000,
-          position: "bottom-center",
-        })
-      );
+      displayError(error, "Couldn't Update Message");
       setSending(false);
       setMsgFileRemoved(false);
     }
   };
 
-  const editMsgHandler = () => {
-    setMsgEditMode(true);
-  };
+  const editMsgHandler = () => setMsgEditMode(true);
 
   const setMediaDuration = (mediaUrl, msgFile) => {
     const media = new Audio(mediaUrl);
@@ -572,12 +494,7 @@ const MessagesView = ({
   };
 
   const deletePersistedNotifs = async (notifsToBeDeleted) => {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
+    const config = getAxiosConfig({ loggedInUser });
     try {
       await axios.put(
         `/api/user/delete/notifications`,
@@ -589,9 +506,8 @@ const MessagesView = ({
     }
   };
 
-  const scrollToBottom = () => {
+  const scrollToBottom = () =>
     msgListBottom.current?.scrollIntoView({ behaviour: "smooth" });
-  };
 
   // Socket client config
   useEffect(() => {
@@ -725,9 +641,7 @@ const MessagesView = ({
           e.target.dataset.msgCreatedAt ||
           e.target.parentNode.dataset.msgCreatedAt;
         updateMessage(editableMsgContent?.current?.innerHTML, msgDate);
-      } else {
-        sendMessage();
-      }
+      } else sendMessage();
     }
   };
 
@@ -807,11 +721,7 @@ const MessagesView = ({
   const openViewProfileDialog = (props) => {
     dispatch(setShowDialogActions(false));
     setDialogBody(props ? <ViewProfileBody {...props} /> : <ViewProfileBody />);
-    dispatch(
-      displayDialog({
-        title: "View Profile",
-      })
-    );
+    dispatch(displayDialog({ title: "View Profile" }));
   };
 
   const openGroupInfoDialog = () => {
@@ -819,11 +729,7 @@ const MessagesView = ({
     dispatch(setGroupInfo(selectedChat));
     dispatch(setShowDialogActions(false));
     setDialogBody(<GroupInfoBody messages={messages} />);
-    dispatch(
-      displayDialog({
-        title: "Group Info",
-      })
-    );
+    dispatch(displayDialog({ title: "Group Info" }));
   };
 
   // Open delete msg confirm dialog
@@ -854,79 +760,13 @@ const MessagesView = ({
     >
       {selectedChat ? (
         <>
-          <section
-            className="messagesHeader pointer-event d-flex justify-content-start position-relative w-100 fw-bold fs-4 bg-info bg-opacity-10 py-2"
-            onClick={hideEmojiPicker}
-          >
-            <CustomTooltip title="Go Back" placement="bottom-start" arrow>
-              <IconButton
-                onClick={closeChat}
-                className={`d-flex d-md-none ms-3`}
-                sx={{
-                  color: "#999999",
-                  ":hover": {
-                    backgroundColor: "#aaaaaa20",
-                  },
-                }}
-              >
-                <ArrowBack />
-              </IconButton>
-            </CustomTooltip>
-            <CustomTooltip
-              title={selectedChat?.isGroupChat ? "Group Info" : "View Profile"}
-              placement="bottom-start"
-              arrow
-            >
-              <IconButton
-                sx={{
-                  margin: "-8px",
-                  ":hover": {
-                    backgroundColor: "#aaaaaa20",
-                  },
-                }}
-                className="pointer ms-1 ms-md-4"
-                onClick={
-                  selectedChat?.isGroupChat
-                    ? openGroupInfoDialog
-                    : openViewProfileDialog
-                }
-              >
-                <Avatar
-                  src={
-                    selectedChat?.isGroupChat
-                      ? selectedChat?.chatDisplayPic
-                      : getOneOnOneChatReceiver(
-                          loggedInUser,
-                          selectedChat?.users
-                        )?.profilePic || ""
-                  }
-                  alt={"receiverAvatar"}
-                />
-              </IconButton>
-            </CustomTooltip>
-
-            <span className="ms-3 mt-1 fs-3 text-info" title={chatName}>
-              {truncateString(chatName, 22, 17)}
-            </span>
-
-            <CustomTooltip title="Close Chat" placement="bottom-end" arrow>
-              <IconButton
-                onClick={closeChat}
-                className="d-none d-md-flex"
-                sx={{
-                  position: "absolute",
-                  right: 15,
-                  top: 8,
-                  color: "#999999",
-                  ":hover": {
-                    backgroundColor: "#aaaaaa20",
-                  },
-                }}
-              >
-                <Close />
-              </IconButton>
-            </CustomTooltip>
-          </section>
+          <MsgsHeader
+            closeChat={closeChat}
+            openGroupInfoDialog={openGroupInfoDialog}
+            openViewProfileDialog={openViewProfileDialog}
+            hideEmojiPicker={hideEmojiPicker}
+            CustomTooltip={CustomTooltip}
+          />
           <section
             className={`messagesBody position-relative ${
               downloadingFileId || loadingMediaId ? "pe-none" : "pe-auto"
@@ -936,9 +776,7 @@ const MessagesView = ({
               const parentDataset = e.target.parentNode.dataset;
               const discardFileClicked =
                 dataset.discardFile || parentDataset.discardFile;
-              if (discardFileClicked) {
-                discardAttachment();
-              }
+              if (discardFileClicked) discardAttachment();
             }}
           >
             {/* Messages list */}
@@ -988,6 +826,7 @@ const MessagesView = ({
                 CustomTooltip={CustomTooltip}
               />
             )}
+
             {/* New Message Input */}
             <div
               className={`msgInputDiv d-flex position-absolute ${
@@ -997,15 +836,13 @@ const MessagesView = ({
               <span
                 className={`d-flex attachFile ${disableIfLoading} pointer bg-dark`}
               >
-                <CustomTooltip title="Select Emoji" placement="top-start" arrow>
-                  <IconButton
-                    onClick={toggleEmojiPicker}
-                    className={`d-flex ms-2 me-1 my-2`}
-                    sx={iconStyles}
-                  >
-                    <EmojiEmotions style={{ fontSize: 24 }} />
-                  </IconButton>
-                </CustomTooltip>
+                <IconButton
+                  onClick={toggleEmojiPicker}
+                  className={`d-flex ms-2 me-1 my-2`}
+                  sx={iconStyles}
+                >
+                  <EmojiEmotions style={{ fontSize: 24 }} />
+                </IconButton>
 
                 <CustomTooltip title="Attach File" placement="top-start" arrow>
                   <IconButton
@@ -1016,13 +853,28 @@ const MessagesView = ({
                     <AttachFile style={{ fontSize: 22 }} />
                   </IconButton>
                 </CustomTooltip>
+
+                {/* Typing indicator */}
+                <span className="position-absolute bottom-50">
+                  <LottieAnimation
+                    ref={typingGif}
+                    className={""}
+                    style={{ height: "30px", bottom: 70 }}
+                    animationData={typingAnimData}
+                  />
+                </span>
+
                 {/* Emoji Picker */}
                 {showEmojiPicker && (
-                  <span className="position-absolute bottom-100 start-0">
-                    <Picker onEmojiClick={onEmojiClick} />
+                  <span className="emojiPicker position-absolute start-0">
+                    <Picker
+                      onEmojiClick={onEmojiClick}
+                      disableAutoFocus={true}
+                      native={true}
+                      searchPlaceholder={"Search an emoji..."}
+                    />
                   </span>
                 )}
-
                 {/* Attachment File input */}
                 <input
                   type="file"
@@ -1072,32 +924,7 @@ const MessagesView = ({
           </section>
         </>
       ) : (
-        <div className="d-flex flex-column justify-content-start align-items-center h-100">
-          <h2 className="mx-3 mt-1">
-            Hello{" "}
-            <span
-              className="fw-bold"
-              style={{ color: "#A798F2" }}
-            >{`${loggedInUser?.name?.split(" ")[0]?.toUpperCase()}`}</span>{" "}
-            👋
-          </h2>
-          <LottieAnimation
-            ref={letsChatGif}
-            className={"d-inline-block mt-3"}
-            style={{ marginBottom: "50px", height: "50%" }}
-            animationData={animationData}
-          />
-          <p
-            className="h4 mx-5"
-            style={{ marginTop: "-20px", color: "#99C5EE" }}
-          >
-            Search or Click a Chat, Create a Group, or Search a User to start or
-            open a chat.
-          </p>
-          <p className="h2" style={{ color: "#99C5EE" }}>
-            Happy Chatting!😀
-          </p>
-        </div>
+        <WelcomeBanner />
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Edit, KeyboardDoubleArrowLeft } from "@mui/icons-material";
 import getCustomTooltip from "../utils/CustomTooltip";
-import { isImageFile, TWO_MB } from "../../utils/appUtils";
+import { getAxiosConfig, isImageFile, TWO_MB } from "../../utils/appUtils";
 import EditPicMenu from "../menus/EditPicMenu";
 import axios from "../../utils/axios";
 import { Button, CircularProgress, DialogActions } from "@mui/material";
@@ -20,9 +20,7 @@ import {
 import { displayToast } from "../../store/slices/ToastSlice";
 import { hideDialog } from "../../store/slices/CustomDialogSlice";
 
-const arrowStyles = {
-  color: "#111",
-};
+const arrowStyles = { color: "#111" };
 const tooltipStyles = {
   maxWidth: 250,
   color: "#eee",
@@ -52,9 +50,18 @@ const NewGroupBody = ({ closeChildDialog }) => {
 
   // Click a button/icon upon 'Enter' or 'Space' keydown
   const clickOnKeydown = (e) => {
-    if (e.key === " " || e.key === "Enter") {
-      e.target.click();
-    }
+    if (e.key === " " || e.key === "Enter") e.target.click();
+  };
+
+  const displayWarning = (message = "Warning", duration = 3000) => {
+    dispatch(
+      displayToast({
+        message,
+        type: "warning",
+        duration,
+        position: "top-center",
+      })
+    );
   };
 
   // Create group chat
@@ -62,34 +69,13 @@ const NewGroupBody = ({ closeChildDialog }) => {
     if (!groupInfo) return;
     const { chatDisplayPic, chatName, users } = groupInfo;
 
-    if (!chatName) {
-      return dispatch(
-        displayToast({
-          message: "Please Enter a Group Name",
-          type: "warning",
-          duration: 3000,
-          position: "top-center",
-        })
-      );
-    }
-    if (users?.length < 2) {
-      return dispatch(
-        displayToast({
-          message: "Please Add Atleast 2 Members",
-          type: "warning",
-          duration: 3000,
-          position: "top-center",
-        })
-      );
-    }
+    if (!chatName) return displayWarning("Please Enter a Group Name");
+
+    if (users?.length < 2)
+      return displayWarning("Please Add Atleast 2 Members");
 
     dispatch(setLoading(true));
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
+    const config = getAxiosConfig({ loggedInUser, formData: true });
     try {
       const formData = new FormData();
       formData.append("displayPic", chatDisplayPic);
@@ -147,14 +133,7 @@ const NewGroupBody = ({ closeChildDialog }) => {
 
     if (image.size >= TWO_MB) {
       imgInput.current.value = "";
-      return dispatch(
-        displayToast({
-          message: "Please Select an Image Smaller than 2 MB",
-          type: "warning",
-          duration: 4000,
-          position: "top-center",
-        })
-      );
+      return displayWarning("Please Select an Image Smaller than 2 MB", 4000);
     }
     dispatch(
       setGroupInfo({

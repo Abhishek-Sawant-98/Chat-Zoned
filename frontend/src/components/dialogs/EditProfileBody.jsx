@@ -5,7 +5,12 @@ import EditNameBody from "./EditNameBody";
 import { CircularProgress, IconButton } from "@mui/material";
 import EditPicMenu from "../menus/EditPicMenu";
 import getCustomTooltip from "../utils/CustomTooltip";
-import { isImageFile, truncateString, TWO_MB } from "../../utils/appUtils";
+import {
+  getAxiosConfig,
+  isImageFile,
+  truncateString,
+  TWO_MB,
+} from "../../utils/appUtils";
 import ChildDialog from "../utils/ChildDialog";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -54,6 +59,43 @@ const EditProfileBody = () => {
     });
   }, [loggedInUser]);
 
+  const displayWarning = (message = "Warning", duration = 3000) => {
+    dispatch(
+      displayToast({
+        message,
+        type: "warning",
+        duration,
+        position: "top-center",
+      })
+    );
+  };
+
+  const displayError = (
+    error = "Oops! Something went wrong",
+    title = "Operation Failed"
+  ) => {
+    dispatch(
+      displayToast({
+        title,
+        message: error.response?.data?.message || error.message,
+        type: "error",
+        duration: 5000,
+        position: "top-center",
+      })
+    );
+  };
+
+  const displaySuccess = (message = "Operation Successful") => {
+    dispatch(
+      displayToast({
+        message,
+        type: "success",
+        duration: 3000,
+        position: "bottom-center",
+      })
+    );
+  };
+
   // For profile pic upload loading indicator
   const [uploading, setUploading] = useState(false);
 
@@ -93,24 +135,11 @@ const EditProfileBody = () => {
 
     if (image.size >= TWO_MB) {
       imgInput.current.value = "";
-      return dispatch(
-        displayToast({
-          message: "Please Select an Image Smaller than 2 MB",
-          type: "warning",
-          duration: 4000,
-          position: "top-center",
-        })
-      );
+      return displayWarning("Please Select an Image Smaller than 2 MB", 4000);
     }
     dispatch(setLoading(true));
     setUploading(true);
-
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
+    const config = getAxiosConfig({ loggedInUser, formData: true });
 
     const formData = new FormData();
     formData.append("profilePic", image);
@@ -123,15 +152,7 @@ const EditProfileBody = () => {
         formData,
         config
       );
-
-      dispatch(
-        displayToast({
-          message: "ProfilePic Updated Successfully.",
-          type: "success",
-          duration: 3000,
-          position: "bottom-center",
-        })
-      );
+      displaySuccess("ProfilePic Updated Successfully");
       dispatch(setLoading(false));
       setUploading(false);
       persistUpdatedUser({
@@ -140,15 +161,7 @@ const EditProfileBody = () => {
         expiryTime: loggedInUser.expiryTime,
       });
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "ProfilePic Update Failed",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 5000,
-          position: "top-center",
-        })
-      );
+      displayError(error, "ProfilePic Update Failed");
       dispatch(setLoading(false));
       setUploading(false);
     }
@@ -156,14 +169,7 @@ const EditProfileBody = () => {
 
   const deleteProfilePic = async () => {
     dispatch(setLoading(true));
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.put(
         "/api/user/delete/profile-pic",
@@ -173,15 +179,7 @@ const EditProfileBody = () => {
         },
         config
       );
-
-      dispatch(
-        displayToast({
-          message: "ProfilePic Deleted Successfully.",
-          type: "success",
-          duration: 4000,
-          position: "bottom-center",
-        })
-      );
+      displaySuccess("ProfilePic Deleted Successfully");
       dispatch(setLoading(false));
       persistUpdatedUser({
         ...data,
@@ -190,15 +188,7 @@ const EditProfileBody = () => {
       });
       return "profileUpdated";
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "ProfilePic Deletion Failed",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 5000,
-          position: "top-center",
-        })
-      );
+      displayError(error, "ProfilePic Deletion Failed");
       dispatch(setLoading(false));
     }
   };
@@ -213,41 +203,17 @@ const EditProfileBody = () => {
   };
 
   const updateProfileName = async (options) => {
-    if (!editedName) {
-      return dispatch(
-        displayToast({
-          message: "Please Enter a Valid Name",
-          type: "warning",
-          duration: 3000,
-          position: "top-center",
-        })
-      );
-    }
+    if (!editedName) return displayWarning("Please Enter a Valid Name");
+
     dispatch(setLoading(true));
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser?.token}`,
-      },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.put(
         "/api/user/update/name",
         { newUserName: editedName },
         config
       );
-
-      dispatch(
-        displayToast({
-          message: "Name Updated Successfully.",
-          type: "success",
-          duration: 3000,
-          position: "bottom-center",
-        })
-      );
-
+      displaySuccess("Name Updated Successfully");
       dispatch(setLoading(false));
       persistUpdatedUser({
         ...data,
@@ -257,15 +223,7 @@ const EditProfileBody = () => {
       if (options?.enterKeyPressed) closeChildDialog();
       else return "profileUpdated";
     } catch (error) {
-      dispatch(
-        displayToast({
-          title: "Name Update Failed",
-          message: error.response?.data?.message || error.message,
-          type: "error",
-          duration: 5000,
-          position: "top-center",
-        })
-      );
+      displayError(error, "Name Update Failed");
       dispatch(setLoading(false));
     }
   };

@@ -18,12 +18,11 @@ const ChildDialog = ({
   });
   const [childDialogBody, setChildDialogBody] = useState(<></>);
   const dispatch = useDispatch();
-  const displayChildDialog = (options) => {
+  const displayChildDialog = (options) =>
     setChildDialogData({ ...options, isOpen: true });
-  };
-  const closeChildDialog = (data) => {
+
+  const closeChildDialog = (data) =>
     setChildDialogData({ ...data, isOpen: false });
-  };
 
   useEffect(() => {
     dispatch(

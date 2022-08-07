@@ -2,7 +2,7 @@ import { ChevronLeft } from "@mui/icons-material";
 import { Drawer, IconButton } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import axios from "../../utils/axios";
-import { debounce, truncateString } from "../../utils/appUtils";
+import { debounce, getAxiosConfig, truncateString } from "../../utils/appUtils";
 import UserListItem from "./UserListItem";
 import LoadingList from "./LoadingList";
 import SearchInput from "./SearchInput";
@@ -17,11 +17,9 @@ import { displayToast } from "../../store/slices/ToastSlice";
 const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-
   const { loggedInUser } = useSelector(selectAppState);
   const { loading } = useSelector(selectFormfieldState);
   const dispatch = useDispatch();
-
   const searchUserInput = useRef(null);
 
   useEffect(() => {
@@ -32,9 +30,7 @@ const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
     }
   }, [isDrawerOpen]);
 
-  const handleClose = () => {
-    setIsDrawerOpen(false);
-  };
+  const handleClose = () => setIsDrawerOpen(false);
 
   // Debouncing fetchUsers method to limit the no. of API calls
   const searchUsers = debounce(async (e) => {
@@ -43,14 +39,7 @@ const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
     if (!query) return setSearchResults([]);
 
     dispatch(setLoading(true));
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.get(`/api/user?search=${query}`, config);
 
@@ -74,14 +63,7 @@ const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
   const createOrRetrieveChat = async (userId) => {
     handleClose();
     dispatch(setLoading(true));
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${loggedInUser.token}`,
-      },
-    };
-
+    const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.post(`/api/chat`, { userId }, config);
 

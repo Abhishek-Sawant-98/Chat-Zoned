@@ -113,6 +113,21 @@ export const setCaretPosition = (node) => {
   sel.addRange(range);
 };
 
+export const getAxiosConfig = (options) => {
+  if (!options) return;
+  const { loggedInUser, formData, blob } = options;
+  const config = {
+    headers: {
+      "Content-Type": formData ? "multipart/form-data" : "application/json",
+    },
+  };
+  if (blob) config.responseType = "blob";
+  if (loggedInUser)
+    config.headers.Authorization = `Bearer ${loggedInUser.token}`;
+
+  return config;
+};
+
 // In bytes
 export const ONE_KB = 1024;
 export const ONE_MB = 1048576;

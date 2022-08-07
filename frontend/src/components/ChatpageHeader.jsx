@@ -1,19 +1,16 @@
 import { Notifications, Search } from "@mui/icons-material";
 import { Avatar, IconButton } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import NotificationsMenu from "./menus/NotificationsMenu";
 import ProfileSettingsMenu from "./menus/ProfileSettingsMenu";
 import SearchUsersDrawer from "./utils/SearchUsersDrawer";
 import getCustomTooltip from "./utils/CustomTooltip";
 import animationData from "../animations/chat-gif.json";
 import LottieAnimation from "./utils/LottieAnimation";
-import io from "socket.io-client";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { selectAppState } from "../store/slices/AppSlice";
 
-const arrowStyles = {
-  color: "#777",
-};
+const arrowStyles = { color: "#777" };
 const tooltipStyles = {
   maxWidth: 250,
   color: "#eee",
@@ -24,8 +21,7 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const ChatpageHeader = ({ chats, setFetchMsgs, setDialogBody }) => {
-  const { loggedInUser, clientSocket } = useSelector(selectAppState);
-  const dispatch = useDispatch();
+  const { loggedInUser } = useSelector(selectAppState);
   const appGif = useRef();
   const notifCount = loggedInUser?.notifications?.length || "";
 
@@ -33,13 +29,8 @@ const ChatpageHeader = ({ chats, setFetchMsgs, setDialogBody }) => {
   const [profileSettingsMenuAnchor, setProfileSettingsMenuAnchor] =
     useState(null);
 
-  const openNotificationMenu = (e) => {
-    setNotificationsMenuAnchor(e.target);
-  };
-
-  const openProfileSettingsMenu = (e) => {
-    setProfileSettingsMenuAnchor(e.target);
-  };
+  const openNotificationMenu = (e) => setNotificationsMenuAnchor(e.target);
+  const openProfileSettingsMenu = (e) => setProfileSettingsMenuAnchor(e.target);
 
   // For opening/closing 'search users' left drawer
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -90,9 +81,7 @@ const ChatpageHeader = ({ chats, setFetchMsgs, setDialogBody }) => {
             onClick={openNotificationMenu}
             sx={{
               color: "#999999",
-              ":hover": {
-                backgroundColor: "#aaaaaa20",
-              },
+              ":hover": { backgroundColor: "#aaaaaa20" },
             }}
           >
             {notifCount && (
@@ -127,9 +116,7 @@ const ChatpageHeader = ({ chats, setFetchMsgs, setDialogBody }) => {
             className="mx-md-3 mx-lg-4"
             sx={{
               color: "#999999",
-              ":hover": {
-                backgroundColor: "#aaaaaa20",
-              },
+              ":hover": { backgroundColor: "#aaaaaa20" },
             }}
             onClick={openProfileSettingsMenu}
           >

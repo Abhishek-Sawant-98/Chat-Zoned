@@ -10,6 +10,7 @@ import {
   setLoading,
 } from "../../store/slices/FormfieldSlice";
 import { displayToast } from "../../store/slices/ToastSlice";
+import { getAxiosConfig } from "../../utils/appUtils";
 
 const Login = () => {
   const {
@@ -30,7 +31,6 @@ const Login = () => {
     email: "",
     password: "",
   });
-
   const { email, password } = userCredentials;
 
   const handleChangeFor = (prop) => (e) => {
@@ -43,7 +43,6 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     // return dispatch(setLoading(true));
-
     if (!email || !password) {
       return dispatch(
         displayToast({
@@ -54,22 +53,14 @@ const Login = () => {
         })
       );
     }
-
     dispatch(setLoading(true));
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-
+    const config = getAxiosConfig({});
     try {
       const { data } = await axios.post(
         "/api/user/login",
         { email, password },
         config
       );
-
       // Success toast : login successful
       dispatch(
         displayToast({

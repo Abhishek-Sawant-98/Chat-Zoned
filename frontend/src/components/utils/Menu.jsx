@@ -28,10 +28,7 @@ const Menu = ({
   anchorOrigin,
 }) => {
   const isMenuOpen = Boolean(menuAnchor);
-
-  const closeMenu = () => {
-    setMenuAnchor(null);
-  };
+  const closeMenu = () => setMenuAnchor(null);
 
   return (
     <MuiMenu

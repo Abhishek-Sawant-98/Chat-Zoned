@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "../../utils/axios";
 import { CircularProgress } from "@mui/material";
 import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
-import { isImageFile, TWO_MB } from "../../utils/appUtils";
+import { getAxiosConfig, isImageFile, TWO_MB } from "../../utils/appUtils";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectFormfieldState,
@@ -95,24 +95,16 @@ const Register = () => {
         })
       );
     }
-
     dispatch(setLoading(true));
-
-    const config = {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    };
+    const config = getAxiosConfig({ formData: true });
 
     const formData = new FormData();
     formData.append("profilePic", profilePic);
     formData.append("name", name);
     formData.append("email", email);
     formData.append("password", password);
-
     try {
       const { data } = await axios.post("/api/user/register", formData, config);
-
       // Success toast : register successful
       dispatch(
         displayToast({
@@ -123,7 +115,6 @@ const Register = () => {
           position: "bottom-center",
         })
       );
-
       localStorage.setItem("loggedInUser", JSON.stringify(data));
       dispatch(setLoggedInUser(data));
       dispatch(setLoading(false));
