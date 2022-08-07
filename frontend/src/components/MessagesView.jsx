@@ -4,18 +4,12 @@ import {
   debounce,
   FIVE_MB,
   getAxiosConfig,
-  getOneOnOneChatReceiver,
   isImageOrGifFile,
   parseInnerHTML,
+  setCaretPosition,
   truncateString,
 } from "../utils/appUtils";
-import {
-  ArrowBack,
-  AttachFile,
-  Close,
-  EmojiEmotions,
-  Send,
-} from "@mui/icons-material";
+import { AttachFile, EmojiEmotions, Send } from "@mui/icons-material";
 import getCustomTooltip from "./utils/CustomTooltip";
 import typingAnimData from "../animations/typing.json";
 import LottieAnimation from "./utils/LottieAnimation";
@@ -51,13 +45,15 @@ import AttachmentPreview from "./utils/AttachmentPreview";
 import WelcomeBanner from "./WelcomeBanner";
 import MsgsHeader from "./MsgsHeader";
 
-const arrowStyles = { color: "#777" };
+const arrowStyles = { color: "#111" };
 const tooltipStyles = {
-  maxWidth: 250,
+  maxWidth: 230,
   color: "#eee",
   fontFamily: "Mirza",
   fontSize: 16,
-  backgroundColor: "#777",
+  borderRadius: 5,
+  border: "1px solid #555",
+  backgroundColor: "#111",
 };
 const iconStyles = {
   margin: "4px 0px",
@@ -69,6 +65,7 @@ const iconStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 const SOCKET_ENDPOINT = process.env.REACT_APP_SERVER_BASE_URL;
 let msgFileAlreadyExists = false;
+let currentlyTyping = false;
 
 const MessagesView = ({
   loadingMsgs,
@@ -91,6 +88,8 @@ const MessagesView = ({
   const [msgFileRemoved, setMsgFileRemoved] = useState(false);
   const [enableMsgSend, setEnableMsgSend] = useState(false);
   const [fileAttached, setFileAttached] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [typingUser, setTypingUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [clickedMsg, setClickedMsg] = useState("");
   const [dontScrollToBottom, setDontScrollToBottom] = useState(false);
@@ -127,6 +126,7 @@ const MessagesView = ({
   };
   const onEmojiClick = (event, emojiObject) => {
     msgContent.current.innerHTML += emojiObject.emoji;
+    setCaretPosition(msgContent.current);
     setEnableMsgSend(true);
   };
 
@@ -327,7 +327,7 @@ const MessagesView = ({
       formData.append("chatId", selectedChat?._id);
       const { data } = await axios.post(apiUrl, formData, config);
 
-      clientSocket?.emit("new msg sent", data);
+      if (isSocketConnected) clientSocket?.emit("new msg sent", data);
       fetchMessages();
       dispatch(toggleRefresh(!refresh));
     } catch (error) {
@@ -348,11 +348,13 @@ const MessagesView = ({
         config
       );
 
-      clientSocket?.emit("msg deleted", {
-        deletedMsgId: clickedMsg,
-        senderId: loggedInUser?._id,
-        chat: selectedChat,
-      });
+      if (isSocketConnected) {
+        clientSocket?.emit("msg deleted", {
+          deletedMsgId: clickedMsg,
+          senderId: loggedInUser?._id,
+          chat: selectedChat,
+        });
+      }
       displaySuccess("Message Deleted Successfully");
       setMessages(messages.filter((msg) => msg?._id !== clickedMsg));
       dispatch(setLoading(false));
@@ -436,7 +438,7 @@ const MessagesView = ({
       formData.append("messageId", clickedMsg);
       const { data } = await axios.put(apiUrl, formData, config);
 
-      clientSocket?.emit("msg updated", data);
+      if (isSocketConnected) clientSocket?.emit("msg updated", data);
       fetchMessages({ updatingMsg: true });
       dispatch(toggleRefresh(!refresh));
       setMsgFileRemoved(false);
@@ -506,28 +508,17 @@ const MessagesView = ({
     }
   };
 
-  const scrollToBottom = () =>
-    msgListBottom.current?.scrollIntoView({ behaviour: "smooth" });
+  const scrollToBottom = () => msgListBottom.current?.scrollIntoView();
 
-  // Socket client config
+  // Initializing Client Socket
   useEffect(() => {
     dispatch(
       setClientSocket(io(SOCKET_ENDPOINT, { transports: ["websocket"] }))
     );
   }, []);
 
-  // Listening to socket events
-  useEffect(() => {
-    if (!clientSocket) return;
-
-    if (!isSocketConnected && clientSocket) {
-      clientSocket.emit("init user", loggedInUser?._id);
-      clientSocket.on("user connected", () => {
-        // console.log("socket connected");
-        dispatch(setSocketConnected(true));
-      });
-    }
-
+  // Socket event handlers
+  const newMsgSocketEventHandler = () => {
     // off() prevents on() to execute multiple times
     clientSocket
       .off("new msg received")
@@ -546,7 +537,9 @@ const MessagesView = ({
           persistUpdatedUser(updatedUser);
         }
       });
+  };
 
+  const deletedMsgSocketEventHandler = () => {
     clientSocket
       .off("remove deleted msg")
       .on("remove deleted msg", (deletedMsgData) => {
@@ -566,7 +559,9 @@ const MessagesView = ({
           deletePersistedNotifs([deletedMsgId]);
         }
       });
+  };
 
+  const updatedMsgSocketEventHandler = () => {
     clientSocket
       .off("update modified msg")
       .on("update modified msg", (updatedMsg) => {
@@ -586,6 +581,40 @@ const MessagesView = ({
           // Updating 'state' is the only way to update attachment
         }
       });
+  };
+
+  const typingSocketEventHandler = () => {
+    clientSocket
+      .off("display typing")
+      .on("display typing", (chat, typingUser) => {
+        if (selectedChat && chat && selectedChat._id === chat._id) {
+          setTypingUser(typingUser);
+          setTyping(true);
+        }
+      });
+
+    clientSocket.off("hide typing").on("hide typing", (chat) => {
+      if (selectedChat && chat && selectedChat._id === chat._id) {
+        setTyping(false);
+      }
+    });
+  };
+
+  // Listening to all socket events
+  useEffect(() => {
+    if (!clientSocket) return;
+
+    if (!isSocketConnected && clientSocket) {
+      clientSocket.emit("init user", loggedInUser?._id);
+      clientSocket.on("user connected", () => {
+        // console.log("socket connected");
+        dispatch(setSocketConnected(true));
+      });
+    }
+    newMsgSocketEventHandler();
+    deletedMsgSocketEventHandler();
+    updatedMsgSocketEventHandler();
+    typingSocketEventHandler();
   });
 
   // Discard msg update draft
@@ -623,9 +652,32 @@ const MessagesView = ({
   };
 
   // Message input handlers
+  const emitTyping = () => {
+    if (isSocketConnected) {
+      clientSocket?.emit("typing", selectedChat, loggedInUser);
+      currentlyTyping = true;
+    }
+  };
+
+  const emitStopTyping = () => {
+    if (isSocketConnected && currentlyTyping) {
+      clientSocket?.emit("stop typing", selectedChat, loggedInUser);
+      currentlyTyping = false;
+    }
+  };
+
+  const onInputBlur = () => {
+    setTimeout(() => {
+      if (showEmojiPicker) return;
+      emitStopTyping();
+    }, 0);
+  };
+
   const msgInputHandler = debounce((e) => {
-    const input = parseInnerHTML(e.target.innerHTML);
-    setEnableMsgSend(Boolean(input));
+    const isNonEmptyInput = Boolean(parseInnerHTML(e.target.innerHTML));
+    setEnableMsgSend(isNonEmptyInput);
+    if (!isNonEmptyInput && currentlyTyping) emitStopTyping();
+    if (isNonEmptyInput && !currentlyTyping) emitTyping();
   }, 500);
 
   const msgKeydownHandler = (e) => {
@@ -641,7 +693,9 @@ const MessagesView = ({
           e.target.dataset.msgCreatedAt ||
           e.target.parentNode.dataset.msgCreatedAt;
         updateMessage(editableMsgContent?.current?.innerHTML, msgDate);
-      } else sendMessage();
+      } else {
+        sendMessage();
+      }
     }
   };
 
@@ -714,7 +768,7 @@ const MessagesView = ({
   useEffect(() => {
     if (fetchMsgs) {
       fetchMessages();
-      clientSocket?.emit("join chat", selectedChat?._id);
+      if (isSocketConnected) clientSocket?.emit("join chat", selectedChat?._id);
     }
   }, [fetchMsgs]);
 
@@ -802,6 +856,7 @@ const MessagesView = ({
                       msgFileRemoved={msgFileRemoved}
                       attachmentData={attachmentData}
                       ref={editableMsgContent}
+                      CustomTooltip={CustomTooltip}
                       key={m._id}
                       msgSent={m.sent}
                       currMsg={m}
@@ -827,6 +882,30 @@ const MessagesView = ({
               />
             )}
 
+            {/* Typing indicator */}
+            <span
+              className={`typingIndicator ${
+                typing ? "displayTyping" : "hideTyping"
+              } d-flex pt-2 rounded-3 ps-2 ms-3`}
+            >
+              <Avatar
+                className=""
+                alt={typingUser?.name || "Receiver"}
+                src={typingUser?.profilePic || "Receiver"}
+                style={{ height: 30, width: 30 }}
+              />
+              <span className="ms-2">{` ${truncateString(
+                typingUser?.name?.split(" ")[0] || "Receiver",
+                12,
+                9
+              )} is typing`}</span>
+              <LottieAnimation
+                ref={typingGif}
+                className={""}
+                style={{ height: "30px", bottom: 0 }}
+                animationData={typingAnimData}
+              />
+            </span>
             {/* New Message Input */}
             <div
               className={`msgInputDiv d-flex position-absolute ${
@@ -854,16 +933,6 @@ const MessagesView = ({
                   </IconButton>
                 </CustomTooltip>
 
-                {/* Typing indicator */}
-                <span className="position-absolute bottom-50">
-                  <LottieAnimation
-                    ref={typingGif}
-                    className={""}
-                    style={{ height: "30px", bottom: 70 }}
-                    animationData={typingAnimData}
-                  />
-                </span>
-
                 {/* Emoji Picker */}
                 {showEmojiPicker && (
                   <span className="emojiPicker position-absolute start-0">
@@ -889,6 +958,7 @@ const MessagesView = ({
               </span>
               {/* Content/text input */}
               <div
+                onBlur={onInputBlur}
                 onInput={msgInputHandler}
                 onKeyDown={msgKeydownHandler}
                 onClick={hideEmojiPicker}

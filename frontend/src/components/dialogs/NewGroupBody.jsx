@@ -9,7 +9,6 @@ import { btnCustomStyle, btnHoverStyle } from "../utils/CustomDialog";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
-  setClientSocket,
   setGroupInfo,
   toggleRefresh,
 } from "../../store/slices/AppSlice";
@@ -33,7 +32,7 @@ const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 const DEFAULT_GROUP_DP = process.env.REACT_APP_DEFAULT_GROUP_DP;
 
 const NewGroupBody = ({ closeChildDialog }) => {
-  const { loggedInUser, refresh, groupInfo, clientSocket } =
+  const { loggedInUser, refresh, groupInfo, clientSocket, isSocketConnected } =
     useSelector(selectAppState);
   const {
     loading,
@@ -83,11 +82,12 @@ const NewGroupBody = ({ closeChildDialog }) => {
       formData.append("users", JSON.stringify(users?.map((user) => user?._id)));
 
       const { data } = await axios.post("/api/chat/group", formData, config);
-
-      clientSocket.emit("new grp created", {
-        admin: loggedInUser,
-        newGroup: data,
-      });
+      if (isSocketConnected) {
+        clientSocket.emit("new grp created", {
+          admin: loggedInUser,
+          newGroup: data,
+        });
+      }
       dispatch(
         displayToast({
           message: "Group Created Successfully",

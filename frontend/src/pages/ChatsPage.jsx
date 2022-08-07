@@ -19,8 +19,13 @@ import {
 } from "../store/slices/CustomDialogSlice";
 
 const ChatsPage = () => {
-  const { loggedInUser, refresh, clientSocket, selectedChat } =
-    useSelector(selectAppState);
+  const {
+    loggedInUser,
+    refresh,
+    clientSocket,
+    selectedChat,
+    isSocketConnected,
+  } = useSelector(selectAppState);
   const { dialogData, showDialogActions } = useSelector(
     selectCustomDialogState
   );
@@ -67,10 +72,7 @@ const ChatsPage = () => {
     );
   };
 
-  // Listening to socket events
-  useEffect(() => {
-    if (!clientSocket) return;
-
+  const groupSocketEventHandlers = () => {
     clientSocket
       .off("display updated grp")
       .on("display updated grp", (updatedGroupData) => {
@@ -124,6 +126,12 @@ const ChatsPage = () => {
     clientSocket.off("display new grp").on("display new grp", () => {
       dispatch(toggleRefresh(!refresh));
     });
+  };
+
+  // Listening to socket events
+  useEffect(() => {
+    if (!clientSocket || !isSocketConnected) return;
+    groupSocketEventHandlers();
   });
 
   return (

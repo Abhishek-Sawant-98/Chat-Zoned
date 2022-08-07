@@ -48,7 +48,7 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const GroupInfoBody = ({ messages }) => {
-  const { loggedInUser, refresh, groupInfo, clientSocket } =
+  const { loggedInUser, refresh, groupInfo, clientSocket, isSocketConnected } =
     useSelector(selectAppState);
   const { childDialogMethods } = useSelector(selectChildDialogState);
   const { loading, disableIfLoading } = useSelector(selectFormfieldState);
@@ -140,10 +140,12 @@ const GroupInfoBody = ({ messages }) => {
         config
       );
 
-      clientSocket.emit("grp updated", {
-        updater: loggedInUser,
-        updatedGroup: data,
-      });
+      if (isSocketConnected) {
+        clientSocket.emit("grp updated", {
+          updater: loggedInUser,
+          updatedGroup: data,
+        });
+      }
       displaySuccess("Group Name Updated Successfully");
 
       dispatch(setLoading(false));
@@ -192,11 +194,12 @@ const GroupInfoBody = ({ messages }) => {
         formData,
         config
       );
-
-      clientSocket.emit("grp updated", {
-        updater: loggedInUser,
-        updatedGroup: data,
-      });
+      if (isSocketConnected) {
+        clientSocket.emit("grp updated", {
+          updater: loggedInUser,
+          updatedGroup: data,
+        });
+      }
       displaySuccess("Group DP Updated Successfully");
       dispatch(setLoading(false));
       setUploading(false);
@@ -222,10 +225,12 @@ const GroupInfoBody = ({ messages }) => {
         config
       );
 
-      clientSocket.emit("grp updated", {
-        updater: loggedInUser,
-        updatedGroup: data,
-      });
+      if (isSocketConnected) {
+        clientSocket.emit("grp updated", {
+          updater: loggedInUser,
+          updatedGroup: data,
+        });
+      }
       displaySuccess("Group DP Deleted Successfully");
       dispatch(setLoading(false));
       updateView(data);
@@ -252,10 +257,12 @@ const GroupInfoBody = ({ messages }) => {
         config
       );
 
-      clientSocket.emit("grp updated", {
-        updater: loggedInUser,
-        updatedGroup: data,
-      });
+      if (isSocketConnected) {
+        clientSocket.emit("grp updated", {
+          updater: loggedInUser,
+          updatedGroup: data,
+        });
+      }
       dispatch(
         displayToast({
           message: `Exited From '${data?.chatName}' Group`,
@@ -308,11 +315,12 @@ const GroupInfoBody = ({ messages }) => {
 
       // Parallel execution of independent promises
       await Promise.all([deleteGroupPromise, deleteMessagesPromise]);
-
-      clientSocket.emit("grp deleted", {
-        admin: loggedInUser,
-        deletedGroup: groupInfo,
-      });
+      if (isSocketConnected) {
+        clientSocket.emit("grp deleted", {
+          admin: loggedInUser,
+          deletedGroup: groupInfo,
+        });
+      }
       displaySuccess("Group Deleted Successfully");
       dispatch(setLoading(false));
       updateView(null);
@@ -422,11 +430,12 @@ const GroupInfoBody = ({ messages }) => {
         },
         config
       );
-
-      clientSocket.emit("grp updated", {
-        updater: loggedInUser,
-        updatedGroup: data,
-      });
+      if (isSocketConnected) {
+        clientSocket.emit("grp updated", {
+          updater: loggedInUser,
+          updatedGroup: data,
+        });
+      }
       displaySuccess("Successfully Added Member/s to Group");
       dispatch(setLoading(false));
       updateView(data);

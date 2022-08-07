@@ -29,7 +29,7 @@ const MemberOptionsMenu = ({
   setShowDialogClose,
   childDialogMethods,
 }) => {
-  const { loggedInUser, refresh, groupInfo, clientSocket } =
+  const { loggedInUser, refresh, groupInfo, clientSocket, isSocketConnected } =
     useSelector(selectAppState);
   const dispatch = useDispatch();
 
@@ -109,12 +109,13 @@ const MemberOptionsMenu = ({
         { userId: clickedMember?._id, chatId: groupInfo?._id },
         config
       );
-
-      clientSocket.emit("grp updated", {
-        updater: loggedInUser,
-        updatedGroup: data,
-        createdAdmin: clickedMember,
-      });
+      if (isSocketConnected) {
+        clientSocket.emit("grp updated", {
+          updater: loggedInUser,
+          updatedGroup: data,
+          createdAdmin: clickedMember,
+        });
+      }
       dispatch(
         displayToast({
           message: `${clickedMemberName} is now a Group Admin`,
@@ -141,12 +142,13 @@ const MemberOptionsMenu = ({
         { userId: clickedMember?._id, chatId: groupInfo?._id },
         config
       );
-
-      clientSocket.emit("grp updated", {
-        updater: loggedInUser,
-        updatedGroup: data,
-        dismissedAdmin: clickedMember,
-      });
+      if (isSocketConnected) {
+        clientSocket.emit("grp updated", {
+          updater: loggedInUser,
+          updatedGroup: data,
+          dismissedAdmin: clickedMember,
+        });
+      }
       dispatch(
         displayToast({
           message: `${clickedMemberName} is no longer a Group Admin`,
@@ -181,10 +183,12 @@ const MemberOptionsMenu = ({
       );
 
       data["removedUser"] = clickedMember;
-      clientSocket.emit("grp updated", {
-        updater: loggedInUser,
-        updatedGroup: data,
-      });
+      if (isSocketConnected) {
+        clientSocket.emit("grp updated", {
+          updater: loggedInUser,
+          updatedGroup: data,
+        });
+      }
       dispatch(
         displayToast({
           message: `${clickedMemberName} removed from Group`,

@@ -1,6 +1,6 @@
 import { Notifications, Search } from "@mui/icons-material";
 import { Avatar, IconButton } from "@mui/material";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import NotificationsMenu from "./menus/NotificationsMenu";
 import ProfileSettingsMenu from "./menus/ProfileSettingsMenu";
 import SearchUsersDrawer from "./utils/SearchUsersDrawer";
@@ -25,6 +25,7 @@ const ChatpageHeader = ({ chats, setFetchMsgs, setDialogBody }) => {
   const appGif = useRef();
   const notifCount = loggedInUser?.notifications?.length || "";
 
+  const [animateNotif, setAnimateNotif] = useState(false);
   const [notificationsMenuAnchor, setNotificationsMenuAnchor] = useState(null);
   const [profileSettingsMenuAnchor, setProfileSettingsMenuAnchor] =
     useState(null);
@@ -34,6 +35,15 @@ const ChatpageHeader = ({ chats, setFetchMsgs, setDialogBody }) => {
 
   // For opening/closing 'search users' left drawer
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    if (animateNotif) return;
+    setAnimateNotif(true);
+    let timeout = setTimeout(() => {
+      setAnimateNotif(false);
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [notifCount]);
 
   return (
     <header
@@ -86,7 +96,9 @@ const ChatpageHeader = ({ chats, setFetchMsgs, setDialogBody }) => {
           >
             {notifCount && (
               <span
-                className={`notifBadge badge rounded-circle bg-danger 
+                className={`notifBadge ${
+                  animateNotif ? "notifCountChange" : ""
+                } badge rounded-circle bg-danger 
                position-absolute`}
                 style={{
                   fontSize: notifCount > 99 ? 12 : 13,

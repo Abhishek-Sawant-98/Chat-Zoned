@@ -17,47 +17,13 @@ import {
   dateStringOf,
   setCaretPosition,
 } from "../../utils/appUtils";
-import getCustomTooltip from "../utils/CustomTooltip";
 import AttachmentPreview from "./AttachmentPreview";
 import MsgAttachment from "./MsgAttachment";
 
-const arrowStyles = { color: "#111" };
-const tooltipStyles = {
-  maxWidth: 230,
-  color: "#eee",
-  fontFamily: "Mirza",
-  fontSize: 16,
-  borderRadius: 5,
-  border: "1px solid #555",
-  backgroundColor: "#111",
-};
-const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 const IconButtonSx = {
   color: "lightblue",
   ":hover": { backgroundColor: "#cccccc20" },
 };
-const fileEditIcons = (
-  <>
-    <CustomTooltip title="Remove Attachment" placement="top" arrow>
-      <IconButton
-        data-remove-msg-file={true}
-        className={`m-1 bg-black bg-opacity-75`}
-        sx={IconButtonSx}
-      >
-        <Delete data-remove-msg-file={true} style={{ fontSize: 20 }} />
-      </IconButton>
-    </CustomTooltip>
-    <CustomTooltip title="Change Attachment" placement="top" arrow>
-      <IconButton
-        data-edit-msg-file={true}
-        className={`m-1 bg-black bg-opacity-75`}
-        sx={IconButtonSx}
-      >
-        <Edit data-edit-msg-file={true} style={{ fontSize: 20 }} />
-      </IconButton>
-    </CustomTooltip>
-  </>
-);
 
 const Message = forwardRef(
   (
@@ -67,6 +33,7 @@ const Message = forwardRef(
       msgEditMode,
       clickedMsgId,
       msgFileRemoved,
+      CustomTooltip,
       msgSent,
       currMsg,
       prevMsg,
@@ -91,6 +58,29 @@ const Message = forwardRef(
       selectedChat?.isGroupChat &&
       (!isSameSender || isOtherDay);
     const isEditMode = msgEditMode && isClickedMsgCurrMsg;
+
+    const fileEditIcons = (
+      <>
+        <CustomTooltip title="Remove Attachment" placement="top" arrow>
+          <IconButton
+            data-remove-msg-file={true}
+            className={`m-1 bg-black bg-opacity-75`}
+            sx={IconButtonSx}
+          >
+            <Delete data-remove-msg-file={true} style={{ fontSize: 20 }} />
+          </IconButton>
+        </CustomTooltip>
+        <CustomTooltip title="Change Attachment" placement="top" arrow>
+          <IconButton
+            data-edit-msg-file={true}
+            className={`m-1 bg-black bg-opacity-75`}
+            sx={IconButtonSx}
+          >
+            <Edit data-edit-msg-file={true} style={{ fontSize: 20 }} />
+          </IconButton>
+        </CustomTooltip>
+      </>
+    );
 
     useEffect(() => {
       if (msgContentRef?.current) {

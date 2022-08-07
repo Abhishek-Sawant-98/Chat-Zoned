@@ -11,7 +11,7 @@ import {
   notFoundHandler,
   appErrorHandler,
 } from "./middleware/ErrorMiddleware.js";
-import configureSockets from "./config/sockets.js";
+import configureSocketEvents from "./config/sockets.js";
 
 connectToMongoDB();
 
@@ -48,4 +48,4 @@ const server = app.listen(PORT, () =>
 );
 
 // Server socket configuration
-configureSockets(server);
+configureSocketEvents(server);
