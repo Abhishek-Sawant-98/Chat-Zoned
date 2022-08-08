@@ -668,7 +668,7 @@ const MessagesView = ({
     setTimeout(() => {
       if (showEmojiPicker) return;
       emitStopTyping();
-    }, 0);
+    }, 10);
   };
 
   const msgInputHandler = debounce((e) => {
