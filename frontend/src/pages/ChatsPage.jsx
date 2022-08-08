@@ -37,6 +37,8 @@ const ChatsPage = () => {
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [dialogBody, setDialogBody] = useState(<></>);
   const [chats, setChats] = useState([]);
+  const [typing, setTyping] = useState(false);
+  const [typingUser, setTypingUser] = useState(null);
 
   useEffect(() => {
     // localStorage persists data even after page refresh, unlike state
@@ -128,10 +130,28 @@ const ChatsPage = () => {
     });
   };
 
+  const typingSocketEventHandler = () => {
+    clientSocket
+      .off("display typing")
+      .on("display typing", (chat, typingUser) => {
+        if (selectedChat && chat && selectedChat._id === chat._id) {
+          setTypingUser(typingUser);
+          setTyping(true);
+        }
+      });
+
+    clientSocket.off("hide typing").on("hide typing", (chat) => {
+      if (selectedChat && chat && selectedChat?._id === chat?._id) {
+        setTyping(false);
+      }
+    });
+  };
+
   // Listening to socket events
   useEffect(() => {
     if (!clientSocket || !isSocketConnected) return;
     groupSocketEventHandlers();
+    typingSocketEventHandler();
   });
 
   return (
@@ -162,6 +182,8 @@ const ChatsPage = () => {
               fetchMsgs={fetchMsgs}
               setFetchMsgs={setFetchMsgs}
               setDialogBody={setDialogBody}
+              typing={typing}
+              typingUser={typingUser}
             />
           </section>
 

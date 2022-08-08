@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Avatar, IconButton } from "@mui/material";
+import { IconButton } from "@mui/material";
 import {
   debounce,
   FIVE_MB,
@@ -7,12 +7,9 @@ import {
   isImageOrGifFile,
   parseInnerHTML,
   setCaretPosition,
-  truncateString,
 } from "../utils/appUtils";
 import { AttachFile, EmojiEmotions, Send } from "@mui/icons-material";
 import getCustomTooltip from "./utils/CustomTooltip";
-import typingAnimData from "../animations/typing.json";
-import LottieAnimation from "./utils/LottieAnimation";
 import axios from "../utils/axios";
 import ViewProfileBody from "./dialogs/ViewProfileBody";
 import GroupInfoBody from "./dialogs/GroupInfoBody";
@@ -20,7 +17,6 @@ import LoadingMsgs from "./utils/LoadingMsgs";
 import FullSizeImage from "./utils/FullSizeImage";
 import Message from "./utils/Message";
 import MsgOptionsMenu from "./menus/MsgOptionsMenu";
-import Picker from "emoji-picker-react";
 import io from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -44,6 +40,8 @@ import {
 import AttachmentPreview from "./utils/AttachmentPreview";
 import WelcomeBanner from "./WelcomeBanner";
 import MsgsHeader from "./MsgsHeader";
+import TypingIndicator from "./utils/TypingIndicator";
+import EmojiPicker from "emoji-picker-react";
 
 const arrowStyles = { color: "#111" };
 const tooltipStyles = {
@@ -67,6 +65,7 @@ const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 const SOCKET_ENDPOINT = process.env.REACT_APP_SERVER_BASE_URL;
 let msgFileAlreadyExists = false;
 let currentlyTyping = false;
+let preventStopTyping = true;
 
 const MessagesView = ({
   loadingMsgs,
@@ -74,8 +73,9 @@ const MessagesView = ({
   fetchMsgs,
   setFetchMsgs,
   setDialogBody,
+  typing,
+  typingUser,
 }) => {
-  const typingGif = useRef(null);
   const {
     loggedInUser,
     selectedChat,
@@ -89,8 +89,6 @@ const MessagesView = ({
   const [msgFileRemoved, setMsgFileRemoved] = useState(false);
   const [enableMsgSend, setEnableMsgSend] = useState(false);
   const [fileAttached, setFileAttached] = useState(false);
-  const [typing, setTyping] = useState(false);
-  const [typingUser, setTypingUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [clickedMsgId, setClickedMsgId] = useState("");
   const [dontScrollToBottom, setDontScrollToBottom] = useState(false);
@@ -121,7 +119,10 @@ const MessagesView = ({
 
   // Emoji picker config
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const toggleEmojiPicker = () => setShowEmojiPicker(!showEmojiPicker);
+  const onEmojiIconClick = () => {
+    preventStopTyping = true;
+    setShowEmojiPicker(!showEmojiPicker);
+  };
   const hideEmojiPicker = () => {
     if (showEmojiPicker) setShowEmojiPicker(false);
   };
@@ -132,6 +133,7 @@ const MessagesView = ({
   };
 
   const selectAttachment = () => {
+    preventStopTyping = true;
     hideEmojiPicker();
     msgFileInput.current?.click();
   };
@@ -277,6 +279,8 @@ const MessagesView = ({
   };
 
   const sendMessage = async () => {
+    preventStopTyping = false;
+    emitStopTyping();
     hideEmojiPicker();
     if (!attachmentData.attachment && !msgContent.current?.innerHTML) return;
 
@@ -582,23 +586,6 @@ const MessagesView = ({
       });
   };
 
-  const typingSocketEventHandler = () => {
-    clientSocket
-      .off("display typing")
-      .on("display typing", (chat, typingUser) => {
-        if (selectedChat && chat && selectedChat._id === chat._id) {
-          setTypingUser(typingUser);
-          setTyping(true);
-        }
-      });
-
-    clientSocket.off("hide typing").on("hide typing", (chat) => {
-      if (selectedChat && chat && selectedChat._id === chat._id) {
-        setTyping(false);
-      }
-    });
-  };
-
   // Listening to all socket events
   useEffect(() => {
     if (!clientSocket) return;
@@ -613,7 +600,6 @@ const MessagesView = ({
     newMsgSocketEventHandler();
     deletedMsgSocketEventHandler();
     updatedMsgSocketEventHandler();
-    typingSocketEventHandler();
   });
 
   // Discard msg update draft
@@ -652,7 +638,7 @@ const MessagesView = ({
 
   // Message input handlers
   const emitTyping = () => {
-    if (isSocketConnected) {
+    if (isSocketConnected && !currentlyTyping) {
       clientSocket?.emit("typing", selectedChat, loggedInUser);
       currentlyTyping = true;
     }
@@ -665,18 +651,21 @@ const MessagesView = ({
     }
   };
 
+  const onInputFocus = () => {
+    preventStopTyping = false;
+  };
+
   const onInputBlur = () => {
     setTimeout(() => {
-      if (showEmojiPicker) return;
-      emitStopTyping();
-    }, 10);
+      if (!preventStopTyping) emitStopTyping();
+    }, 1000);
   };
 
   const msgInputHandler = debounce((e) => {
     const isNonEmptyInput = Boolean(parseInnerHTML(e.target.innerHTML));
     setEnableMsgSend(isNonEmptyInput);
-    if (!isNonEmptyInput && currentlyTyping) emitStopTyping();
-    if (isNonEmptyInput && !currentlyTyping) emitTyping();
+    if (!isNonEmptyInput) emitStopTyping();
+    if (isNonEmptyInput) emitTyping();
   }, 500);
 
   const msgKeydownHandler = (e) => {
@@ -882,29 +871,8 @@ const MessagesView = ({
             )}
 
             {/* Typing indicator */}
-            <span
-              className={`typingIndicator ${
-                typing ? "displayTyping" : "hideTyping"
-              } d-flex pt-2 rounded-3 ps-2 ms-3`}
-            >
-              <Avatar
-                className=""
-                alt={typingUser?.name || "Receiver"}
-                src={typingUser?.profilePic || "Receiver"}
-                style={{ height: 30, width: 30 }}
-              />
-              <span className="ms-2">{` ${truncateString(
-                typingUser?.name?.split(" ")[0] || "Receiver",
-                12,
-                9
-              )} is typing`}</span>
-              <LottieAnimation
-                ref={typingGif}
-                className={""}
-                style={{ height: "30px", bottom: 0 }}
-                animationData={typingAnimData}
-              />
-            </span>
+            <TypingIndicator typing={typing} typingUser={typingUser} />
+
             {/* New Message Input */}
             <div
               className={`msgInputDiv d-flex position-absolute ${
@@ -915,13 +883,12 @@ const MessagesView = ({
                 className={`d-flex attachFile ${disableIfLoading} pointer bg-dark`}
               >
                 <IconButton
-                  onClick={toggleEmojiPicker}
+                  onClick={onEmojiIconClick}
                   className={`d-flex ms-2 me-1 my-2`}
                   sx={iconStyles}
                 >
                   <EmojiEmotions style={{ fontSize: 24 }} />
                 </IconButton>
-
                 <CustomTooltip title="Attach File" placement="top-start" arrow>
                   <IconButton
                     onClick={selectAttachment}
@@ -931,11 +898,10 @@ const MessagesView = ({
                     <AttachFile style={{ fontSize: 22 }} />
                   </IconButton>
                 </CustomTooltip>
-
                 {/* Emoji Picker */}
                 {showEmojiPicker && (
                   <span className="emojiPicker position-absolute start-0">
-                    <Picker
+                    <EmojiPicker
                       onEmojiClick={onEmojiClick}
                       disableAutoFocus={true}
                       native={true}
@@ -957,6 +923,7 @@ const MessagesView = ({
               </span>
               {/* Content/text input */}
               <div
+                onFocus={onInputFocus}
                 onBlur={onInputBlur}
                 onInput={msgInputHandler}
                 onKeyDown={msgKeydownHandler}

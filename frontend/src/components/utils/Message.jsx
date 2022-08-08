@@ -5,6 +5,7 @@ import {
   Done,
   DoneAll,
   Edit,
+  EmojiEmotions,
   KeyboardArrowDown,
 } from "@mui/icons-material";
 import { Avatar, CircularProgress, IconButton } from "@mui/material";

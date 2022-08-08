@@ -25,6 +25,7 @@ const tooltipStyles = {
   color: "#eee",
   fontFamily: "Trebuchet MS",
   fontSize: 17,
+  padding: "5px 10px",
   border: "1px solid #333",
   backgroundColor: "#111",
 };
@@ -169,7 +170,7 @@ const NewGroupBody = ({ closeChildDialog }) => {
           src={chatDisplayPicUrl}
           alt="displayPic"
         />
-        <CustomTooltip title="Edit Group Display Pic" placement="right" arrow>
+        <CustomTooltip title="Edit Group Display Pic" placement="top-start" arrow>
           <i
             id="editGroupDPTooltip"
             tabIndex={2}
