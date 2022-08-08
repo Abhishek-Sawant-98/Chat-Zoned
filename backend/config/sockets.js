@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { addNotification } from "../controllers/UserController.js";
+import { addNotification, deleteNotifOnMsgDelete } from "../controllers/UserController.js";
 
 // Message event listeners
 const configureMsgEvents = (socket) => {
@@ -18,17 +18,20 @@ const configureMsgEvents = (socket) => {
     );
   });
 
-  socket.on("msg deleted", (deletedMsgData) => {
+  socket.on("msg deleted", async (deletedMsgData) => {
     const { deletedMsgId, senderId, chat } = deletedMsgData;
     if (!deletedMsgId || !senderId || !chat) return;
 
-    chat.users.forEach((user) => {
-      // Emit a socket to delete 'deletedMsg' for all chat users
-      // except 'deletedMsg' sender
-      if (user._id !== senderId) {
-        socket.to(user._id).emit("remove deleted msg", deletedMsgData);
-      }
-    });
+    // Emit a socket to delete 'deletedMsg' for all chat users
+    // except 'deletedMsg' sender
+    await Promise.all(
+      chat.users.map(async (user) => {
+        if (user._id !== senderId) {
+          await deleteNotifOnMsgDelete(deletedMsgId, user._id);
+          socket.to(user._id).emit("remove deleted msg", deletedMsgData);
+        }
+      })
+    );
   });
 
   socket.on("msg updated", (updatedMsg) => {

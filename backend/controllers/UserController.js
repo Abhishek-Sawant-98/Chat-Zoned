@@ -145,9 +145,7 @@ const updateUserName = asyncHandler(async (req, res) => {
 
   const updatedUser = await UserModel.findByIdAndUpdate(
     loggedInUser,
-    {
-      name: newUserName,
-    },
+    { name: newUserName },
     { new: true }
   )
     .select("-password")
@@ -377,9 +375,30 @@ const addNotification = async (notificationId, userId) => {
   return userData;
 };
 
+// Just a regular method, NOT a route handler
+const deleteNotifOnMsgDelete = async (notificationId, userId) => {
+  try {
+    if (!notificationId || !userId) {
+      throw new Error("Invalid params for deleting notification");
+    }
+    const userData = await UserModel.findByIdAndUpdate(
+      userId,
+      { $pull: { notifications: notificationId } },
+      { new: true }
+    );
+    if (!userData) {
+      throw new Error("User not found while deleting notification");
+    }
+    return userData;
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
 const deleteNotifications = asyncHandler(async (req, res) => {
   // Frontend logic
-  // if(selectedChat && selectedChat === newMsg.chat) => delete notification from array (if present)
+  // if(selectedChat && selectedChat === newMsg.chat)
+  // => delete notification from array (if present)
   let { notificationIds } = req.body;
   notificationIds = JSON.parse(notificationIds);
   const loggedInUser = req.user?._id;
@@ -423,6 +442,7 @@ const deleteNotifications = asyncHandler(async (req, res) => {
   res.status(200).json(userData);
 });
 
+
 export {
   registerUser,
   authenticateUser,
@@ -432,5 +452,6 @@ export {
   updateUserProfilePic,
   deleteUserProfilePic,
   addNotification,
+  deleteNotifOnMsgDelete,
   deleteNotifications,
 };

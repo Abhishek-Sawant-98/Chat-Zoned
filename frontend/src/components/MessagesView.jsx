@@ -91,7 +91,7 @@ const MessagesView = ({
   const [typing, setTyping] = useState(false);
   const [typingUser, setTypingUser] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [clickedMsg, setClickedMsg] = useState("");
+  const [clickedMsgId, setClickedMsgId] = useState("");
   const [dontScrollToBottom, setDontScrollToBottom] = useState(false);
   const [attachmentData, setAttachmentData] = useState({
     attachment: null,
@@ -344,19 +344,18 @@ const MessagesView = ({
     try {
       await axios.put(
         `/api/message/delete`,
-        { messageIds: JSON.stringify([clickedMsg]) },
+        { messageIds: JSON.stringify([clickedMsgId]) },
         config
       );
-
       if (isSocketConnected) {
         clientSocket?.emit("msg deleted", {
-          deletedMsgId: clickedMsg,
+          deletedMsgId: clickedMsgId,
           senderId: loggedInUser?._id,
           chat: selectedChat,
         });
       }
       displaySuccess("Message Deleted Successfully");
-      setMessages(messages.filter((msg) => msg?._id !== clickedMsg));
+      setMessages(messages.filter((msg) => msg?._id !== clickedMsgId));
       dispatch(setLoading(false));
       dispatch(toggleRefresh(!refresh));
       setSending(false);
@@ -418,7 +417,7 @@ const MessagesView = ({
       sent: false,
     };
     setMessages(
-      messages.map((msg) => (msg._id === clickedMsg ? updatedMsg : msg))
+      messages.map((msg) => (msg._id === clickedMsgId ? updatedMsg : msg))
     );
     discardAttachment();
     setSending(true);
@@ -435,7 +434,7 @@ const MessagesView = ({
       formData.append("msgFileRemoved", msgFileRemoved);
       formData.append("mediaDuration", msgData?.mediaDuration);
       formData.append("updatedContent", msgData.content);
-      formData.append("messageId", clickedMsg);
+      formData.append("messageId", clickedMsgId);
       const { data } = await axios.put(apiUrl, formData, config);
 
       if (isSocketConnected) clientSocket?.emit("msg updated", data);
@@ -556,7 +555,6 @@ const MessagesView = ({
             notifications: notifs.filter((n) => n._id !== deletedMsgId),
           };
           persistUpdatedUser(updatedUser);
-          deletePersistedNotifs([deletedMsgId]);
         }
       });
   };
@@ -629,7 +627,7 @@ const MessagesView = ({
       setSending(false);
       // To execute after all the messages have been mapped
       setTimeout(() => {
-        document.getElementById(clickedMsg)?.scrollIntoView();
+        document.getElementById(clickedMsgId)?.scrollIntoView();
       }, 10);
     }, 0);
     setMsgFileRemoved(false);
@@ -746,7 +744,7 @@ const MessagesView = ({
       msgFileAlreadyExists = Boolean(
         dataset.fileExists || parentDataset.fileExists
       );
-      setClickedMsg(msgId);
+      setClickedMsgId(msgId);
       openMsgOptionsMenu(e);
     } else if (attachMsgFileClicked || editMsgFileClicked) {
       selectAttachment();
@@ -852,7 +850,7 @@ const MessagesView = ({
                       downloadingFileId={downloadingFileId}
                       loadingMediaId={loadingMediaId}
                       msgEditMode={msgEditMode}
-                      clickedMsgId={clickedMsg}
+                      clickedMsgId={clickedMsgId}
                       msgFileRemoved={msgFileRemoved}
                       attachmentData={attachmentData}
                       ref={editableMsgContent}
@@ -870,7 +868,7 @@ const MessagesView = ({
             <MsgOptionsMenu
               anchor={msgOptionsMenuAnchor}
               setAnchor={setMsgOptionsMenuAnchor}
-              clickedMsg={clickedMsg}
+              clickedMsg={clickedMsgId}
               editMsgHandler={editMsgHandler}
               openDeleteMsgConfirmDialog={openDeleteMsgConfirmDialog}
             />
