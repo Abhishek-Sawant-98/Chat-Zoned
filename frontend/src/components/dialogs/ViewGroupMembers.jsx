@@ -23,16 +23,16 @@ const ViewGroupMembers = () => {
   const sortMembers = () => {
     return [
       loggedInUser,
-      ...admins?.filter((a) => a?._id !== loggedInUser?._id),
+      ...admins?.filter((admin) => admin?._id !== loggedInUser?._id),
       ...groupMembers?.filter(
-        (u) =>
-          u?._id !== loggedInUser?._id &&
-          admins?.every((a) => a?._id !== u?._id)
+        (member) =>
+          member?._id !== loggedInUser?._id &&
+          admins?.every((admin) => admin?._id !== member?._id)
       ),
     ].map((member) => {
       return {
         ...member,
-        isGroupAdmin: admins?.some((a) => a?._id === member?._id),
+        isGroupAdmin: admins?.some((admin) => admin?._id === member?._id),
       };
     });
   };
@@ -70,7 +70,7 @@ const ViewGroupMembers = () => {
       style={{ height: "75vh" }}
     >
       {/* Member Count */}
-      <p className="h3 text-center text-light" style={{ marginTop: "5px" }}>
+      <p className="h3 text-center text-light" style={{ marginTop: "-5px" }}>
         {`${groupMembers?.length} Member${groupMembers?.length > 1 ? "s" : ""}`}
       </p>
       {/* Search Bar */}

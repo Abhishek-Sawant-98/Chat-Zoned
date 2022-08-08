@@ -19,18 +19,16 @@ import {
 } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 
-const arrowStyles = {
-  color: "#E6480C",
-};
+const arrowStyles = { color: "#A30CA7" };
 const tooltipStyles = {
   maxWidth: 230,
   color: "#eee",
-  fontFamily: "Mirza",
+  fontFamily: "Trebuchet MS",
   fontSize: 17,
+  padding: "5px 12px",
   borderRadius: 5,
-  backgroundColor: "#E6480C",
+  backgroundColor: "#A30CA7",
 };
-
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const ChatListItem = ({ chat, chatNotifCount }) => {
@@ -117,7 +115,7 @@ const ChatListItem = ({ chat, chatNotifCount }) => {
           title={tooltipTitle}
           className="chatListName fs-5 fw-bold text-info"
         >
-          {truncateString(chatName, 23, 20)}
+          {truncateString(chatName, 21, 18)}
         </p>
         {lastMessage && (
           <span

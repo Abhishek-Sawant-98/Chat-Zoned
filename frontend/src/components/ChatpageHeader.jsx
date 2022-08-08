@@ -10,13 +10,14 @@ import LottieAnimation from "./utils/LottieAnimation";
 import { useSelector } from "react-redux";
 import { selectAppState } from "../store/slices/AppSlice";
 
-const arrowStyles = { color: "#777" };
+const arrowStyles = { color: "#666" };
 const tooltipStyles = {
   maxWidth: 250,
   color: "#eee",
-  fontFamily: "Mirza",
-  fontSize: 17,
-  backgroundColor: "#777",
+  fontFamily: "Trebuchet MS",
+  fontSize: 16,
+  padding: "5px 15px",
+  backgroundColor: "#666",
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
@@ -78,7 +79,7 @@ const ChatpageHeader = ({ chats, setFetchMsgs, setDialogBody }) => {
           style={{ width: "35px", height: "35px" }}
           animationData={animationData}
         />
-        <span style={{ color: "orange" }} className="fs-3 fw-bold mt-1">
+        <span style={{ color: "orange" }} className="fs-4 fw-bold mt-1">
           CHAT ZONED
         </span>
       </div>

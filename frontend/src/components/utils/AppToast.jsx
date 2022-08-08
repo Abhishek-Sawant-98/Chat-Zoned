@@ -32,7 +32,7 @@ const AppToast = () => {
       >
         {title && (
           <AlertTitle
-            style={{ fontFamily: "Mirza", fontSize: 20, marginTop: -8 }}
+            style={{ fontFamily: "Trebuchet MS", fontSize: 20, marginTop: -8 }}
             className="fw-bold user-select-none"
           >
             {title}

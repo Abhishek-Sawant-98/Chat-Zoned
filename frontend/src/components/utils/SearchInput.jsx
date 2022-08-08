@@ -52,11 +52,7 @@ const SearchInput = forwardRef((props, inputRef) => {
               margin: "-7px",
               color: "#999999",
             }}
-            sx={{
-              ":hover": {
-                backgroundColor: "#aaaaaa20",
-              },
-            }}
+            sx={{ ":hover": { backgroundColor: "#aaaaaa20" } }}
           >
             <Clear style={{ fontSize: "19px" }} />
           </IconButton>

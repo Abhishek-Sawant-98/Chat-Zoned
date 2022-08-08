@@ -2,14 +2,15 @@ import { Avatar } from "@mui/material";
 import { truncateString } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 
-const arrowStyles = { color: "#E6480C" };
+const arrowStyles = { color: "#A30CA7" };
 const tooltipStyles = {
-  maxWidth: 230,
+  maxWidth: 250,
   color: "#eee",
-  fontFamily: "Mirza",
+  fontFamily: "Trebuchet MS",
   fontSize: 17,
+  padding: "5px 12px",
   borderRadius: 5,
-  backgroundColor: "#E6480C",
+  backgroundColor: "#A30CA7",
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
@@ -39,10 +40,10 @@ const UserListItem = ({ user, truncateValues }) => {
         data-user={_id}
         className="userListData d-flex flex-column align-items-start px-2"
       >
-        <p data-user={_id} className="userListName fs-4 fw-bold text-info">
+        <p data-user={_id} className="userListName fs-5 fw-bold text-info">
           {truncateString(name, max, index)}
         </p>
-        <p data-user={_id} className="userListEmail">
+        <p data-user={_id} className="userListEmail fs-6">
           {truncateString(email, max, index)}
         </p>
       </div>

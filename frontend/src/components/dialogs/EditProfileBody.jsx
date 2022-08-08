@@ -21,18 +21,16 @@ import { selectAppState, setLoggedInUser } from "../../store/slices/AppSlice";
 import { selectChildDialogState } from "../../store/slices/ChildDialogSlice";
 import { displayToast } from "../../store/slices/ToastSlice";
 
-const arrowStyles = {
-  color: "#111",
-};
+const arrowStyles = { color: "#111" };
 const tooltipStyles = {
   maxWidth: 250,
   color: "#eee",
-  fontFamily: "Mirza",
+  fontFamily: "Trebuchet MS",
   fontSize: 17,
+  padding: "5px 10px",
   border: "1px solid #333",
   backgroundColor: "#111",
 };
-
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const EditProfileBody = () => {
@@ -284,7 +282,7 @@ const EditProfileBody = () => {
             alt="profilePic"
           />
           {!isGuestUser && (
-            <CustomTooltip title="Edit Profile Pic" placement="right" arrow>
+            <CustomTooltip title="Edit Profile Pic" placement="top-start" arrow>
               <i
                 id="editProfilePic"
                 tabIndex={2}
@@ -328,7 +326,7 @@ const EditProfileBody = () => {
           >
             <div
               className="w-100 h1 fw-bold mx-4 text-info"
-              style={{ fontSize: "35px", wordBreak: "break-all" }}
+              style={{ fontSize: "32px", wordBreak: "break-all" }}
             >
               {truncateString(name, 25, 21)}
             </div>
@@ -342,10 +340,8 @@ const EditProfileBody = () => {
                 sx={{
                   position: "absolute",
                   right: -8,
-                  top: 6,
-                  ":hover": {
-                    backgroundColor: "#aaaaaa30",
-                  },
+                  top: 0,
+                  ":hover": { backgroundColor: "#aaaaaa30" },
                 }}
               >
                 <Edit className="text-light" />

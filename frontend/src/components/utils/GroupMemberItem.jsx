@@ -9,7 +9,7 @@ const arrowStyles = { color: "#E6480C" };
 const tooltipStyles = {
   maxWidth: 230,
   color: "#eee",
-  fontFamily: "Mirza",
+  fontFamily: "Trebuchet MS",
   fontSize: 17,
   borderRadius: 10,
   backgroundColor: "#E6480C",

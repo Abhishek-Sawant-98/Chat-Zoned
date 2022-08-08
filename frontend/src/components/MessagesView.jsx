@@ -49,8 +49,9 @@ const arrowStyles = { color: "#111" };
 const tooltipStyles = {
   maxWidth: 230,
   color: "#eee",
-  fontFamily: "Mirza",
+  fontFamily: "Trebuchet MS",
   fontSize: 16,
+  padding: "5px 10px",
   borderRadius: 5,
   border: "1px solid #555",
   backgroundColor: "#111",
@@ -963,7 +964,7 @@ const MessagesView = ({
                 ref={msgContent}
                 className={`msgInput ${
                   fileAttached && !msgEditMode ? "addCaption" : ""
-                } w-100 text-start d-flex bg-dark px-3 justify-content-start`}
+                } w-100 text-start d-flex bg-dark px-2 justify-content-start`}
                 contentEditable={true}
                 style={{
                   borderRadius:

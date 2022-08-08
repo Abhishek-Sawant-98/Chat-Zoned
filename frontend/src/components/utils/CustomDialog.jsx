@@ -21,9 +21,9 @@ import { truncateString } from "../../utils/appUtils";
 
 export const btnHoverStyle = { ":hover": { backgroundColor: "#93c2f727" } };
 export const btnCustomStyle = {
-  fontSize: 19,
+  fontSize: 17,
   color: "#8cc2ff",
-  fontFamily: "Mirza",
+  fontFamily: "Trebuchet MS",
   borderRadius: 10,
 };
 
@@ -85,7 +85,12 @@ const CustomDialog = ({
       onClose={handleDialogClose}
     >
       <DialogTitle
-        style={{ fontSize: 26, color: "#ffffff", fontFamily: "Mirza" }}
+        style={{
+          fontSize: 25,
+          color: "#A4D0F0",
+          fontFamily: "Trebuchet MS",
+          fontWeight: "bold",
+        }}
       >
         <span
           className="d-flex"
@@ -113,7 +118,7 @@ const CustomDialog = ({
         )}
       </DialogTitle>
       <DialogContent
-        style={{ fontSize: 19, color: "#e0e0e0", fontFamily: "Mirza" }}
+        style={{ fontSize: 19, color: "#e0e0e0", fontFamily: "Trebuchet MS" }}
       >
         {children || <></>}
       </DialogContent>

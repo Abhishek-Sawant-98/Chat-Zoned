@@ -23,7 +23,7 @@ const arrowStyles = { color: "#111" };
 const tooltipStyles = {
   maxWidth: 250,
   color: "#eee",
-  fontFamily: "Mirza",
+  fontFamily: "Trebuchet MS",
   fontSize: 17,
   border: "1px solid #333",
   backgroundColor: "#111",

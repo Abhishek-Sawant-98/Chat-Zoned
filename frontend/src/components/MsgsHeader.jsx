@@ -18,7 +18,7 @@ const MsgsHeader = ({
   return (
     <section
       className={`messagesHeader pointer-event d-flex justify-content-start 
-            position-relative w-100 fw-bold fs-4 bg-info bg-opacity-10 py-2`}
+            position-relative w-100 fw-bold bg-info bg-opacity-10 py-2`}
       onClick={hideEmojiPicker}
     >
       <CustomTooltip title="Go Back" placement="bottom-start" arrow>
@@ -43,7 +43,7 @@ const MsgsHeader = ({
             margin: "-8px",
             ":hover": { backgroundColor: "#aaaaaa20" },
           }}
-          className="pointer ms-1 ms-md-4"
+          className="pointer ms-0 ms-md-4"
           onClick={
             selectedChat?.isGroupChat
               ? openGroupInfoDialog
@@ -62,7 +62,7 @@ const MsgsHeader = ({
         </IconButton>
       </CustomTooltip>
 
-      <span className="ms-3 mt-1 fs-3 text-info" title={chatName}>
+      <span className="ms-2 mt-1 fs-4 text-info" title={chatName}>
         {truncateString(chatName, 22, 17)}
       </span>
 

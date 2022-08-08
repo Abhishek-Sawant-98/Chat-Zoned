@@ -7,7 +7,7 @@ const arrowStyles = { color: "#111" };
 const tooltipStyles = {
   maxWidth: 250,
   color: "#eee",
-  fontFamily: "Mirza",
+  fontFamily: "Trebuchet MS",
   fontSize: 17,
   border: "1px solid #333",
   backgroundColor: "#111",
@@ -50,7 +50,7 @@ const ViewProfileBody = ({ memberProfilePic, memberName, memberEmail }) => {
           >
             <div
               className="w-100 h1 fw-bold mx-4 text-info"
-              style={{ fontSize: "35px" }}
+              style={{ fontSize: "32px" }}
             >
               {truncateString(name, 25, 21)}
             </div>
@@ -67,7 +67,7 @@ const ViewProfileBody = ({ memberProfilePic, memberName, memberEmail }) => {
           placement="bottom"
           arrow
         >
-          <span className="h4" style={{ color: "lightblue" }}>
+          <span className="fs-4" style={{ color: "lightblue" }}>
             {truncateString(email, 25, 21)}
           </span>
         </CustomTooltip>

@@ -40,8 +40,9 @@ const arrowStyles = { color: "#111" };
 const tooltipStyles = {
   maxWidth: 250,
   color: "#eee",
-  fontFamily: "Mirza",
+  fontFamily: "Trebuchet MS",
   fontSize: 17,
+  padding: "5px 10px",
   border: "1px solid #333",
   backgroundColor: "#111",
 };
@@ -550,7 +551,7 @@ const GroupInfoBody = ({ messages }) => {
           >
             <div
               className="w-100 fw-bold mx-4 text-info"
-              style={{ fontSize: "30px", lineHeight: "30px" }}
+              style={{ fontSize: "28px", lineHeight: "30px" }}
             >
               {truncateString(groupName, 25, 21)}
             </div>
@@ -564,9 +565,7 @@ const GroupInfoBody = ({ messages }) => {
                 position: "absolute",
                 right: -8,
                 top: 0,
-                ":hover": {
-                  backgroundColor: "#aaaaaa30",
-                },
+                ":hover": { backgroundColor: "#aaaaaa30" },
               }}
             >
               <Edit className="text-light" />
@@ -577,12 +576,10 @@ const GroupInfoBody = ({ messages }) => {
 
       {/* No of members */}
       <section
-        className={`dialogField text-center mb-3`}
-        style={{ marginTop: "-10px", borderRadius: "10px" }}
+        className={`dialogField text-center mb-3 text-light text-opacity-75`}
+        style={{ marginTop: "-5px", borderRadius: "10px" }}
       >
-        {`Group : ${groupMembers?.length} Member${
-          groupMembers?.length > 1 ? "s" : ""
-        }`}
+        {`${groupMembers?.length} Member${groupMembers?.length > 1 ? "s" : ""}`}
       </section>
 
       {/* View Members */}

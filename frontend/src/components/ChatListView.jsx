@@ -28,13 +28,14 @@ import { displayToast } from "../store/slices/ToastSlice";
 
 const DEFAULT_GROUP_DP = process.env.REACT_APP_DEFAULT_GROUP_DP;
 
-const arrowStyles = { color: "#777" };
+const arrowStyles = { color: "#666" };
 const tooltipStyles = {
   maxWidth: 250,
   color: "#eee",
-  fontFamily: "Mirza",
+  fontFamily: "Trebuchet MS",
   fontSize: 16,
-  backgroundColor: "#777",
+  padding: "5px 12px",
+  backgroundColor: "#666",
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
@@ -179,7 +180,7 @@ const ChatListView = ({
       style={{ pointerEvents: loadingMsgs ? "none" : "auto" }}
     >
       <section className="position-relative">
-        <p className="chatListHeader fw-bold fs-3 rounded-pill bg-info bg-opacity-10 py-2">
+        <p className="chatListHeader fw-bold fs-4 rounded-pill bg-info bg-opacity-10 py-2">
           CHATS
           {/* Create Group Chat */}
           <CustomTooltip
@@ -257,7 +258,7 @@ const ChatListView = ({
               })}
           </div>
         ) : (
-          <span className="d-inline-block w-100 text-light h4 mt-5 mx-auto">
+          <span className="d-inline-block w-100 text-light fs-3 mt-5 mx-auto">
             No Chats Found
           </span>
         )}
