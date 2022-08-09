@@ -73,6 +73,7 @@ const MessagesView = ({
   fetchMsgs,
   setFetchMsgs,
   setDialogBody,
+  isNewUser,
   typing,
   typingUser,
 }) => {
@@ -523,7 +524,7 @@ const MessagesView = ({
 
   // Socket event handlers
   const newMsgSocketEventHandler = () => {
-    // off() prevents on() to execute multiple times
+    // off() prevents on() from executing multiple times
     clientSocket
       .off("new msg received")
       .on("new msg received", (newMsg, notifications) => {
@@ -552,8 +553,8 @@ const MessagesView = ({
         if (selectedChat && chat && selectedChat._id === chat._id) {
           setMessages(messages.filter((m) => m?._id !== deletedMsgId));
         } else {
-          // Remove notification of 'deleted msg' from global state,
-          // localStorage and from mongodb
+          // Remove notification of 'deleted msg' from global state
+          // and localStorage
           const notifs = loggedInUser.notifications;
           const updatedUser = {
             ...loggedInUser,
@@ -656,9 +657,9 @@ const MessagesView = ({
   };
 
   const onInputBlur = () => {
-    setTimeout(() => {
-      if (!preventStopTyping) emitStopTyping();
-    }, 1000);
+    // setTimeout(() => {
+    //   if (!preventStopTyping) emitStopTyping();
+    // }, 1000);
   };
 
   const msgInputHandler = debounce((e) => {
@@ -871,7 +872,11 @@ const MessagesView = ({
             )}
 
             {/* Typing indicator */}
-            <TypingIndicator typing={typing} typingUser={typingUser} />
+            <TypingIndicator
+              showAvatar={true}
+              typing={typing}
+              typingUser={typingUser}
+            />
 
             {/* New Message Input */}
             <div
@@ -960,7 +965,7 @@ const MessagesView = ({
           </section>
         </>
       ) : (
-        <WelcomeBanner />
+        <WelcomeBanner isNewUser={isNewUser} />
       )}
     </div>
   );

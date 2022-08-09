@@ -442,7 +442,6 @@ const deleteNotifications = asyncHandler(async (req, res) => {
   res.status(200).json(userData);
 });
 
-
 export {
   registerUser,
   authenticateUser,

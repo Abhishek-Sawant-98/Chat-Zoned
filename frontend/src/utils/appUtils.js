@@ -38,7 +38,7 @@ export const truncateString = memoize((str, limit, index) => {
   return str.length > limit ? `${str.substring(0, index)}...` : str;
 });
 
-export const getOneOnOneChatReceiver = memoize((loggedInUser, chatUsers) => {
+export const getOneToOneChatReceiver = memoize((loggedInUser, chatUsers) => {
   if (!chatUsers?.length || !loggedInUser) return;
   return loggedInUser._id !== chatUsers[0]._id ? chatUsers[0] : chatUsers[1];
 });

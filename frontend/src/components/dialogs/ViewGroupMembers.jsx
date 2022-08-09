@@ -32,7 +32,7 @@ const ViewGroupMembers = () => {
     ].map((member) => {
       return {
         ...member,
-        isGroupAdmin: admins?.some((admin) => admin?._id === member?._id),
+        isGroupAdmin: admins?.some((admin) => member?._id === admin?._id),
       };
     });
   };

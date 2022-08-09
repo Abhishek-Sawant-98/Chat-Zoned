@@ -1,9 +1,10 @@
 import { GroupAdd } from "@mui/icons-material";
-import { useEffect, useRef, useState } from "react";
+import { lazy, useEffect, useRef, useState } from "react";
 import {
   debounce,
   getAxiosConfig,
-  getOneOnOneChatReceiver,
+  getOneToOneChatReceiver,
+  truncateString,
 } from "../utils/appUtils";
 import axios from "../utils/axios";
 import AddMembersToGroup from "./dialogs/AddMembersToGroup";
@@ -12,7 +13,6 @@ import getCustomTooltip from "./utils/CustomTooltip";
 import FullSizeImage from "./utils/FullSizeImage";
 import LoadingList from "./utils/LoadingList";
 import SearchInput from "./utils/SearchInput";
-import io from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
@@ -25,6 +25,8 @@ import {
   setShowDialogActions,
 } from "../store/slices/CustomDialogSlice";
 import { displayToast } from "../store/slices/ToastSlice";
+
+const GettingStarted = lazy(() => import("./GettingStarted"));
 
 const DEFAULT_GROUP_DP = process.env.REACT_APP_DEFAULT_GROUP_DP;
 
@@ -45,6 +47,7 @@ const ChatListView = ({
   loadingMsgs,
   setFetchMsgs,
   setDialogBody,
+  typingChatUsers,
 }) => {
   const { loggedInUser, selectedChat, refresh } = useSelector(selectAppState);
   const notifs = [...loggedInUser?.notifications];
@@ -91,20 +94,20 @@ const ChatListView = ({
     try {
       const { data } = await axios.get(`/api/chat`, config);
 
-      const mappedChats = data.map((chat) => {
-        const { isGroupChat, users } = chat;
+      const mappedChats = data
+        .map((chat) => {
+          const { isGroupChat, users } = chat;
 
-        if (!isGroupChat) {
-          const receiver = getOneOnOneChatReceiver(loggedInUser, users);
-          return {
-            ...chat,
-            chatName: receiver?.name,
-            receiverEmail: receiver?.email,
-            chatDisplayPic: receiver?.profilePic,
-          };
-        }
-        return chat;
-      });
+          if (!isGroupChat) {
+            const receiver = getOneToOneChatReceiver(loggedInUser, users);
+            chat["chatName"] = receiver?.name;
+            chat["receiverEmail"] = receiver?.email;
+            chat["chatDisplayPic"] = receiver?.profilePic;
+          }
+          return chat;
+        })
+        .filter((chat) => chat.lastMessage !== undefined || chat.isGroupChat);
+
       setChats(mappedChats);
       setFilteredChats(mappedChats);
       if (loading) setLoading(false);
@@ -124,10 +127,8 @@ const ChatListView = ({
 
   // Debouncing filterChats method to limit the no. of fn calls
   const searchChats = debounce((e) => {
-    const chatNameInput = e.target?.value?.toLowerCase().trim();
-    if (!chatNameInput) {
-      return setFilteredChats(chats);
-    }
+    const chatNameInput = e.target.value?.toLowerCase().trim();
+    if (!chatNameInput) return setFilteredChats(chats);
     setFilteredChats(
       chats.filter((chat) =>
         chat?.chatName?.toLowerCase().includes(chatNameInput)
@@ -176,8 +177,9 @@ const ChatListView = ({
     <div
       className={`chatpageDiv chatpageView chatListView text-light ${
         selectedChat ? "d-none d-md-flex" : "d-flex"
-      } flex-column user-select-none col-md-5 col-lg-4 mx-1 p-2`}
-      style={{ pointerEvents: loadingMsgs ? "none" : "auto" }}
+      } flex-column user-select-none mx-1 p-2 ${
+        loadingMsgs ? "pe-none" : "pe-auto"
+      }`}
     >
       <section className="position-relative">
         <p className="chatListHeader fw-bold fs-4 rounded-pill bg-info bg-opacity-10 py-2">
@@ -239,28 +241,36 @@ const ChatListView = ({
               if (hasNotifs) deleteNotifications(clickedChatId);
             }}
           >
-            {filteredChats
-              .filter(
-                (chat) => chat.lastMessage !== undefined || chat.isGroupChat
-              )
-              .map((chat) => {
-                let chatNotifCount = 0;
-                notifs?.forEach((notif) => {
-                  if (notif.chat._id === chat._id) ++chatNotifCount;
-                });
-                return (
-                  <ChatListItem
-                    key={chat._id}
-                    chat={chat}
-                    chatNotifCount={chatNotifCount || ""}
-                  />
-                );
-              })}
+            {filteredChats.map((chat) => {
+              let chatNotifCount = 0;
+              notifs?.forEach((notif) => {
+                if (notif.chat._id === chat._id) ++chatNotifCount;
+              });
+              const typingChatUser = typingChatUsers?.find(
+                (u) => u?.toString()?.split("---")[0] === chat._id
+              );
+              return (
+                <ChatListItem
+                  key={chat._id}
+                  chat={chat}
+                  chatNotifCount={chatNotifCount || ""}
+                  typingChatUser={typingChatUser}
+                />
+              );
+            })}
           </div>
         ) : (
-          <span className="d-inline-block w-100 text-light fs-3 mt-5 mx-auto">
-            No Chats Found
-          </span>
+          <>
+            <span className="d-inline-block w-100 text-light fs-3 mt-4 mx-auto">
+              {chats?.length === 0
+                ? `Hi ${
+                    truncateString(loggedInUser?.name?.split(" ")[0], 12, 9) ||
+                    "There"
+                  }😎`
+                : "No Chats Found"}
+            </span>
+            {chats?.length === 0 && <GettingStarted />}
+          </>
         )}
       </section>
     </div>

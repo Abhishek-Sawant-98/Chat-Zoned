@@ -45,6 +45,21 @@
       border-radius: 15px;
     }
   }
+  @media (min-width: 768px) {
+    .chatListView {
+      width: 48%;
+    }
+  }
+  @media (min-width: 900px) {
+    .chatListView {
+      width: 44%;
+    }
+  }
+  @media (min-width: 1100px) {
+    .chatListView {
+      width: 36%;
+    }
+  }
   .messagesView {
     .messagesHeader {
       border-radius: 10px;

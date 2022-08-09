@@ -29,9 +29,7 @@ const ChatsPage = () => {
   const { dialogData, showDialogActions } = useSelector(
     selectCustomDialogState
   );
-
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
   const [fetchMsgs, setFetchMsgs] = useState(false);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
@@ -39,6 +37,7 @@ const ChatsPage = () => {
   const [chats, setChats] = useState([]);
   const [typing, setTyping] = useState(false);
   const [typingUser, setTypingUser] = useState(null);
+  const [typingChatUsers, setTypingChatUsers] = useState([]);
 
   useEffect(() => {
     // localStorage persists data even after page refresh, unlike state
@@ -63,7 +62,7 @@ const ChatsPage = () => {
     dispatch(setSelectedChat(null));
   }, []);
 
-  const displayInfo = (message) => {
+  const displayInfo = (message = "Operation Executed") => {
     dispatch(
       displayToast({
         message,
@@ -134,14 +133,25 @@ const ChatsPage = () => {
     clientSocket
       .off("display typing")
       .on("display typing", (chat, typingUser) => {
-        if (selectedChat && chat && selectedChat._id === chat._id) {
+        if (!chat || !typingUser) return;
+        setTypingChatUsers([
+          ...typingChatUsers,
+          `${chat._id}---${typingUser.name || ""}`,
+        ]);
+        if (selectedChat && selectedChat._id === chat._id) {
           setTypingUser(typingUser);
           setTyping(true);
         }
       });
 
-    clientSocket.off("hide typing").on("hide typing", (chat) => {
-      if (selectedChat && chat && selectedChat?._id === chat?._id) {
+    clientSocket.off("hide typing").on("hide typing", (chat, typingUser) => {
+      if (!chat || !typingUser) return;
+      setTypingChatUsers([
+        typingChatUsers.filter(
+          (chatUser) => chatUser !== `${chat._id}---${typingUser.name || ""}`
+        ),
+      ]);
+      if (selectedChat && selectedChat._id === chat._id) {
         setTyping(false);
       }
     });
@@ -173,6 +183,7 @@ const ChatsPage = () => {
               loadingMsgs={loadingMsgs}
               setFetchMsgs={setFetchMsgs}
               setDialogBody={setDialogBody}
+              typingChatUsers={typingChatUsers}
             />
 
             {/* Chat Messages component */}
@@ -182,6 +193,7 @@ const ChatsPage = () => {
               fetchMsgs={fetchMsgs}
               setFetchMsgs={setFetchMsgs}
               setDialogBody={setDialogBody}
+              isNewUser={chats?.length === 0}
               typing={typing}
               typingUser={typingUser}
             />

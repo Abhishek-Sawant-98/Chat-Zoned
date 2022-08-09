@@ -1,4 +1,4 @@
-import { getOneOnOneChatReceiver, truncateString } from "../../utils/appUtils";
+import { getOneToOneChatReceiver, truncateString } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
 import { useSelector } from "react-redux";
 import { selectAppState } from "../../store/slices/AppSlice";
@@ -33,7 +33,7 @@ const ViewProfileBody = ({ memberProfilePic, memberName, memberEmail }) => {
     email = memberEmail;
     profilePic = memberProfilePic;
   } else {
-    const receiver = getOneOnOneChatReceiver(loggedInUser, selectedChat?.users);
+    const receiver = getOneToOneChatReceiver(loggedInUser, selectedChat?.users);
     name = receiver?.name;
     email = receiver?.email;
     profilePic = receiver?.profilePic;
@@ -53,7 +53,7 @@ const ViewProfileBody = ({ memberProfilePic, memberName, memberEmail }) => {
     <>
       {/* View Profile Pic */}
       <section className="dialogField d-flex position-relative mb-4">
-        <CustomTooltip title="View Profile Pic" placement="right" arrow>
+        <CustomTooltip title="View Profile Pic" placement="top" arrow>
           <img
             className="img-fluid pointer d-flex mx-auto border border-2 border-primary rounded-circle mt-1"
             id="view_profilePic"

@@ -8,7 +8,11 @@ import {
   setLoggedInUser,
   setSelectedChat,
 } from "../../store/slices/AppSlice";
-import { getAxiosConfig, getOneOnOneChatReceiver, truncateString } from "../../utils/appUtils";
+import {
+  getAxiosConfig,
+  getOneToOneChatReceiver,
+  truncateString,
+} from "../../utils/appUtils";
 import axios from "../../utils/axios";
 
 const NotificationsMenu = ({ chats, setFetchMsgs, anchor, setAnchor }) => {
@@ -23,7 +27,7 @@ const NotificationsMenu = ({ chats, setFetchMsgs, anchor, setAnchor }) => {
     const chatId = notifChat._id;
     const chatName = notifChat.isGroupChat
       ? `group===${notifChat.chatName}`
-      : getOneOnOneChatReceiver(loggedInUser, notifChat.users).name;
+      : getOneToOneChatReceiver(loggedInUser, notifChat.users).name;
     const notifGroupId = `${chatId}---${chatName}`;
     if (notifGroups[notifGroupId]) {
       ++notifGroups[notifGroupId];

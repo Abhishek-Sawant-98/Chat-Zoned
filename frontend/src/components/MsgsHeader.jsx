@@ -2,7 +2,7 @@ import { ArrowBack, Close } from "@mui/icons-material";
 import { Avatar, IconButton } from "@mui/material";
 import { useSelector } from "react-redux";
 import { selectAppState } from "../store/slices/AppSlice";
-import { getOneOnOneChatReceiver, truncateString } from "../utils/appUtils";
+import { getOneToOneChatReceiver, truncateString } from "../utils/appUtils";
 
 const MsgsHeader = ({
   closeChat,
@@ -14,7 +14,7 @@ const MsgsHeader = ({
   const { loggedInUser, selectedChat } = useSelector(selectAppState);
   const chatName = selectedChat?.isGroupChat
     ? selectedChat?.chatName
-    : getOneOnOneChatReceiver(loggedInUser, selectedChat?.users)?.name;
+    : getOneToOneChatReceiver(loggedInUser, selectedChat?.users)?.name;
   return (
     <section
       className={`messagesHeader pointer-event d-flex justify-content-start 
@@ -54,7 +54,7 @@ const MsgsHeader = ({
             src={
               selectedChat?.isGroupChat
                 ? selectedChat?.chatDisplayPic
-                : getOneOnOneChatReceiver(loggedInUser, selectedChat?.users)
+                : getOneToOneChatReceiver(loggedInUser, selectedChat?.users)
                     ?.profilePic || ""
             }
             alt={"receiverAvatar"}

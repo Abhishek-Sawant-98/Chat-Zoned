@@ -103,8 +103,8 @@ const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
       >
         <div className="d-flex justify-content-center">
           <span
-            className="text-center h2 mt-1 user-select-none text-light"
-            style={{ marginTop: "0px" }}
+            className="text-center mt-1 user-select-none text-light"
+            style={{ marginTop: 0, fontSize: 27 }}
           >
             Search Users
             <IconButton
@@ -114,9 +114,7 @@ const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
                 right: 8,
                 top: 5,
                 color: "#999999",
-                ":hover": {
-                  backgroundColor: "#aaaaaa20",
-                },
+                ":hover": { backgroundColor: "#aaaaaa20" },
               }}
             >
               <ChevronLeft className="text-light m-1" />

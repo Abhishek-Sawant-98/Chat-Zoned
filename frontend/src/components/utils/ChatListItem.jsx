@@ -18,6 +18,7 @@ import {
   truncateString,
 } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
+import TypingIndicator from "./TypingIndicator";
 
 const arrowStyles = { color: "#A30CA7" };
 const tooltipStyles = {
@@ -31,7 +32,7 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const ChatListItem = ({ chat, chatNotifCount }) => {
+const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
   const { selectedChat, loggedInUser } = useSelector(selectAppState);
   const {
     _id,
@@ -42,6 +43,7 @@ const ChatListItem = ({ chat, chatNotifCount }) => {
     chatDisplayPic,
   } = chat;
 
+  const typingUserName = typingChatUser?.toString()?.split("---")[1] || "";
   const tooltipTitle = isGroupChat
     ? `Group: ${chatName}\n(${chat?.users?.length} Members)`
     : `${chatName}\n${receiverEmail}`;
@@ -113,7 +115,7 @@ const ChatListItem = ({ chat, chatNotifCount }) => {
           data-chat={_id}
           data-has-notifs={chatNotifCount}
           title={tooltipTitle}
-          className="chatListName fs-5 fw-bold text-info"
+          className="chatListName fs-5 fw-bold text-info text-start"
         >
           {truncateString(chatName, 21, 18)}
         </p>
@@ -153,141 +155,147 @@ const ChatListItem = ({ chat, chatNotifCount }) => {
           </span>
         )}
         {/* Last Message Data */}
-        {(lastMessage || lastMessage === null || isGroupChat) && (
-          <p
-            data-chat={_id}
-            data-has-notifs={chatNotifCount}
-            className="chatListLastMessage"
-          >
-            <span
+        {typingUserName ? (
+          <span style={{ color: "#73F76D", margin: "-3px 0px -3px -30px" }}>
+            <TypingIndicator typingUserName={typingUserName} />
+          </span>
+        ) : (
+          (lastMessage || lastMessage === null || isGroupChat) && (
+            <p
               data-chat={_id}
               data-has-notifs={chatNotifCount}
-              className="text-warning"
+              className="chatListLastMessage"
             >
-              <>
-                {lastMessage === null ||
-                (isGroupChat && !lastMessage) ||
-                (!isGroupChat &&
-                  lastMessage?.sender?._id !== loggedInUser?._id) ? (
-                  ""
-                ) : lastMessage?.sender?._id === loggedInUser?._id ? (
-                  <>
-                    {isGroupChat ? (
-                      <>You: </>
-                    ) : (
-                      <DoneAll
-                        data-chat={_id}
-                        data-has-notifs={chatNotifCount}
-                        className="me-1 fs-5"
-                        style={{ color: "lightblue" }}
-                      />
-                    )}
-                  </>
-                ) : (
-                  truncateString(
-                    lastMessage?.sender?.name?.split(" ")[0],
-                    12,
-                    8
-                  ) + ": "
-                )}
-              </>
-            </span>
-            {lastMsgFileUrl ? (
-              <span data-chat={_id} data-has-notifs={chatNotifCount}>
-                {lastMsgFileType === "image" ? (
-                  <span
-                    data-chat={_id}
-                    data-has-notifs={chatNotifCount}
-                    title={lastMsgData}
-                  >
-                    <Image
-                      data-chat={_id}
-                      data-has-notifs={chatNotifCount}
-                      className="fileIcon"
-                    />{" "}
-                    {truncateString(lastMsgContent, 25, 22) || "Photo"}
-                  </span>
-                ) : lastMsgFileType === "gif" ? (
-                  <span
-                    data-chat={_id}
-                    data-has-notifs={chatNotifCount}
-                    title={lastMsgData}
-                  >
-                    <GifBox
-                      data-chat={_id}
-                      data-has-notifs={chatNotifCount}
-                      className="fileIcon"
-                    />{" "}
-                    {truncateString(lastMsgContent, 25, 22) || "Gif"}
-                  </span>
-                ) : lastMsgFileType === "video" ? (
-                  <span
-                    data-chat={_id}
-                    data-has-notifs={chatNotifCount}
-                    title={lastMsgData}
-                  >
-                    <VideoFile
-                      data-chat={_id}
-                      data-has-notifs={chatNotifCount}
-                      className="fileIcon"
-                    />{" "}
-                    {truncateString(lastMsgContent, 25, 22) || "Video"}
-                  </span>
-                ) : lastMsgFileType === "audio" ? (
-                  <span
-                    data-chat={_id}
-                    data-has-notifs={chatNotifCount}
-                    title={lastMsgData}
-                  >
-                    <AudioFile
-                      data-chat={_id}
-                      data-has-notifs={chatNotifCount}
-                      className="fileIcon"
-                    />{" "}
-                    {truncateString(lastMsgContent, 25, 22) || "Audio"}
-                  </span>
-                ) : lastMsgFileType === "pdf" ? (
-                  <span
-                    data-chat={_id}
-                    data-has-notifs={chatNotifCount}
-                    title={lastMsgData}
-                  >
-                    <PictureAsPdf
-                      data-chat={_id}
-                      data-has-notifs={chatNotifCount}
-                      className="fileIcon"
-                    />{" "}
-                    {truncateString(lastMsgData, 22, 19) || "Pdf"}
-                  </span>
-                ) : (
-                  <span
-                    data-chat={_id}
-                    data-has-notifs={chatNotifCount}
-                    title={lastMsgData}
-                  >
-                    <Description
-                      data-chat={_id}
-                      data-has-notifs={chatNotifCount}
-                      className="fileIcon"
-                    />{" "}
-                    {truncateString(lastMsgData, 22, 19) || "File"}
-                  </span>
-                )}
-              </span>
-            ) : (
               <span
                 data-chat={_id}
                 data-has-notifs={chatNotifCount}
-                title={lastMsgContent}
+                className="text-warning"
               >
-                {lastMessage === null
-                  ? " Last Message was deleted"
-                  : isGroupChat && !lastMessage
-                  ? `New Group Created`
-                  : truncateString(lastMsgContent, 25, 22)}
+                <>
+                  {lastMessage === null ||
+                  (isGroupChat && !lastMessage) ||
+                  (!isGroupChat &&
+                    lastMessage?.sender?._id !== loggedInUser?._id) ? (
+                    ""
+                  ) : lastMessage?.sender?._id === loggedInUser?._id ? (
+                    <>
+                      {isGroupChat ? (
+                        <>You: </>
+                      ) : (
+                        <DoneAll
+                          data-chat={_id}
+                          data-has-notifs={chatNotifCount}
+                          className="me-1 fs-5"
+                          style={{ color: "lightblue" }}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    truncateString(
+                      lastMessage?.sender?.name?.split(" ")[0],
+                      12,
+                      8
+                    ) + ": "
+                  )}
+                </>
               </span>
-            )}
-          </p>
+              {lastMsgFileUrl ? (
+                <span data-chat={_id} data-has-notifs={chatNotifCount}>
+                  {lastMsgFileType === "image" ? (
+                    <span
+                      data-chat={_id}
+                      data-has-notifs={chatNotifCount}
+                      title={lastMsgData}
+                    >
+                      <Image
+                        data-chat={_id}
+                        data-has-notifs={chatNotifCount}
+                        className="fileIcon"
+                      />{" "}
+                      {truncateString(lastMsgContent, 25, 22) || "Photo"}
+                    </span>
+                  ) : lastMsgFileType === "gif" ? (
+                    <span
+                      data-chat={_id}
+                      data-has-notifs={chatNotifCount}
+                      title={lastMsgData}
+                    >
+                      <GifBox
+                        data-chat={_id}
+                        data-has-notifs={chatNotifCount}
+                        className="fileIcon"
+                      />{" "}
+                      {truncateString(lastMsgContent, 25, 22) || "Gif"}
+                    </span>
+                  ) : lastMsgFileType === "video" ? (
+                    <span
+                      data-chat={_id}
+                      data-has-notifs={chatNotifCount}
+                      title={lastMsgData}
+                    >
+                      <VideoFile
+                        data-chat={_id}
+                        data-has-notifs={chatNotifCount}
+                        className="fileIcon"
+                      />{" "}
+                      {truncateString(lastMsgContent, 25, 22) || "Video"}
+                    </span>
+                  ) : lastMsgFileType === "audio" ? (
+                    <span
+                      data-chat={_id}
+                      data-has-notifs={chatNotifCount}
+                      title={lastMsgData}
+                    >
+                      <AudioFile
+                        data-chat={_id}
+                        data-has-notifs={chatNotifCount}
+                        className="fileIcon"
+                      />{" "}
+                      {truncateString(lastMsgContent, 25, 22) || "Audio"}
+                    </span>
+                  ) : lastMsgFileType === "pdf" ? (
+                    <span
+                      data-chat={_id}
+                      data-has-notifs={chatNotifCount}
+                      title={lastMsgData}
+                    >
+                      <PictureAsPdf
+                        data-chat={_id}
+                        data-has-notifs={chatNotifCount}
+                        className="fileIcon"
+                      />{" "}
+                      {truncateString(lastMsgData, 22, 19) || "Pdf"}
+                    </span>
+                  ) : (
+                    <span
+                      data-chat={_id}
+                      data-has-notifs={chatNotifCount}
+                      title={lastMsgData}
+                    >
+                      <Description
+                        data-chat={_id}
+                        data-has-notifs={chatNotifCount}
+                        className="fileIcon"
+                      />{" "}
+                      {truncateString(lastMsgData, 22, 19) || "File"}
+                    </span>
+                  )}
+                </span>
+              ) : (
+                <span
+                  data-chat={_id}
+                  data-has-notifs={chatNotifCount}
+                  title={lastMsgContent}
+                >
+                  {lastMessage === null
+                    ? " Last Message was deleted"
+                    : isGroupChat && !lastMessage
+                    ? `New Group Created`
+                    : truncateString(lastMsgContent, 25, 22)}
+                </span>
+              )}
+            </p>
+          )
         )}
       </div>
     </div>

@@ -1,5 +1,8 @@
 import { Server } from "socket.io";
-import { addNotification, deleteNotifOnMsgDelete } from "../controllers/UserController.js";
+import {
+  addNotification,
+  deleteNotifOnMsgDelete,
+} from "../controllers/UserController.js";
 
 // Message event listeners
 const configureMsgEvents = (socket) => {
@@ -103,7 +106,7 @@ const configureTypingEvents = (socket) => {
     if (!chat || !typingUser) return;
     chat.users?.forEach((user) => {
       if (user?._id !== typingUser?._id) {
-        socket.to(user?._id).emit("hide typing", chat);
+        socket.to(user?._id).emit("hide typing", chat, typingUser);
       }
     });
   });
