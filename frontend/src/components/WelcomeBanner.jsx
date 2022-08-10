@@ -32,7 +32,7 @@ const WelcomeBanner = ({ isNewUser }) => {
       />
       <p className="h4 mx-5 mb-3" style={{ marginTop: -40, color: "#99C5EE" }}>
         Create one-to-one chats, group chats, send/edit/delete text messages and
-        files to get 'Chat-Zoned' 😉.
+        files to get 'Chat-Zoned'😉.
       </p>
       <p className="h2" style={{ color: "#DDBEF9" }}>
         Happy Chatting!😀

@@ -42,8 +42,6 @@ const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
     lastMessage,
     chatDisplayPic,
   } = chat;
-
-  const typingUserName = typingChatUser?.toString()?.split("---")[1] || "";
   const tooltipTitle = isGroupChat
     ? `Group: ${chatName}\n(${chat?.users?.length} Members)`
     : `${chatName}\n${receiverEmail}`;
@@ -155,9 +153,9 @@ const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
           </span>
         )}
         {/* Last Message Data */}
-        {typingUserName ? (
+        {typingChatUser ? (
           <span style={{ color: "#73F76D", margin: "-3px 0px -3px -30px" }}>
-            <TypingIndicator typingUserName={typingUserName} />
+            <TypingIndicator typingChatUser={typingChatUser} />
           </span>
         ) : (
           (lastMessage || lastMessage === null || isGroupChat) && (

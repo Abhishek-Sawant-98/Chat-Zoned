@@ -17,6 +17,7 @@ import {
   hideDialog,
   selectCustomDialogState,
 } from "../store/slices/CustomDialogSlice";
+import { truncateString } from "../utils/appUtils";
 
 const ChatsPage = () => {
   const {
@@ -35,8 +36,6 @@ const ChatsPage = () => {
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [dialogBody, setDialogBody] = useState(<></>);
   const [chats, setChats] = useState([]);
-  const [typing, setTyping] = useState(false);
-  const [typingUser, setTypingUser] = useState(null);
   const [typingChatUsers, setTypingChatUsers] = useState([]);
 
   useEffect(() => {
@@ -61,6 +60,11 @@ const ChatsPage = () => {
     dispatch(hideDialog());
     dispatch(setSelectedChat(null));
   }, []);
+
+  const getTypingUserName = (typingUser) =>
+    truncateString(typingUser.name?.toString().split(" ")[0], 12, 9) || " ";
+
+  const getTypingChatId = (chatUser) => chatUser?.toString().split("---")[0];
 
   const displayInfo = (message = "Operation Executed") => {
     dispatch(
@@ -136,24 +140,23 @@ const ChatsPage = () => {
         if (!chat || !typingUser) return;
         setTypingChatUsers([
           ...typingChatUsers,
-          `${chat._id}---${typingUser.name || ""}`,
+          `${chat._id}---${getTypingUserName(typingUser)}---${
+            typingUser.profilePic
+          }`,
         ]);
-        if (selectedChat && selectedChat._id === chat._id) {
-          setTypingUser(typingUser);
-          setTyping(true);
-        }
       });
 
     clientSocket.off("hide typing").on("hide typing", (chat, typingUser) => {
       if (!chat || !typingUser) return;
-      setTypingChatUsers([
+      setTypingChatUsers(
         typingChatUsers.filter(
-          (chatUser) => chatUser !== `${chat._id}---${typingUser.name || ""}`
-        ),
-      ]);
-      if (selectedChat && selectedChat._id === chat._id) {
-        setTyping(false);
-      }
+          (chatUser) =>
+            chatUser !==
+            `${chat._id}---${getTypingUserName(typingUser)}---${
+              typingUser.profilePic
+            }`
+        )
+      );
     });
   };
 
@@ -194,12 +197,13 @@ const ChatsPage = () => {
               setFetchMsgs={setFetchMsgs}
               setDialogBody={setDialogBody}
               isNewUser={chats?.length === 0}
-              typing={typing}
-              typingUser={typingUser}
+              typingChatUser={typingChatUsers.find(
+                (u) => getTypingChatId(u) === selectedChat?._id
+              )}
             />
           </section>
 
-          {/* Alert dialog */}
+          {/* App Parent Dialog */}
           <CustomDialog
             dialogData={dialogData}
             showDialogActions={showDialogActions}

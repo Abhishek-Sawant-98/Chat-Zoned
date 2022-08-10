@@ -74,8 +74,7 @@ const MessagesView = ({
   setFetchMsgs,
   setDialogBody,
   isNewUser,
-  typing,
-  typingUser,
+  typingChatUser,
 }) => {
   const {
     loggedInUser,
@@ -790,6 +789,10 @@ const MessagesView = ({
     );
   };
 
+  useEffect(() => {
+    if (msgContent?.current) msgContent.current.innerHTML = "";
+  }, [selectedChat]);
+
   const openMsgOptionsMenu = (e) => {
     if (sending) return;
     setMsgOptionsMenuAnchor(e.target);
@@ -870,14 +873,13 @@ const MessagesView = ({
                 CustomTooltip={CustomTooltip}
               />
             )}
-
             {/* Typing indicator */}
-            <TypingIndicator
-              showAvatar={true}
-              typing={typing}
-              typingUser={typingUser}
-            />
-
+            <span className={`${typingChatUser ? "d-inline-block" : "d-none"}`}>
+              <TypingIndicator
+                typingChatUser={typingChatUser}
+                showAvatar={true}
+              />
+            </span>
             {/* New Message Input */}
             <div
               className={`msgInputDiv d-flex position-absolute ${

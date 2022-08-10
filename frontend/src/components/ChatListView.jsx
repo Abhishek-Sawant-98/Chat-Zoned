@@ -246,15 +246,14 @@ const ChatListView = ({
               notifs?.forEach((notif) => {
                 if (notif.chat._id === chat._id) ++chatNotifCount;
               });
-              const typingChatUser = typingChatUsers?.find(
-                (u) => u?.toString()?.split("---")[0] === chat._id
-              );
               return (
                 <ChatListItem
                   key={chat._id}
                   chat={chat}
                   chatNotifCount={chatNotifCount || ""}
-                  typingChatUser={typingChatUser}
+                  typingChatUser={typingChatUsers?.find(
+                    (u) => u?.toString()?.split("---")[0] === chat._id
+                  )}
                 />
               );
             })}
