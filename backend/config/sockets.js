@@ -115,11 +115,11 @@ const configureTypingEvents = (socket) => {
 // Disconnect event listeners
 const configureDisconnectEvents = (socket) => {
   socket.on("disconnect", () => {
-    console.log("user disconnected");
+    // console.log("user disconnected");
   });
 
   socket.off("init user", (userId) => {
-    console.log("User socket disconnected");
+    // console.log("User socket disconnected");
     socket.leave(userId);
   });
 };
@@ -136,13 +136,13 @@ const configureSocketEvents = (server) => {
     socket.on("init user", (userId) => {
       socket.join(userId);
       socket.emit(`user connected`);
-      console.log("user initialized: ", userId);
+      // console.log("user initialized: ", userId);
     });
 
     // Initialize chat
     socket.on("join chat", (chatId) => {
       socket.join(chatId);
-      console.log(`User joined chat : ${chatId}`);
+      // console.log(`User joined chat : ${chatId}`);
     });
 
     configureMsgEvents(socket);
