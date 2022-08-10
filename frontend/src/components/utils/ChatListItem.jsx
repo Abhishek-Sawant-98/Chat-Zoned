@@ -84,7 +84,7 @@ const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
     <div
       data-chat={_id}
       data-has-notifs={chatNotifCount}
-      className={`chatListItem user-select-none text-light pointer ${
+      className={`chatListItem w-100 user-select-none text-light pointer ${
         selectedChat?._id === _id ? "isSelected" : ""
       } d-flex justify-content-start align-items-center`}
     >
@@ -106,7 +106,7 @@ const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
       <div
         data-chat={_id}
         data-has-notifs={chatNotifCount}
-        className="chatListData d-flex flex-column align-items-start px-2"
+        className="chatListData w-100 d-flex flex-column align-items-start px-2"
       >
         {/* Chat Name */}
         <p
@@ -115,7 +115,7 @@ const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
           title={tooltipTitle}
           className="chatListName fs-5 fw-bold text-info text-start"
         >
-          {truncateString(chatName, 21, 18)}
+          {truncateString(chatName, 31, 28)}
         </p>
         {lastMessage && (
           <span
@@ -154,7 +154,7 @@ const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
         )}
         {/* Last Message Data */}
         {typingChatUser ? (
-          <span style={{ color: "#73F76D", margin: "-3px 0px -3px -30px" }}>
+          <span style={{ color: "#73F76D", margin: "-6px 0px -4px -30px" }}>
             <TypingIndicator typingChatUser={typingChatUser} />
           </span>
         ) : (
@@ -162,7 +162,7 @@ const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
             <p
               data-chat={_id}
               data-has-notifs={chatNotifCount}
-              className="chatListLastMessage"
+              className="chatListLastMessage text-start"
             >
               <span
                 data-chat={_id}
@@ -289,7 +289,7 @@ const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
                     ? " Last Message was deleted"
                     : isGroupChat && !lastMessage
                     ? `New Group Created`
-                    : truncateString(lastMsgContent, 25, 22)}
+                    : truncateString(lastMsgContent, 35, 32)}
                 </span>
               )}
             </p>

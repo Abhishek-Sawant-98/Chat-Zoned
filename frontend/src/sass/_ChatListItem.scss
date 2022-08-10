@@ -14,9 +14,10 @@ $bgColor: $selectedChatBgColor;
   .chatListData {
     margin: 5px 0px;
     .chatListName {
-      margin: 6px 0px -6px 0px;
+      margin: 6px 0px 3px 0px;
+      line-height: 23px;
+      width: calc(73% - 30px);
       word-wrap: break-word;
-      z-index: 1;
     }
     .lastMsgDate {
       position: absolute;
@@ -25,6 +26,7 @@ $bgColor: $selectedChatBgColor;
     }
     .chatListLastMessage {
       margin: 2px 8px 6px 0px;
+      line-height: 20px;
       .fileIcon {
         color: #9c9c9c;
         font-size: 20px;
