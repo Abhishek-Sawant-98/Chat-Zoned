@@ -1,5 +1,5 @@
 import { GroupAdd } from "@mui/icons-material";
-import { lazy, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   debounce,
   getAxiosConfig,
@@ -25,8 +25,7 @@ import {
   setShowDialogActions,
 } from "../store/slices/CustomDialogSlice";
 import { displayToast } from "../store/slices/ToastSlice";
-
-const GettingStarted = lazy(() => import("./GettingStarted"));
+import GettingStarted from "./GettingStarted";
 
 const DEFAULT_GROUP_DP = process.env.REACT_APP_DEFAULT_GROUP_DP;
 
@@ -265,7 +264,7 @@ const ChatListView = ({
                 ? `Hi ${
                     truncateString(loggedInUser?.name?.split(" ")[0], 12, 9) ||
                     "There"
-                  }😎`
+                  } 😎`
                 : "No Chats Found"}
             </span>
             {chats?.length === 0 && <GettingStarted />}

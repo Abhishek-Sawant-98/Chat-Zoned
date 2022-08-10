@@ -891,10 +891,10 @@ const MessagesView = ({
               >
                 <IconButton
                   onClick={onEmojiIconClick}
-                  className={`d-flex ms-2 me-1 my-2`}
+                  className={`d-flex ms-2 me-1 my-1`}
                   sx={iconStyles}
                 >
-                  <EmojiEmotions style={{ fontSize: 24 }} />
+                  <EmojiEmotions style={{ fontSize: 28 }} />
                 </IconButton>
                 <CustomTooltip title="Attach File" placement="top-start" arrow>
                   <IconButton
