@@ -38,6 +38,17 @@ export const truncateString = memoize((str, limit, index) => {
   return str.length > limit ? `${str.substring(0, index)}...` : str;
 });
 
+// Truncate each word of a sentence/string
+export const truncateWords = (sentence, limit, index) => {
+  if (!sentence || !limit || !index) return "";
+  const words = sentence.split(" ");
+  return words
+    .map((word) =>
+      word.length > limit ? `${word.substring(0, index)}...` : word
+    )
+    .join(" ");
+};
+
 export const getOneToOneChatReceiver = memoize((loggedInUser, chatUsers) => {
   if (!chatUsers?.length || !loggedInUser) return;
   return loggedInUser._id !== chatUsers[0]._id ? chatUsers[0] : chatUsers[1];

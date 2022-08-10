@@ -9,6 +9,7 @@ import {
   getAxiosConfig,
   isImageFile,
   truncateString,
+  truncateWords,
   TWO_MB,
 } from "../../utils/appUtils";
 import ChildDialog from "../utils/ChildDialog";
@@ -23,7 +24,7 @@ import { displayToast } from "../../store/slices/ToastSlice";
 
 const arrowStyles = { color: "#111" };
 const tooltipStyles = {
-  maxWidth: 250,
+  maxWidth: 260,
   color: "#eee",
   fontFamily: "Trebuchet MS",
   fontSize: 17,
@@ -319,16 +320,12 @@ const EditProfileBody = () => {
       {/* View Name */}
       <section className={`dialogField text-center mb-2`}>
         <div className="input-group" style={{ marginTop: "-15px" }}>
-          <CustomTooltip
-            title={name?.length > 24 ? name : ""}
-            placement="top-start"
-            arrow
-          >
+          <CustomTooltip title={name} placement="top" arrow>
             <div
               className="w-100 h1 fw-bold mx-4 text-info"
-              style={{ fontSize: "32px", wordBreak: "break-all" }}
+              style={{ fontSize: "32px", wordWrap: "break-word" }}
             >
-              {truncateString(name, 25, 21)}
+              {truncateWords(name, 14, 11)}
             </div>
           </CustomTooltip>
           {!isGuestUser && (
