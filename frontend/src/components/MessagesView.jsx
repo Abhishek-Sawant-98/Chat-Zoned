@@ -656,9 +656,9 @@ const MessagesView = ({
   };
 
   const onInputBlur = () => {
-    // setTimeout(() => {
-    //   if (!preventStopTyping) emitStopTyping();
-    // }, 1000);
+    setTimeout(() => {
+      if (!preventStopTyping) emitStopTyping();
+    }, 1000);
   };
 
   const msgInputHandler = debounce((e) => {
