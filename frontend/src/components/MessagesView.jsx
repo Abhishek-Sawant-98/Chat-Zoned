@@ -17,7 +17,7 @@ import LoadingMsgs from "./utils/LoadingMsgs";
 import FullSizeImage from "./utils/FullSizeImage";
 import Message from "./utils/Message";
 import MsgOptionsMenu from "./menus/MsgOptionsMenu";
-import io from "socket.io-client";
+import { io } from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
