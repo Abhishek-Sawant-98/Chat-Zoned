@@ -1,6 +1,6 @@
 # `Chat-Zoned` MERN-Chat-App
 
-> This is a [**Progressive Web App**](https://medium.com/swlh/converting-existing-react-app-to-pwa-3c7e4e773db3) built using [`MERN Stack`](https://www.mongodb.com/mern-stack), which is primarily used for Real-time Online Chatting (similar to Whatsapp or MS Teams). This app allows a user to perform the following major operations:-
+> This is a [**Progressive Web App**](https://medium.com/swlh/converting-existing-react-app-to-pwa-3c7e4e773db3) built using [`MERN Stack`](https://www.mongodb.com/mern-stack), which is primarily used for `Real-time Online Chatting` (similar to Whatsapp or MS Teams). This app allows a user to perform the following major operations:-
 - Register/Login/Logout/search registered users
 - Create one-to-one chats, group chats
 - Send/edit/delete text messages
@@ -14,21 +14,19 @@
 - Edit profile pic/profile name
 - Change profile password
 
-> Deployed App 👉 <https://chat-zoned.herokuapp.com> 🚀 (it can be installed natively on mobile and desktop devices).
+> Deployed App 👉 <https://chat-zoned.herokuapp.com> 🚀 (it can be installed natively on mobile and desktop devices)🔥.
 
-## Cool Features:-
+## Cool Features 😎
 
 - All frequently used [pure functions](https://www.geeksforgeeks.org/pure-functions-in-javascript/#:~:text=A%20Pure%20Function%20is%20a,depends%20on%20its%20input%20arguments.) are [memoized](https://www.freecodecamp.org/news/understanding-memoize-in-javascript-51d07d19430e/) to improve app performance.
 - [Debouncing](https://www.freecodecamp.org/news/javascript-debounce-example/) has been implemented for every search box in the app to improve app performance.
 - [Event Delegation](https://www.geeksforgeeks.org/event-delegation-in-javascript/) has been implemented for every parent element containing an item list (messages list, user list, group member list, chat list, notification list etc.) to improve app performance.
-- [Promise.all()](https://dmitripavlutin.com/promise-all/) has been used for `parallel execution` of 'independent async operations' wherever necessary (eg. concurrently deleting all group chat messages upon group chat delete), to improve app performance.
+- [Promise.all()](https://dmitripavlutin.com/promise-all/) has been used for `parallel execution` of `independent async operations` wherever necessary (eg. concurrently deleting all group chat messages upon group chat delete), to improve app performance.
 - `Loading Skeletons` and `Circular Spinners` are displayed for all async (time consuming) API calls, for better UX.
 - [Sockets](https://socket.io/) have been used not just for real-time messaging, but also for `real-time message updates` (editing/deleting message), `real-time group updates` like creating a new group, updating group name/display pic, adding/ removing members, making/dismissing group admins, exiting/deleting group etc.
 - `Typing Indicators` (similar to MS Teams app) have also been implemented using sockets.
 - `Real-time notifications` also implemented using sockets. Most important, all the notifications are `PERSISTED` (saved) in MongoDB, so even if a user is offline/logged out, he/she will see all the notifications after logging in.
 - All new message notifications are `grouped by chat` in the UI, and the respective chat specific notification counts are displayed on each chat (similar to Whatsapp).
-- Whenever a user opens a chat containing notifications, all those chat notifications are deleted from MongoDB ONLY for that user.
-- Whenever a sender deletes his/her sent message, the notification of that message is deleted from MongoDB for ALL OTHER users of that chat (one-to-one or group chat).
 - The notification count after every new message delete, is `updated in real-time` for ALL OTHER USERS of that chat.
 - [Emoji picker](https://www.npmjs.com/package/emoji-picker-react) has been added to new message input box, to conveniently allow a user to select all the native emojis of his/her device.
 - `Enter` key can be used for submitting udpated profile name/group name, or for sending a new message.
@@ -36,7 +34,6 @@
 - The sent/updated message `PRESERVES the formatting` of the message text content.
 - Edit message feature is similar to 'MS Teams edit message feature', where you can modify text content, add/remove/change attached files of that message, discard updated draft etc.
 - `File preview` is displayed whenever you add/change an attachment, before sending and updating a message.
-- Text truncation and scrollbars are implemented wherever there's an overflow.
 - User Passwords are `encrypted` before storing/updating them in MongoDB, using [bcryptjs](https://www.npmjs.com/package/bcryptjs), to improve security.
 - User [Authorization](https://auth0.com/intro-to-iam/what-is-authorization/) is carried out by an [express middleware](https://expressjs.com/en/guide/using-middleware.html#middleware.router) using [JWT package](https://www.npmjs.com/package/jsonwebtoken), before performing ANY chatpage specific operation.
 - Every user login session expires after 15 days.
@@ -51,7 +48,7 @@
 - [Lottie Files](https://lottiefiles.com/) for Animations
 - [Emoji Picker](https://www.npmjs.com/package/emoji-picker-react) for adding emojis to text messages
 - [Socket.io-client](https://www.npmjs.com/package/socket.io-client) for client-side socket setup and event handling
-- [Axios](https://www.npmjs.com/package/axios) for API calls
+- [Axios](https://www.npmjs.com/package/axios) as an HTTP client for API calls
 
 ## Tools Used (Backend)
 
