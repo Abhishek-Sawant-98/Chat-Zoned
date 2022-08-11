@@ -1,6 +1,7 @@
 # `Chat-Zoned` MERN-Chat-App
 
 > This is a [**Progressive Web App**](https://medium.com/swlh/converting-existing-react-app-to-pwa-3c7e4e773db3) built using [`MERN Stack`](https://www.mongodb.com/mern-stack), which is primarily used for Real-time Online Chatting (similar to Whatsapp). This app allows a user to perform the following major operations:-
+
 - Register/Login/Logout/search registered users
 - Create one-to-one chats, group chats
 - Send/edit/delete text messages
@@ -38,15 +39,15 @@
 - [Bcryptjs](https://www.npmjs.com/package/bcryptjs) for User Password Encryption and verification
 - [Cloudinary package](https://www.npmjs.com/package/cloudinary) for uploading/deleting images to [cloudinary](https://cloudinary.com/)
 - [AWS SDK Package](https://www.npmjs.com/package/aws-sdk) for downloading/deleting non-image files to [AWS S3](https://aws.amazon.com/s3/)
-- [Multer](https://www.npmjs.com/package/multer) for uploading images temporarily to server for uploading to cloudinary 
+- [Multer](https://www.npmjs.com/package/multer) for uploading images temporarily to server for uploading to cloudinary
 - [Multer S3](https://www.npmjs.com/package/multer-s3) for uploading non-image files to AWS S3
 - [Socket.io](https://www.npmjs.com/package/socket.io) for server-side socket setup and event handling
 
-## Steps to Run Project Locally 
+## Steps to Run Project Locally
 
 - Install backend dependencies: run `npm install` in root project folder
-- Install frontend dependencies: run `cd frontend` (to go to **frontend** folder) and then run `npm install` 
-- Create **.env** file in root project folder and add the following key value pairs (`KEY = VALUE`) 
+- Install frontend dependencies: run `cd frontend` (to go to **frontend** folder) and then run `npm install`
+- Create **.env** file in root project folder and add the following key value pairs (`KEY = VALUE`)
 
 <table>
   <tr>
@@ -109,7 +110,7 @@
 
 - Get `cloudinary` related secret keys from [here](https://cloudinary.com/documentation/how_to_integrate_cloudinary)
 - Get `AWS S3` related secret keys from [here](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-appendix-sign-up.html)
-- Next, create another **.env** file in **frontend** folder and add the following key value pairs (`KEY = VALUE`) 
+- Next, create another **.env** file in **frontend** folder and add the following key value pairs (`KEY = VALUE`)
 
 <table>
   <tr>
@@ -141,5 +142,3 @@
 - Run server in development mode: `npm run dev` in root project folder
 - Run frontend app in development mode: `cd frontend` => `npm start`
 - Build frontend project for production: `cd frontend` => `npm run build`
-
-

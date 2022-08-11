@@ -512,7 +512,9 @@ const MessagesView = ({
     }
   };
 
-  const scrollToBottom = () => msgListBottom.current?.scrollIntoView();
+  const scrollToBottom = () => {
+    msgListBottom.current?.scrollIntoView();
+  };
 
   // Initializing Client Socket
   useEffect(() => {

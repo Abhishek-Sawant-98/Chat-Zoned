@@ -33,6 +33,10 @@ const GettingStarted = () => {
         </span>{" "}
         in search box to list all users.
       </p>
+      <p>
+        After creating a chat, click the chat avatar at top-left of messages
+        view, for receiver/group info.
+      </p>
     </div>
   );
 };
