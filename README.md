@@ -38,8 +38,9 @@
 - User [Authorization](https://auth0.com/intro-to-iam/what-is-authorization/) is carried out by an [express middleware](https://expressjs.com/en/guide/using-middleware.html#middleware.router) using [JWT package](https://www.npmjs.com/package/jsonwebtoken), before performing ANY chatpage specific operation.
 - Every user login session expires after 15 days.
 
-## Tools Used (Frontend)
+## Tools Used 🛠️
 
+### Frontend :-
 - [React](https://reactjs.org/) for reusable, stateful UI components
 - [Redux Toolkit](https://redux.js.org/tutorials/quick-start) for Global State Management
 - [Sass](https://sass-lang.com/) for custom styling, responsive design
@@ -50,8 +51,7 @@
 - [Socket.io-client](https://www.npmjs.com/package/socket.io-client) for client-side socket setup and event handling
 - [Axios](https://www.npmjs.com/package/axios) as an HTTP client for API calls
 
-## Tools Used (Backend)
-
+### Backend :-
 - [Nodejs](https://nodejs.org/en/) as Backend JS Runtime
 - [Express](https://expressjs.com/) as Backend Nodejs Framework
 - [MongoDB](https://mongodb.com/) as Database
@@ -64,7 +64,7 @@
 - [Multer S3](https://www.npmjs.com/package/multer-s3) for uploading non-image files to AWS S3
 - [Socket.io](https://www.npmjs.com/package/socket.io) for server-side socket setup and event handling
 
-## Steps to Run Project Locally 
+## Steps to Run Project Locally 💻
 
 - Install backend dependencies: run `npm install` in root project folder
 - Install frontend dependencies: run `cd frontend` (to go to **frontend** folder) and then run `npm install` 
