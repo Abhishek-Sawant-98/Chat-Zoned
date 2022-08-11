@@ -70,96 +70,34 @@
 - Install frontend dependencies: run `cd frontend` (to go to **frontend** folder) and then run `npm install` 
 - Create **.env** file in root project folder and add the following environment variables (`KEY = VALUE`) 
 
-<table>
-  <tr>
-    <th>KEY</th>
-    <th>VALUE</th>
-  </tr>
-  <tr align="center">
-    <td>PORT</td>
-    <td>YOUR_PREFERRED_PORT_NUMBER</td>
-  </tr>
-  <tr align="center">
-    <td>MONGODB_URI</td>
-    <td>YOUR_MONGODB_URI</td>
-  </tr>
-  <tr align="center">
-    <td>CLOUDINARY_CLOUD_NAME</td>
-    <td>YOUR_CLOUDINARY_CLOUD_NAME</td>
-  </tr>
-  <tr align="center">
-    <td>CLOUDINARY_API_KEY</td>
-    <td>YOUR_CLOUDINARY_API_KEY</td>
-  </tr>
-  <tr align="center">
-    <td>CLOUDINARY_API_SECRET</td>
-    <td>YOUR_CLOUDINARY_API_SECRET</td>
-  </tr>
-  <tr align="center">
-    <td>DEFAULT_GROUP_DP</td>
-    <td>YOUR_PREFERRED_IMAGE_URL</td>
-  </tr>
-  <tr align="center">
-    <td>DEFAULT_USER_DP</td>
-    <td>YOUR_PREFERRED_IMAGE_URL</td>
-  </tr>
-  <tr align="center">
-    <td>JWT_SECRET</td>
-    <td>YOUR_PREFERRED_JWT_SECRET</td>
-  </tr>
-  <tr align="center">
-    <td>NODE_ENV</td>
-    <td>'development' (While developing)<br>or<br>'production' (While deploying)</td>
-  </tr>
-  <tr align="center">
-    <td>S3_ACCESS_KEY_ID</td>
-    <td>YOUR_AWS_S3_ACCESS_KEY_ID</td>
-  </tr>
-  <tr align="center">
-    <td>S3_SECRET_ACCESS_KEY</td>
-    <td>YOUR_AWS_S3_SECRET_ACCESS_KEY</td>
-  </tr>
-  <tr align="center">
-    <td>S3_REGION</td>
-    <td>YOUR_AWS_S3_BUCKET_REGION</td>
-  </tr>
-  <tr align="center">
-    <td>S3_BUCKET</td>
-    <td>YOUR_AWS_S3_BUCKET_NAME</td>
-  </tr>
-</table>
+|        **KEY**        |                                 **VALUE**                                |
+|:---------------------:|:------------------------------------------------------------------------:|
+|          PORT         |                        YOUR_PREFERRED_PORT_NUMBER                        |
+|      MONGODB_URI      |                             YOUR_MONGODB_URI                             |
+| CLOUDINARY_CLOUD_NAME |                        YOUR_CLOUDINARY_CLOUD_NAME                        |
+|   CLOUDINARY_API_KEY  |                          YOUR_CLOUDINARY_API_KEY                         |
+| CLOUDINARY_API_SECRET |                        YOUR_CLOUDINARY_API_SECRET                        |
+|    DEFAULT_GROUP_DP   |                         YOUR_PREFERRED_IMAGE_URL                         |
+|    DEFAULT_USER_DP    |                         YOUR_PREFERRED_IMAGE_URL                         |
+|       JWT_SECRET      |                         YOUR_PREFERRED_JWT_SECRET                        |
+|        NODE_ENV       | 'development' (While Developing)<br>or<br>'production' (While Deploying) |
+|    S3_ACCESS_KEY_ID   |                         YOUR_AWS_S3_ACCESS_KEY_ID                        |
+|  S3_SECRET_ACCESS_KEY |                       YOUR_AWS_S3_SECRET_ACCESS_KEY                      |
+|       S3_REGION       |                         YOUR_AWS_S3_BUCKET_REGION                        |
+|       S3_BUCKET       |                          YOUR_AWS_S3_BUCKET_NAME                         |
 
 - Get `MongoDB URI` by creating a MongoDB cluster from [here](https://www.mongodb.com/)
 - Get `cloudinary` related secret keys from [here](https://cloudinary.com/documentation/how_to_integrate_cloudinary)
 - Get `AWS S3` related secret keys from [here](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-appendix-sign-up.html)
-- Next, create another **.env** file in **frontend** folder and add the following environment variables (`KEY = VALUE`) 
+- Next, create another **.env** file in `frontend` folder and add the following environment variables (`KEY = VALUE`) 
 
-<table>
-  <tr>
-    <th>KEY</th>
-    <th>VALUE</th>
-  </tr>
-  <tr align="center">
-    <td>REACT_APP_SERVER_BASE_URL</td>
-    <td>http://localhost:YOUR_PORT_NUMBER (Local Development)<br>or<br>https://YOUR_DEPLOYED_SERVER_URL (During Deployment)</td>
-  </tr>
-  <tr align="center">
-    <td>REACT_APP_DEFAULT_USER_DP</td>
-    <td>YOUR_PREFERRED_IMAGE_URL</td>
-  </tr>
-  <tr align="center">
-    <td>REACT_APP_DEFAULT_GROUP_DP</td>
-    <td>YOUR_PREFERRED_IMAGE_URL</td>
-  </tr>
-  <tr align="center">
-    <td>REACT_APP_PLACEHOLDER_IMG_URL</td>
-    <td>YOUR_PREFERRED_IMAGE_URL</td>
-  </tr>
-  <tr align="center">
-    <td>REACT_APP_CLOUDINARY_BASE_URL</td>
-    <td>https://res.cloudinary.com</td>
-  </tr>
-</table>
+|            **KEY**            |                                                          **VALUE**                                                          |
+|:-----------------------------:|:---------------------------------------------------------------------------------------------------------------------------:|
+|   REACT_APP_SERVER_BASE_URL   | http://localhost:YOUR_PORT_NUMBER <br>(Local Development)<br>or<br>https://YOUR_DEPLOYED_SERVER_URL <br>(During Deployment) |
+|   REACT_APP_DEFAULT_USER_DP   |                                                   YOUR_PREFERRED_IMAGE_URL                                                  |
+|   REACT_APP_DEFAULT_GROUP_DP  |                                                   YOUR_PREFERRED_IMAGE_URL                                                  |
+| REACT_APP_PLACEHOLDER_IMG_URL |                                                   YOUR_PREFERRED_IMAGE_URL                                                  |
+| REACT_APP_CLOUDINARY_BASE_URL |                                                  https://res.cloudinary.com                                                 |
 
 - Run server in development mode: `npm run dev` in root project folder
 - Run frontend app in development mode: `cd frontend` => `npm start`
