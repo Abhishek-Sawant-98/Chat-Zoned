@@ -73,6 +73,8 @@ const MessagesView = ({
   fetchMsgs,
   setFetchMsgs,
   setDialogBody,
+  deletePersistedNotifs,
+  deleteNotifications,
   isNewUser,
   typingChatUser,
 }) => {
@@ -499,19 +501,6 @@ const MessagesView = ({
     }
   };
 
-  const deletePersistedNotifs = async (notifsToBeDeleted) => {
-    const config = getAxiosConfig({ loggedInUser });
-    try {
-      await axios.put(
-        `/api/user/delete/notifications`,
-        { notificationIds: JSON.stringify(notifsToBeDeleted) },
-        config
-      );
-    } catch (error) {
-      console.log("Couldn't Delete Notifications : ", error.message);
-    }
-  };
-
   const scrollToBottom = () => {
     msgListBottom.current?.scrollIntoView();
   };
@@ -570,18 +559,21 @@ const MessagesView = ({
     clientSocket
       .off("update modified msg")
       .on("update modified msg", (updatedMsg) => {
+        if (!updatedMsg) return;
         const { chat } = updatedMsg;
         dispatch(toggleRefresh(!refresh));
         if (selectedChat && chat && selectedChat._id === chat._id) {
           updatedMsg["sent"] = true;
-          updatedMsg["chat"] = updatedMsg?.chat?._id;
+          updatedMsg["chat"] = updatedMsg.chat?._id;
           setTimeout(() => {
             // Only updating msg content using 'document' method
             // as updating 'messages' state will re-render all
             // msgs and scroll to bottom, which may prevent the
             // receiver to edit or view his/her msg, causing bad UX
-            document.getElementById(`${updatedMsg._id}---content`).innerHTML =
-              updatedMsg.content;
+            if (parseInnerHTML(updatedMsg.content)) {
+              document.getElementById(`${updatedMsg._id}---content`).innerHTML =
+                updatedMsg.content;
+            }
           }, 10);
           // Updating 'state' is the only way to update attachment
         }
@@ -772,7 +764,13 @@ const MessagesView = ({
     // Open group info dialog
     dispatch(setGroupInfo(selectedChat));
     dispatch(setShowDialogActions(false));
-    setDialogBody(<GroupInfoBody messages={messages} />);
+    setDialogBody(
+      <GroupInfoBody
+        messages={messages}
+        setFetchMsgs={setFetchMsgs}
+        deleteNotifications={deleteNotifications}
+      />
+    );
     dispatch(displayDialog({ title: "Group Info" }));
   };
 

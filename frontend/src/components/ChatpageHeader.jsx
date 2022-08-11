@@ -21,7 +21,12 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const ChatpageHeader = ({ chats, setFetchMsgs, setDialogBody }) => {
+const ChatpageHeader = ({
+  chats,
+  setFetchMsgs,
+  setDialogBody,
+  deleteNotifications,
+}) => {
   const { loggedInUser } = useSelector(selectAppState);
   const appGif = useRef();
   const notifCount = loggedInUser?.notifications?.length || "";
@@ -69,6 +74,7 @@ const ChatpageHeader = ({ chats, setFetchMsgs, setDialogBody }) => {
         setFetchMsgs={setFetchMsgs}
         isDrawerOpen={isDrawerOpen}
         setIsDrawerOpen={setIsDrawerOpen}
+        deleteNotifications={deleteNotifications}
       />
 
       {/* App Logo */}
@@ -145,6 +151,7 @@ const ChatpageHeader = ({ chats, setFetchMsgs, setDialogBody }) => {
           setFetchMsgs={setFetchMsgs}
           anchor={notificationsMenuAnchor}
           setAnchor={setNotificationsMenuAnchor}
+          deleteNotifications={deleteNotifications}
         />
         <ProfileSettingsMenu
           anchor={profileSettingsMenuAnchor}

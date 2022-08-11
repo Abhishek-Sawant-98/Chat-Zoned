@@ -10,7 +10,7 @@ import { selectChildDialogState } from "../../store/slices/ChildDialogSlice";
 
 let filteredMembersCache = [];
 
-const ViewGroupMembers = () => {
+const ViewGroupMembers = ({ setFetchMsgs, deleteNotifications }) => {
   const { loggedInUser, groupInfo } = useSelector(selectAppState);
   const { childDialogMethods } = useSelector(selectChildDialogState);
   const [showDialogActions, setShowDialogActions] = useState(true);
@@ -126,6 +126,8 @@ const ViewGroupMembers = () => {
         setShowDialogActions={setShowDialogActions}
         setShowDialogClose={setShowDialogClose}
         childDialogMethods={childDialogMethods}
+        setFetchMsgs={setFetchMsgs}
+        deleteNotifications={deleteNotifications}
       />
       {/* Child dialog */}
       <ChildDialog

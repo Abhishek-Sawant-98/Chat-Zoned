@@ -48,7 +48,7 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const GroupInfoBody = ({ messages }) => {
+const GroupInfoBody = ({ messages, setFetchMsgs, deleteNotifications }) => {
   const { loggedInUser, refresh, groupInfo, clientSocket, isSocketConnected } =
     useSelector(selectAppState);
   const { childDialogMethods } = useSelector(selectChildDialogState);
@@ -464,7 +464,12 @@ const GroupInfoBody = ({ messages }) => {
   const openViewMembersDialog = () => {
     setShowDialogActions(false);
     setShowDialogClose(true);
-    setChildDialogBody(<ViewGroupMembers />);
+    setChildDialogBody(
+      <ViewGroupMembers
+        setFetchMsgs={setFetchMsgs}
+        deleteNotifications={deleteNotifications}
+      />
+    );
     displayChildDialog({
       title: ``,
     });

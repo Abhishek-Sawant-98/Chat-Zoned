@@ -14,7 +14,12 @@ import {
 } from "../../store/slices/FormfieldSlice";
 import { displayToast } from "../../store/slices/ToastSlice";
 
-const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
+const SearchUsersDrawer = ({
+  setFetchMsgs,
+  isDrawerOpen,
+  setIsDrawerOpen,
+  deleteNotifications,
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const { loggedInUser } = useSelector(selectAppState);
@@ -70,6 +75,7 @@ const SearchUsersDrawer = ({ setFetchMsgs, isDrawerOpen, setIsDrawerOpen }) => {
       dispatch(setLoading(false));
       dispatch(setSelectedChat(data));
       setFetchMsgs(true);
+      deleteNotifications(data._id);
     } catch (error) {
       dispatch(
         displayToast({

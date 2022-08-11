@@ -28,6 +28,8 @@ const MemberOptionsMenu = ({
   setShowDialogActions,
   setShowDialogClose,
   childDialogMethods,
+  setFetchMsgs,
+  deleteNotifications,
 }) => {
   const { loggedInUser, refresh, groupInfo, clientSocket, isSocketConnected } =
     useSelector(selectAppState);
@@ -81,6 +83,8 @@ const MemberOptionsMenu = ({
 
       dispatch(setLoading(false));
       updateView(data);
+      setFetchMsgs(true);
+      deleteNotifications(data._id);
     } catch (error) {
       displayError(error, "Couldn't Create/Retrieve Chat");
       dispatch(setLoading(false));

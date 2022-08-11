@@ -5,17 +5,17 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
   setGroupInfo,
-  setLoggedInUser,
   setSelectedChat,
 } from "../../store/slices/AppSlice";
-import {
-  getAxiosConfig,
-  getOneToOneChatReceiver,
-  truncateString,
-} from "../../utils/appUtils";
-import axios from "../../utils/axios";
+import { getOneToOneChatReceiver, truncateString } from "../../utils/appUtils";
 
-const NotificationsMenu = ({ chats, setFetchMsgs, anchor, setAnchor }) => {
+const NotificationsMenu = ({
+  chats,
+  setFetchMsgs,
+  anchor,
+  setAnchor,
+  deleteNotifications,
+}) => {
   const { loggedInUser } = useSelector(selectAppState);
   const dispatch = useDispatch();
   const notifs = [...loggedInUser?.notifications];
@@ -35,39 +35,6 @@ const NotificationsMenu = ({ chats, setFetchMsgs, anchor, setAnchor }) => {
       notifGroups[notifGroupId] = 1;
     }
   });
-
-  const deletePersistedNotifs = async (notifsToBeDeleted) => {
-    const config = getAxiosConfig({ loggedInUser });
-    try {
-      await axios.put(
-        `/api/user/delete/notifications`,
-        { notificationIds: JSON.stringify(notifsToBeDeleted) },
-        config
-      );
-    } catch (error) {
-      console.log("Couldn't Delete Notifications : ", error.message);
-    }
-  };
-
-  const deleteNotifications = (clickedChatId) => {
-    // Delete notifs from global state and localStorage
-    const notifsToBeDeleted = [];
-    for (let i = 0; i < notifs.length; ++i) {
-      if (notifs[i].chat._id === clickedChatId) {
-        const deletedNotif = notifs.splice(i, 1)[0];
-        notifsToBeDeleted.push(deletedNotif._id);
-        // After deleting element at 'i', next element (i+1) shifts back
-        // to 'i' index
-        --i;
-      }
-    }
-    const updatedUser = { ...loggedInUser, notifications: notifs };
-    localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
-    dispatch(setLoggedInUser(updatedUser));
-
-    // Delete notifs that were persisted in mongodb
-    deletePersistedNotifs(notifsToBeDeleted);
-  };
 
   const chatNotifClickHandler = (e) => {
     const chatNotifId =
