@@ -13,6 +13,8 @@ import ViewProfileBody from "../dialogs/ViewProfileBody";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
+  setDeleteNotifsOfChat,
+  setFetchMsgs,
   setGroupInfo,
   setSelectedChat,
   toggleRefresh,
@@ -28,8 +30,6 @@ const MemberOptionsMenu = ({
   setShowDialogActions,
   setShowDialogClose,
   childDialogMethods,
-  setFetchMsgs,
-  deleteNotifications,
 }) => {
   const { loggedInUser, refresh, groupInfo, clientSocket, isSocketConnected } =
     useSelector(selectAppState);
@@ -83,8 +83,8 @@ const MemberOptionsMenu = ({
 
       dispatch(setLoading(false));
       updateView(data);
-      setFetchMsgs(true);
-      deleteNotifications(data._id);
+      dispatch(setFetchMsgs(true));
+      dispatch(setDeleteNotifsOfChat(data._id));
     } catch (error) {
       displayError(error, "Couldn't Create/Retrieve Chat");
       dispatch(setLoading(false));

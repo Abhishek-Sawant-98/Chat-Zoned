@@ -22,6 +22,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
   setClientSocket,
+  setFetchMsgs,
   setGroupInfo,
   setLoggedInUser,
   setSelectedChat,
@@ -70,11 +71,8 @@ let preventStopTyping = true;
 const MessagesView = ({
   loadingMsgs,
   setLoadingMsgs,
-  fetchMsgs,
-  setFetchMsgs,
   setDialogBody,
   deletePersistedNotifs,
-  deleteNotifications,
   isNewUser,
   typingChatUser,
 }) => {
@@ -82,6 +80,7 @@ const MessagesView = ({
     loggedInUser,
     selectedChat,
     refresh,
+    fetchMsgs,
     clientSocket,
     isSocketConnected,
   } = useSelector(selectAppState);
@@ -269,13 +268,13 @@ const MessagesView = ({
         })
       );
       setLoadingMsgs(false);
-      if (fetchMsgs) setFetchMsgs(false);
+      if (fetchMsgs) dispatch(setFetchMsgs(false));
       if (options?.updatingMsg) displaySuccess("Message Updated Successfully");
       setSending(false);
     } catch (error) {
       displayError(error, "Couldn't Fetch Messages");
       setLoadingMsgs(false);
-      if (fetchMsgs) setFetchMsgs(false);
+      if (fetchMsgs) dispatch(setFetchMsgs(false));
       setSending(false);
     }
   };
@@ -764,13 +763,7 @@ const MessagesView = ({
     // Open group info dialog
     dispatch(setGroupInfo(selectedChat));
     dispatch(setShowDialogActions(false));
-    setDialogBody(
-      <GroupInfoBody
-        messages={messages}
-        setFetchMsgs={setFetchMsgs}
-        deleteNotifications={deleteNotifications}
-      />
-    );
+    setDialogBody(<GroupInfoBody messages={messages} />);
     dispatch(displayDialog({ title: "Group Info" }));
   };
 

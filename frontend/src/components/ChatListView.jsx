@@ -16,6 +16,8 @@ import SearchInput from "./utils/SearchInput";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
+  setDeleteNotifsOfChat,
+  setFetchMsgs,
   setGroupInfo,
   setSelectedChat,
 } from "../store/slices/AppSlice";
@@ -43,10 +45,8 @@ const ChatListView = ({
   chats,
   setChats,
   loadingMsgs,
-  setFetchMsgs,
   setDialogBody,
   typingChatUsers,
-  deleteNotifications,
 }) => {
   const { loggedInUser, selectedChat, refresh } = useSelector(selectAppState);
   const notifs = [...loggedInUser?.notifications];
@@ -200,11 +200,11 @@ const ChatListView = ({
               );
               if (clickedChat._id === selectedChat?._id) return;
               dispatch(setSelectedChat(clickedChat));
-              setFetchMsgs(true); // To fetch selected chat msgs
+              dispatch(setFetchMsgs(true)); // To fetch selected chat msgs
               if (clickedChat?.isGroupChat) dispatch(setGroupInfo(clickedChat));
 
               // Delete notifications if notif badge is present
-              if (hasNotifs) deleteNotifications(clickedChatId);
+              if (hasNotifs) dispatch(setDeleteNotifsOfChat(clickedChatId));
             }}
           >
             {filteredChats.map((chat) => {

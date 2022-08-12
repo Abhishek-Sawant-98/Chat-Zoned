@@ -7,19 +7,19 @@ import UserListItem from "./UserListItem";
 import LoadingList from "./LoadingList";
 import SearchInput from "./SearchInput";
 import { useDispatch, useSelector } from "react-redux";
-import { selectAppState, setSelectedChat } from "../../store/slices/AppSlice";
+import {
+  selectAppState,
+  setDeleteNotifsOfChat,
+  setFetchMsgs,
+  setSelectedChat,
+} from "../../store/slices/AppSlice";
 import {
   selectFormfieldState,
   setLoading,
 } from "../../store/slices/FormfieldSlice";
 import { displayToast } from "../../store/slices/ToastSlice";
 
-const SearchUsersDrawer = ({
-  setFetchMsgs,
-  isDrawerOpen,
-  setIsDrawerOpen,
-  deleteNotifications,
-}) => {
+const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const { loggedInUser } = useSelector(selectAppState);
@@ -74,8 +74,8 @@ const SearchUsersDrawer = ({
 
       dispatch(setLoading(false));
       dispatch(setSelectedChat(data));
-      setFetchMsgs(true);
-      deleteNotifications(data._id);
+      dispatch(setFetchMsgs(true));
+      dispatch(setDeleteNotifsOfChat(data._id));
     } catch (error) {
       dispatch(
         displayToast({

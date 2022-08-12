@@ -13,6 +13,8 @@ const AppSlice = createSlice({
       chatName: "",
       users: [],
     },
+    fetchMsgs: false,
+    deleteNotifsOfChat: "",
     clientSocket: null,
     isSocketConnected: false,
   },
@@ -29,6 +31,12 @@ const AppSlice = createSlice({
     setGroupInfo: (state, action) => {
       state.groupInfo = action.payload;
     },
+    setFetchMsgs: (state, action) => {
+      state.fetchMsgs = action.payload;
+    },
+    setDeleteNotifsOfChat: (state, action) => {
+      state.deleteNotifsOfChat = action.payload;
+    },
     setClientSocket: (state, action) => {
       state.clientSocket = action.payload;
     },
@@ -43,6 +51,8 @@ export const {
   setSelectedChat,
   toggleRefresh,
   setGroupInfo,
+  setFetchMsgs,
+  setDeleteNotifsOfChat,
   setClientSocket,
   setSocketConnected,
 } = AppSlice.actions;

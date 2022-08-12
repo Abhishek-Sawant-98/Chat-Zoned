@@ -154,7 +154,7 @@ const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
         )}
         {/* Last Message Data */}
         {typingChatUser ? (
-          <span style={{ color: "#73F76D", margin: "-6px 0px -3px -30px" }}>
+          <span style={{ color: "#73F76D", margin: "-6px 0px -4px -30px" }}>
             <TypingIndicator typingChatUser={typingChatUser} />
           </span>
         ) : (

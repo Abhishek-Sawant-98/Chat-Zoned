@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { displayToast } from "../store/slices/ToastSlice";
 import {
   selectAppState,
+  setDeleteNotifsOfChat,
   setGroupInfo,
   setLoggedInUser,
   setSelectedChat,
@@ -17,12 +18,14 @@ import {
   hideDialog,
   selectCustomDialogState,
 } from "../store/slices/CustomDialogSlice";
-import { truncateString } from "../utils/appUtils";
+import { getAxiosConfig, truncateString } from "../utils/appUtils";
+import axios from "../utils/axios";
 
 const ChatsPage = () => {
   const {
     loggedInUser,
     refresh,
+    deleteNotifsOfChat,
     clientSocket,
     selectedChat,
     isSocketConnected,
@@ -32,7 +35,6 @@ const ChatsPage = () => {
   );
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [fetchMsgs, setFetchMsgs] = useState(false);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [dialogBody, setDialogBody] = useState(<></>);
   const [chats, setChats] = useState([]);
@@ -167,16 +169,52 @@ const ChatsPage = () => {
     typingSocketEventHandler();
   });
 
+  const deletePersistedNotifs = async (notifsToBeDeleted) => {
+    const config = getAxiosConfig({ loggedInUser });
+    try {
+      await axios.put(
+        `/api/user/delete/notifications`,
+        { notificationIds: JSON.stringify(notifsToBeDeleted) },
+        config
+      );
+    } catch (error) {
+      console.log("Couldn't Delete Notifications : ", error.message);
+    }
+  };
+
+  const deleteNotifications = (clickedChatId) => {
+    // Delete notifs from global state and localStorage
+    const notifs = [...loggedInUser?.notifications];
+    const notifsToBeDeleted = [];
+    for (let i = 0; i < notifs.length; ++i) {
+      if (notifs[i].chat._id === clickedChatId) {
+        const deletedNotif = notifs.splice(i, 1)[0];
+        notifsToBeDeleted.push(deletedNotif._id);
+        // After deleting element at 'i', next element (i+1) shifts back
+        // to 'i' index
+        --i;
+      }
+    }
+    const updatedUser = { ...loggedInUser, notifications: notifs };
+    localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
+    dispatch(setLoggedInUser(updatedUser));
+
+    // Delete notifs that were persisted in mongodb
+    deletePersistedNotifs(notifsToBeDeleted);
+    dispatch(setDeleteNotifsOfChat(""));
+  };
+
+  useEffect(() => {
+    if (!deleteNotifsOfChat) return;
+    deleteNotifications(deleteNotifsOfChat);
+  }, [deleteNotifsOfChat]);
+
   return (
     <>
       {loggedInUser && (
         <div className={`chatpage`}>
           {/* Header component */}
-          <ChatpageHeader
-            chats={chats}
-            setFetchMsgs={setFetchMsgs}
-            setDialogBody={setDialogBody}
-          />
+          <ChatpageHeader chats={chats} setDialogBody={setDialogBody} />
 
           <section className={`row g-1`}>
             {/* Chat List component */}
@@ -184,7 +222,6 @@ const ChatsPage = () => {
               chats={chats}
               setChats={setChats}
               loadingMsgs={loadingMsgs}
-              setFetchMsgs={setFetchMsgs}
               setDialogBody={setDialogBody}
               typingChatUsers={typingChatUsers}
             />
@@ -193,9 +230,8 @@ const ChatsPage = () => {
             <MessagesView
               loadingMsgs={loadingMsgs}
               setLoadingMsgs={setLoadingMsgs}
-              fetchMsgs={fetchMsgs}
-              setFetchMsgs={setFetchMsgs}
               setDialogBody={setDialogBody}
+              deletePersistedNotifs={deletePersistedNotifs}
               isNewUser={chats?.length === 0}
               typingChatUser={typingChatUsers.find(
                 (u) => getTypingChatId(u) === selectedChat?._id

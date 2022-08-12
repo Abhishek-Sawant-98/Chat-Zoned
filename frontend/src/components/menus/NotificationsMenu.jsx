@@ -4,18 +4,14 @@ import MenuItemText from "../utils/MenuItemText";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
+  setDeleteNotifsOfChat,
+  setFetchMsgs,
   setGroupInfo,
   setSelectedChat,
 } from "../../store/slices/AppSlice";
 import { getOneToOneChatReceiver, truncateString } from "../../utils/appUtils";
 
-const NotificationsMenu = ({
-  chats,
-  setFetchMsgs,
-  anchor,
-  setAnchor,
-  deleteNotifications,
-}) => {
+const NotificationsMenu = ({ chats, anchor, setAnchor }) => {
   const { loggedInUser } = useSelector(selectAppState);
   const dispatch = useDispatch();
   const notifs = [...loggedInUser?.notifications];
@@ -44,8 +40,8 @@ const NotificationsMenu = ({
     const chatId = chatNotifId.split("---")[0];
     const chatToBeOpened = chats.find((chat) => chat._id === chatId);
     dispatch(setSelectedChat(chatToBeOpened));
-    setFetchMsgs(true); // To fetch selected chat msgs
-    deleteNotifications(chatId);
+    dispatch(setFetchMsgs(true)); // To fetch selected chat msgs
+    dispatch(setDeleteNotifsOfChat(chatId));
     if (chatToBeOpened?.isGroupChat) dispatch(setGroupInfo(chatToBeOpened));
   };
 
