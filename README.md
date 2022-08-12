@@ -2,7 +2,7 @@
 
 # `Chat-Zoned` MERN-Chat-App
 
-> #### This is a [**Progressive Web App**](https://medium.com/swlh/converting-existing-react-app-to-pwa-3c7e4e773db3) built using [`MERN Stack`](https://www.mongodb.com/mern-stack), which is primarily used for `Real-time Online Chatting` (similar to Whatsapp or MS Teams). Being a PWA, this app can be installed natively on mobile and desktop devices🔥. This app allows a user to perform the following major operations:-
+> #### This is a [**Progressive Web App**](https://medium.com/swlh/converting-existing-react-app-to-pwa-3c7e4e773db3) built using [`MERN Stack`](https://www.mongodb.com/mern-stack), which is primarily used for `Real-time Online Chatting` (similar to Whatsapp or MS Teams). Being a PWA, this app can be installed natively on mobile and desktop devices🔥. It allows a user to perform the following major operations:-
 
 </div>
 
