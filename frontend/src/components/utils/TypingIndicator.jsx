@@ -7,6 +7,7 @@ const TypingIndicator = ({ typingChatUser, showAvatar }) => {
   const typingGif = useRef(null);
   const typingUserData = typingChatUser?.toString().split("---") || [];
   const typingUserName = typingUserData[1] || "";
+  const isGroupChat = typingUserData[3] === "true";
   return (
     <span
       className={`typingIndicator ${
@@ -22,7 +23,7 @@ const TypingIndicator = ({ typingChatUser, showAvatar }) => {
         />
       )}
       <span className="ms-2">
-        {typingUserName ? `${typingUserName} is ` : ""}typing
+        {typingUserName && isGroupChat ? `${typingUserName} is ` : ""}typing
       </span>
       <LottieAnimation
         ref={typingGif}

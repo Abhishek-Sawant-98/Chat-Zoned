@@ -144,7 +144,7 @@ const ChatsPage = () => {
           ...typingChatUsers,
           `${chat._id}---${getTypingUserName(typingUser)}---${
             typingUser.profilePic
-          }`,
+          }---${chat.isGroupChat}`,
         ]);
       });
 
@@ -156,7 +156,7 @@ const ChatsPage = () => {
             chatUser !==
             `${chat._id}---${getTypingUserName(typingUser)}---${
               typingUser.profilePic
-            }`
+            }---${chat.isGroupChat}`
         )
       );
     });
