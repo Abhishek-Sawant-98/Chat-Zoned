@@ -22,6 +22,7 @@
 - [Debouncing](https://www.freecodecamp.org/news/javascript-debounce-example/) has been implemented for every search box in the app to improve app performance.
 - [Event Delegation](https://www.geeksforgeeks.org/event-delegation-in-javascript/) has been implemented for every parent element containing an item list (messages list, user list, group member list, chat list, notification list etc.) to improve app performance.
 - [Promise.all()](https://dmitripavlutin.com/promise-all/) has been used for `parallel execution` of `independent async operations` wherever necessary (eg. concurrently deleting all group chat messages upon group chat delete), to improve app performance.
+- [Code splitting](https://reactjs.org/docs/code-splitting.html) (lazy loading) has been implemented to load either homepage or chatpage based on user logged-in status.
 - `Loading Skeletons` and `Circular Spinners` are displayed for all async (time consuming) API calls, for better UX.
 - [Sockets](https://socket.io/) have been used not just for real-time messaging, but also for `real-time message updates` (editing/deleting message), `real-time group updates` like creating a new group, updating group name/display pic, adding/ removing members, making/dismissing group admins, exiting/deleting group etc.
 - `Typing Indicators` (similar to MS Teams app) have also been implemented using sockets.
