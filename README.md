@@ -1,20 +1,31 @@
+<div align="center">
+
 # `Chat-Zoned` MERN-Chat-App
 
-> This is a [**Progressive Web App**](https://medium.com/swlh/converting-existing-react-app-to-pwa-3c7e4e773db3) built using [`MERN Stack`](https://www.mongodb.com/mern-stack), which is primarily used for `Real-time Online Chatting` (similar to Whatsapp or MS Teams). This app allows a user to perform the following major operations:-
+> #### This is a [**Progressive Web App**](https://medium.com/swlh/converting-existing-react-app-to-pwa-3c7e4e773db3) built using [`MERN Stack`](https://www.mongodb.com/mern-stack), which is primarily used for `Real-time Online Chatting` (similar to Whatsapp or MS Teams). Being a PWA, this app can be installed natively on mobile and desktop devices🔥. This app allows a user to perform the following major operations:-
+
+</div>
+
 - Register/Login/Logout/search registered users
 - Create one-to-one chats, group chats
 - Send/edit/delete text messages
 - Add/Edit/Delete files (document/image/gif/audio/video) in messages
-- View group chat members (any group member can)
-- Add/remove group members (only group admins can)
-- Make/dismiss group admin (only admins can)
-- Exit group chat (any member can)
-- Delete group chat (only admins can)
-- Edit group display pic/group name (any member can)
+- Group Chat features (for all group members) 
+  - View group chat members
+  - Edit group display pic/group name 
+  - Exit group chat
+- Group Chat features (only for group admins)
+  - Add/remove group members 
+  - Make/dismiss group admin 
+  - Delete group chat 
 - Edit profile pic/profile name
 - Change profile password
 
-> Deployed App 👉 <https://chat-zoned.herokuapp.com> 🚀 (it can be installed natively on mobile and desktop devices)🔥.
+<div align="center">
+
+### Deployed App 👉 <https://chat-zoned.herokuapp.com> 🚀
+
+</div>
 
 ## Cool Features 😎
 
@@ -67,8 +78,6 @@
 
 ## Steps to Run Project Locally 💻
 
-- Install backend dependencies: run `npm install` in root project folder
-- Install frontend dependencies: run `cd frontend` (to go to **frontend** folder) and then run `npm install` 
 - Create **.env** file in root project folder and add the following environment variables (`KEY = VALUE`) 
 
 |        **KEY**        |                                 **VALUE**                                |
@@ -100,8 +109,41 @@
 | REACT_APP_PLACEHOLDER_IMG_URL |                                                   YOUR_PREFERRED_IMAGE_URL                                                  |
 | REACT_APP_CLOUDINARY_BASE_URL |                                                  https://res.cloudinary.com                                                 |
 
-- Run server in development mode: `npm run dev` in root project folder
-- Run frontend app in development mode: `cd frontend` => `npm start`
-- Build frontend project for production: `cd frontend` => `npm run build`
+### Run backend
+```sh
+# install dependencies (in root project folder)
+npm install
+# serve at localhost:YOUR_PORT_NUMBER
+npm start
+# serve with hot reload at localhost:YOUR_PORT_NUMBER
+npm run dev
+```
 
+### Run frontend
+```sh
+# Go to 'frontend' folder
+cd frontend
+# install dependencies
+npm install
+# serve at localhost:3000 with hot reload
+npm start
+# build for production
+npm run build
+```
+
+#### Deploy it using Heroku
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://dashboard.heroku.com/)
+
+## License
+
+[MIT](LICENSE) © Abhishek Sawant
+
+---
+
+<div align="center">
+
+### If you liked this app, show some ❤️ by starring 🌟 the repository 🙂
+
+</div>
 
