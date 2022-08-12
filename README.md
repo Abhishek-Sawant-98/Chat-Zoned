@@ -11,13 +11,13 @@
 - Send/edit/delete text messages
 - Add/Edit/Delete files (document/image/gif/audio/video) in messages
 - Group Chat features (for all group members) 
-  - View group chat members
+  - View group members
   - Edit group display pic/group name 
-  - Exit group chat
+  - Exit group
 - Group Chat features (only for group admins)
-  - Add/remove group members 
+  - Add/remove members 
   - Make/dismiss group admin 
-  - Delete group chat 
+  - Delete group 
 - Edit profile pic/profile name
 - Change profile password
 
