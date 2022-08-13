@@ -9,7 +9,7 @@
 - Register/Login/Logout/search registered users
 - Create one-to-one chats, group chats
 - Send/edit/delete text messages
-- Add/Edit/Delete files (document/image/gif/audio/video) in messages
+- Add/Edit/Delete/Download files (document/image/gif/audio/video) in messages
 - Group Chat features (for all group members) 
   - View group members
   - Edit group display pic/group name 
