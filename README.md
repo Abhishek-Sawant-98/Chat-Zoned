@@ -82,7 +82,14 @@ https://user-images.githubusercontent.com/66935206/184427042-8fef5d36-73b0-4be8-
 
 ## Steps to Run Project Locally 💻
 
-- Create **.env** file in root project folder and add the following environment variables (`KEY = VALUE`) 
+```bash
+#Clone this repo to your local machine
+git clone https://github.com/Abhishek-Sawant-98/Chat-Zoned.git
+
+# Go to project root folder
+cd Chat-Zoned
+```
+- Create `.env` file in root project folder and add the following environment variables (`KEY = VALUE`) 
 
 |        **KEY**        |                                 **VALUE**                                |
 |:---------------------:|:------------------------------------------------------------------------:|
@@ -103,7 +110,7 @@ https://user-images.githubusercontent.com/66935206/184427042-8fef5d36-73b0-4be8-
 - Get `MongoDB URI` by creating a MongoDB cluster from [here](https://www.mongodb.com/)
 - Get `cloudinary` related secret keys from [here](https://cloudinary.com/documentation/how_to_integrate_cloudinary)
 - Get `AWS S3` related secret keys from [here](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-appendix-sign-up.html)
-- Next, create another **.env** file in `frontend` folder and add the following environment variables (`KEY = VALUE`) 
+- Next, create another `.env` file in `frontend` folder and add the following environment variables (`KEY = VALUE`) 
 
 |            **KEY**            |                                                          **VALUE**                                                          |
 |:-----------------------------:|:---------------------------------------------------------------------------------------------------------------------------:|
