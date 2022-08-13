@@ -44,7 +44,7 @@ https://user-images.githubusercontent.com/66935206/184427042-8fef5d36-73b0-4be8-
 - `Real-time notifications` also implemented using sockets. Most important, all the notifications are `PERSISTED` (saved) in MongoDB, so even if a user is offline/logged out, he/she will see all the notifications after logging in.
 - All new message notifications are `grouped by chat` in the UI, and the respective chat specific notification counts are displayed on each chat (similar to Whatsapp).
 - The notification count after every new message delete, is `updated in real-time` for ALL OTHER USERS of that chat.
-- [Emoji picker](https://www.npmjs.com/package/emoji-picker-react) has been added to new message input box, to conveniently allow a user to select all the native emojis of his/her device.
+- [Emoji picker](https://www.npmjs.com/package/emoji-picker-react) has been added to new message input box, to conveniently allow the user to select all native emojis of his/her device.
 - `Enter` key can be used for submitting udpated profile name/group name, or for sending a new message.
 - `Shift + Enter` key can be used for adding a new line in message text content.
 - The sent/updated message `PRESERVES the formatting` of the message text content.
