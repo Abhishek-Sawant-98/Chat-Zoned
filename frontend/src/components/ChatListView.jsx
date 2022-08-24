@@ -51,7 +51,6 @@ const ChatListView = ({
   const { loggedInUser, selectedChat, refresh } = useSelector(selectAppState);
   const notifs = [...loggedInUser?.notifications];
   const dispatch = useDispatch();
-  const bb = null;
 
   const [loading, setLoading] = useState(true);
   const [filteredChats, setFilteredChats] = useState(chats);
