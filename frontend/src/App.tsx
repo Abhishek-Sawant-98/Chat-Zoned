@@ -3,7 +3,7 @@ import { Suspense, lazy, useRef } from "react";
 import animationData from "./animations/app-loading.json";
 import LottieAnimation from "./components/utils/LottieAnimation";
 import ErrorBoundary from "./pages/ErrorBoundary";
-import type { lazyComponent } from "./AppTypes";
+import type { lazyComponent } from "./utils/AppTypes";
 
 const HomePage: lazyComponent = lazy(() => import("./pages/HomePage"));
 const ChatsPage: lazyComponent = lazy(() => import("./pages/ChatsPage"));

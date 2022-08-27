@@ -7,7 +7,7 @@ import animationData from "../animations/chat-gif.json";
 import { useDispatch, useSelector } from "react-redux";
 import { selectAppState } from "../store/slices/AppSlice";
 import { selectFormfieldState } from "../store/slices/FormfieldSlice";
-import type { UserType } from "../AppTypes";
+import type { UserType } from "../utils/AppTypes";
 
 const HomePage = () => {
   const { loggedInUser } = useSelector(selectAppState);

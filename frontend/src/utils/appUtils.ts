@@ -1,21 +1,33 @@
+import {
+  AxiosConfig,
+  AxiosOptions,
+  ChatType,
+  falsyType,
+  UserType,
+} from "./AppTypes";
+
 // Convert a normal function to a 'debounced' function
-export const debounce = (func, delay = 500) => {
-  let timer;
-  return (...args) => {
+export const debounce = function (
+  func: Function,
+  delay: number = 500,
+  context: any
+) {
+  let timer: NodeJS.Timeout;
+  return (...args: any[]) => {
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => {
-      func.apply(this, args);
+      func.apply(context, args);
     }, delay);
   };
 };
 
 // Optimization method to cache and retrieve the results
 // of pure functions, instead of recalculating again
-export const memoize = (func) => {
+export const memoize = function (func: Function) {
   // Each memoized fn has its own separate cache
-  const cachedResults = {};
+  const cachedResults: any = {};
 
-  return (...args) => {
+  return (...args: any[]) => {
     // To generate a unique key for each input args array
     const argsKey = JSON.stringify(args);
     // console.log(
@@ -23,7 +35,7 @@ export const memoize = (func) => {
     // );
 
     // Retrieve result from cache if present, else calculate
-    const result = cachedResults[argsKey] || func(...args);
+    const result: any = cachedResults[argsKey] || func(...args);
 
     // If result isn't saved in cache, save it for later use
     if (!cachedResults[argsKey]) cachedResults[argsKey] = result;
@@ -33,13 +45,23 @@ export const memoize = (func) => {
 };
 
 // Truncate a sentence/string
-export const truncateString = memoize((str, limit, index) => {
-  if (!str || !limit || !index) return "";
-  return str.length > limit ? `${str.substring(0, index)}...` : str;
-});
+export const truncateString = memoize(
+  (
+    str: string | falsyType,
+    limit: number | falsyType,
+    index: number | falsyType
+  ) => {
+    if (!str || !limit || !index) return "";
+    return str.length > limit ? `${str.substring(0, index)}...` : str;
+  }
+);
 
 // Truncate each word of a sentence/string
-export const truncateWords = (sentence, limit, index) => {
+export const truncateWords = (
+  sentence: string | falsyType,
+  limit: number | falsyType,
+  index: number | falsyType
+) => {
   if (!sentence || !limit || !index) return "";
   const words = sentence.split(" ");
   return words
@@ -49,12 +71,14 @@ export const truncateWords = (sentence, limit, index) => {
     .join(" ");
 };
 
-export const getOneToOneChatReceiver = memoize((loggedInUser, chatUsers) => {
-  if (!chatUsers?.length || !loggedInUser) return;
-  return loggedInUser._id !== chatUsers[0]._id ? chatUsers[0] : chatUsers[1];
-});
+export const getOneToOneChatReceiver = memoize(
+  (loggedInUser: UserType, chatUsers: ChatType[]) => {
+    if (!chatUsers?.length || !loggedInUser) return;
+    return loggedInUser._id !== chatUsers[0]?._id ? chatUsers[0] : chatUsers[1];
+  }
+);
 
-export const msgTimeStringOf = memoize((msgDate) => {
+export const msgTimeStringOf = memoize((msgDate: Date | falsyType) => {
   if (!msgDate) return "";
   let hours = msgDate.getHours();
   let minutes = msgDate.getMinutes();
@@ -63,14 +87,14 @@ export const msgTimeStringOf = memoize((msgDate) => {
   return `${hours}:${minutes < 10 ? "0" : ""}${minutes}${am_or_pm}`;
 });
 
-export const dateStringOf = memoize((date) => {
+export const dateStringOf = memoize((date: Date | falsyType) => {
   return date
     ? `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
     : "";
 });
 
 // Impure function, so can't memoize
-export const msgDateStringOf = (currDate) => {
+export const msgDateStringOf = (currDate: Date | falsyType) => {
   if (!currDate) return "";
   const months = [
     "January",
@@ -100,7 +124,7 @@ export const msgDateStringOf = (currDate) => {
       } ${currDate.getFullYear()}`;
 };
 
-export const parseInnerHTML = (innerHTML) => {
+export const parseInnerHTML = (innerHTML: string | falsyType) => {
   return (
     innerHTML
       ?.replaceAll("<br>", "")
@@ -111,23 +135,24 @@ export const parseInnerHTML = (innerHTML) => {
   );
 };
 
-export const setCaretPosition = (node) => {
+export const setCaretPosition = (node: HTMLElement) => {
   node?.focus();
-  const lastTextNode = node?.lastChild;
+  const lastTextNode: ChildNode | null = node?.lastChild;
   if (!lastTextNode) return;
-  const caret = lastTextNode.data?.length || 0;
+  console.log("lastTextNode", lastTextNode);
+  const caret = lastTextNode.textContent?.length || 0;
   const range = document.createRange();
   range.setStart(lastTextNode, caret);
   range.setEnd(lastTextNode, caret);
-  const sel = window.getSelection();
-  sel.removeAllRanges();
-  sel.addRange(range);
+  const sel: Selection | null = window.getSelection();
+  sel?.removeAllRanges();
+  sel?.addRange(range);
 };
 
-export const getAxiosConfig = (options) => {
+export const getAxiosConfig = (options: AxiosOptions | falsyType) => {
   if (!options) return;
   const { loggedInUser, formData, blob } = options;
-  const config = {
+  const config: AxiosConfig = {
     headers: {
       "Content-Type": formData ? "multipart/form-data" : "application/json",
     },
@@ -145,7 +170,7 @@ export const ONE_MB = 1048576;
 export const TWO_MB = 2097152;
 export const FIVE_MB = 5242880;
 
-export const getFileSizeString = memoize((fileSize) => {
+export const getFileSizeString = memoize((fileSize: number | falsyType) => {
   return !fileSize
     ? ""
     : fileSize > ONE_MB
@@ -155,10 +180,10 @@ export const getFileSizeString = memoize((fileSize) => {
     : fileSize + " B";
 });
 
-export const isImageFile = memoize((filename) =>
+export const isImageFile = memoize((filename: string) =>
   /(\.png|\.jpg|\.jpeg|\.svg|\.webp)$/.test(filename)
 );
 
-export const isImageOrGifFile = memoize((filename) =>
+export const isImageOrGifFile = memoize((filename: string) =>
   /(\.png|\.jpg|\.jpeg|\.svg|\.gif|\.webp)$/.test(filename)
 );
