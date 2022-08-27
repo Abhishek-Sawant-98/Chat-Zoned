@@ -23,7 +23,10 @@
 
 <div align="center">
 
-### Deployed App 👉 <https://chat-zoned.herokuapp.com> 🚀
+## Deployed Links 👇
+
+### Heroku  👉 <https://chat-zoned.herokuapp.com> 🚀
+### Vercel  👉 <https://chat-zoned.vercel.app> 🚀
 
 </div>
 
@@ -142,9 +145,7 @@ npm start
 npm run build
 ```
 
-#### Deploy it using Heroku
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://dashboard.heroku.com/)
+- Finally, deploy it using [Heroku](https://dashboard.heroku.com/) or [Vercel](https://vercel.com/). Don't forget to add all the above mentioned environment variables while deploying.
 
 ## License
 
