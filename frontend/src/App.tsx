@@ -1,15 +1,18 @@
 import { Route, Routes } from "react-router-dom";
 import { Suspense, lazy, useRef } from "react";
-import animationData from "../src/animations/app-loading.json";
-import LottieAnimation from "../src/components/utils/LottieAnimation";
+import animationData from "./animations/app-loading.json";
+import LottieAnimation from "./components/utils/LottieAnimation";
 import ErrorBoundary from "./pages/ErrorBoundary";
+import type { lazyComponent } from "./AppTypes";
 
-const HomePage = lazy(() => import("./pages/HomePage"));
-const ChatsPage = lazy(() => import("./pages/ChatsPage"));
-const AppToast = lazy(() => import("./components/utils/AppToast"));
+const HomePage: lazyComponent = lazy(() => import("./pages/HomePage"));
+const ChatsPage: lazyComponent = lazy(() => import("./pages/ChatsPage"));
+const AppToast: lazyComponent = lazy(
+  () => import("./components/utils/AppToast")
+);
 
 function App() {
-  const loadingGif = useRef(null);
+  const loadingGif = useRef<HTMLDivElement>(null);
   return (
     <div className="App">
       <ErrorBoundary>

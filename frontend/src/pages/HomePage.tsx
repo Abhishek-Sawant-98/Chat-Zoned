@@ -2,26 +2,28 @@ import { useState, useEffect, useRef } from "react";
 import Login from "../components/authentication/Login";
 import Register from "../components/authentication/Register";
 import LottieAnimation from "../components/utils/LottieAnimation";
-import { useNavigate } from "react-router-dom";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 import animationData from "../animations/chat-gif.json";
 import { useDispatch, useSelector } from "react-redux";
 import { selectAppState } from "../store/slices/AppSlice";
 import { selectFormfieldState } from "../store/slices/FormfieldSlice";
+import type { UserType } from "../AppTypes";
 
 const HomePage = () => {
   const { loggedInUser } = useSelector(selectAppState);
   const { disableIfLoading } = useSelector(selectFormfieldState);
   const dispatch = useDispatch();
-  const appGif = useRef();
+  const appGif = useRef<HTMLDivElement>();
 
   const [showLogin, setShowLogin] = useState(true);
-
-  const navigate = useNavigate();
+  const navigate: NavigateFunction = useNavigate();
 
   useEffect(() => {
     // localStorage persists data even after page refresh, unlike state
-    const user = JSON.parse(localStorage.getItem("loggedInUser"));
-    if (user && Date.now() < parseInt(user.expiryTime)) navigate("/chats");
+    const user: UserType = JSON.parse(
+      localStorage.getItem("loggedInUser") as string
+    );
+    if (user && Date.now() < user.expiryTime) navigate("/chats");
   }, []);
 
   return (
@@ -30,7 +32,7 @@ const HomePage = () => {
         <section className="homepage container-fluid d-flex flex-column p-4">
           <section className="homepage__header container pt-0 pb-2 ps-1 pe-4 mb-2 user-select-none">
             <LottieAnimation
-              ref={appGif}
+              ref={appGif as React.Ref<HTMLDivElement>}
               className={"d-inline-block me-2"}
               style={{ width: "35px", height: "35px" }}
               animationData={animationData}

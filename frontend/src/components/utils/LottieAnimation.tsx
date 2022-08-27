@@ -1,12 +1,18 @@
 import lottie from "lottie-web/build/player/lottie_light";
-import { useEffect, forwardRef } from "react";
+import React, { useEffect, forwardRef } from "react";
 
-const AppGif = forwardRef((props, gifRef) => {
+export interface GifProps {
+  className: string;
+  style: React.CSSProperties;
+  animationData: {};
+}
+
+const AppGif = forwardRef<HTMLDivElement, GifProps>((props, gifRef) => {
   const { className, style, animationData } = props;
 
   useEffect(() => {
     lottie.loadAnimation({
-      container: gifRef?.current,
+      container: (gifRef as React.MutableRefObject<HTMLDivElement>)?.current,
       animationData: animationData,
     });
   }, []);
