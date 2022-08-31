@@ -143,3 +143,18 @@ export interface AxiosErrorType {
 }
 
 export type ButtonEventHandler = MouseEventHandler<HTMLButtonElement>;
+
+export interface AttachmentData {
+  attachmentData: any;
+  attachmentPreviewUrl: string | falsyType;
+}
+
+export interface MsgAttachmentProps {
+  msgSent?: boolean;
+  isEditMode: boolean;
+  fileEditIcons: any;
+  downloadingFileId?: string | falsyType;
+  loadingMediaId?: string | falsyType;
+  isPreview: boolean;
+  fileData: any;
+}

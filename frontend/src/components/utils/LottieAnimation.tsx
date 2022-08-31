@@ -1,10 +1,10 @@
 import lottie from "lottie-web/build/player/lottie_light";
 import React, { useEffect, forwardRef } from "react";
 
-export interface GifProps {
+interface GifProps {
   className: string;
   style: React.CSSProperties;
-  animationData: {};
+  animationData: any;
 }
 
 const AppGif = forwardRef<HTMLDivElement, GifProps>((props, gifRef) => {

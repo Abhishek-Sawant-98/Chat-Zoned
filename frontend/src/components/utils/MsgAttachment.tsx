@@ -14,8 +14,9 @@ import {
   truncateString,
 } from "../../utils/appUtils";
 import animationData from "../../animations/app-loading.json";
-import LottieAnimation from "../utils/LottieAnimation";
+import LottieAnimation from "./LottieAnimation";
 import { useRef } from "react";
+import { MsgAttachmentProps } from "../../utils/AppTypes";
 
 const IMG_BASE_URL = process.env.REACT_APP_CLOUDINARY_BASE_URL;
 
@@ -27,7 +28,7 @@ const MsgAttachment = ({
   loadingMediaId,
   isPreview,
   fileData,
-}) => {
+}: MsgAttachmentProps) => {
   const previewStyles = `${
     isPreview && !isEditMode
       ? "py-4 border border-4 border-secondary previewFile"

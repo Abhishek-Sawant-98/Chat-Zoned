@@ -79,7 +79,6 @@ const MessagesView = ({
   const {
     loggedInUser,
     selectedChat,
-    refresh,
     fetchMsgs,
     clientSocket,
     isSocketConnected,
@@ -94,7 +93,7 @@ const MessagesView = ({
   const [clickedMsgId, setClickedMsgId] = useState("");
   const [dontScrollToBottom, setDontScrollToBottom] = useState(false);
   const [attachmentData, setAttachmentData] = useState({
-    attachment: null,
+    attachment: "",
     attachmentPreviewUrl: "",
   });
   const msgListBottom = useRef(null);
@@ -108,7 +107,7 @@ const MessagesView = ({
 
   const resetMsgInput = (options) => {
     setAttachmentData({
-      attachment: null,
+      attachment: "",
       attachmentPreviewUrl: "",
     });
     msgFileInput.current.value = "";

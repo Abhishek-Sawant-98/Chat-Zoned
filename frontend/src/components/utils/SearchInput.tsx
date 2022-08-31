@@ -1,16 +1,33 @@
 import { Clear, Search } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
-import { forwardRef, useState } from "react";
+import { forwardRef, LegacyRef, MutableRefObject, useState } from "react";
 import { useSelector } from "react-redux";
 import { selectFormfieldState } from "../../store/slices/FormfieldSlice";
 
-const SearchInput = forwardRef((props, inputRef) => {
+interface Props {
+  searchHandler: Function;
+  autoFocus: boolean;
+  placeholder: string;
+  clearInput: Function;
+}
+
+type InputRef = MutableRefObject<HTMLInputElement>;
+
+const SearchInput = forwardRef<HTMLInputElement, Props>((props, inputRef) => {
   const { searchHandler, autoFocus, placeholder, clearInput } = props;
   const { disableIfLoading, formFieldClassName, inputFieldClassName } =
     useSelector(selectFormfieldState);
 
   // To display/hide clear search (<Close />) icon when typing
   const [typing, setTyping] = useState(false);
+
+  const onClearIconClick = () => {
+    if (!inputRef || !(inputRef as InputRef).current) return;
+    (inputRef as InputRef).current.value = "";
+    setTyping(false); // Hide '<Close />' icon
+    (inputRef as InputRef).current.focus();
+    clearInput();
+  };
 
   return (
     <section className={`${formFieldClassName} pt-3 pb-2 mx-1`}>
@@ -23,7 +40,7 @@ const SearchInput = forwardRef((props, inputRef) => {
         </span>
         <input
           type="text"
-          ref={inputRef}
+          ref={inputRef as LegacyRef<HTMLInputElement>}
           onChange={(e) => {
             setTyping(Boolean(e.target.value.trim()));
             searchHandler(e);
@@ -40,12 +57,7 @@ const SearchInput = forwardRef((props, inputRef) => {
           className={`input-group-text ${disableIfLoading} bg-black bg-gradient border-secondary text-light rounded-pill rounded-start border-start-0`}
         >
           <IconButton
-            onClick={() => {
-              inputRef.current.value = "";
-              setTyping(false); // Hide '<Close />' icon
-              inputRef.current.focus();
-              clearInput();
-            }}
+            onClick={onClearIconClick}
             className={`${typing ? "d-inline-block" : "d-none"}`}
             style={{
               padding: "0px 9px 3px 9px",

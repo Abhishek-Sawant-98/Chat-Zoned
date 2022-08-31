@@ -5,12 +5,19 @@ import MsgAttachment from "./MsgAttachment";
 
 const PLACEHOLDER_IMG = process.env.REACT_APP_PLACEHOLDER_IMG_URL;
 
+interface Props {
+  isEditMode: boolean;
+  attachmentData: any;
+  CustomTooltip: any;
+  fileEditIcons: any;
+}
+
 const AttachmentPreview = ({
   isEditMode,
   attachmentData,
   CustomTooltip,
   fileEditIcons,
-}) => {
+}: Props) => {
   const {
     attachment: { name, type, size },
     attachmentPreviewUrl,
