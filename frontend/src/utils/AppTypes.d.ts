@@ -27,13 +27,16 @@ export interface MessageInterface {
 export type MessageType = MessageInterface | falsyType;
 
 export interface ChatInterface {
-  chatDisplayPic: string;
+  chatDisplayPic: string | File | falsyType;
+  chatDisplayPicUrl?: string | falsyType;
+  chatName?: string;
   cloudinary_id: string;
   createdAt: string;
   groupAdmins?: UserType[];
   isGroupChat: boolean;
   lastMessage?: MessageType;
   updatedAt?: string;
+  removedUser?: UserType;
   users: UserType[];
   __v?: number;
   _id: string;
@@ -57,12 +60,13 @@ export interface AxiosConfig {
 }
 
 // AppSlice types
-export interface GroupInfo {
-  chatDisplayPic: string | falsyType;
+export interface GroupInfoInterface {
+  chatDisplayPic: string | File | falsyType;
   chatDisplayPicUrl: string | falsyType;
-  chatName: string;
+  chatName: string | falsyType;
   users: UserType[];
 }
+export type GroupInfo = GroupInfoInterface | falsyType;
 
 export interface AppState {
   loggedInUser: UserType;
@@ -88,6 +92,7 @@ export interface ChildDialogState {
 
 // CustomDialogSlice types
 export interface DialogData {
+  isFullScreen?: boolean;
   isOpen: boolean;
   title: string;
   nolabel: string;
@@ -97,8 +102,11 @@ export interface DialogData {
 }
 
 export interface CustomDialogState {
+  children?: ReactNode;
   dialogData: DialogData;
   showDialogActions: boolean;
+  showDialogClose?: boolean;
+  closeDialog?: Function;
 }
 
 // FormfieldSlice types
@@ -115,7 +123,7 @@ export interface FormfieldState {
 // ToastSlice types
 export interface ToastData {
   isOpen: boolean;
-  title: string;
+  title?: string;
   message: string;
   type: string;
   duration: number;
@@ -125,3 +133,13 @@ export interface ToastData {
 export interface ToastState {
   toastData: ToastData;
 }
+
+export interface AxiosErrorType {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
+export type ButtonEventHandler = MouseEventHandler<HTMLButtonElement>;

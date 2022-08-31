@@ -1,4 +1,11 @@
-import { Alert, AlertTitle, Snackbar } from "@mui/material";
+import {
+  Alert,
+  AlertColor,
+  AlertTitle,
+  Snackbar,
+  SnackbarCloseReason,
+} from "@mui/material";
+import { SyntheticEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { hideToast, selectToastState } from "../../store/slices/ToastSlice";
 
@@ -6,7 +13,10 @@ const AppToast = () => {
   const { toastData } = useSelector(selectToastState);
   const dispatch = useDispatch();
 
-  const handleToastClose = (event, reason) => {
+  const handleToastClose = (
+    event: Event | SyntheticEvent<any | Event>,
+    reason: SnackbarCloseReason
+  ) => {
     if (reason === "clickaway") return;
     dispatch(hideToast());
   };
@@ -16,8 +26,8 @@ const AppToast = () => {
   return (
     <Snackbar
       anchorOrigin={{
-        vertical: positions[0],
-        horizontal: positions[1],
+        vertical: positions[0] as "top" | "bottom",
+        horizontal: positions[1] as "left" | "right" | "center",
       }}
       style={{ maxWidth: 340, margin: "10px auto" }}
       open={isOpen}
@@ -27,8 +37,10 @@ const AppToast = () => {
       <Alert
         className="text-start"
         variant="filled"
-        severity={type}
-        onClose={handleToastClose}
+        severity={type as AlertColor}
+        onClose={
+          handleToastClose as (event: SyntheticEvent<Element, Event>) => void
+        }
       >
         {title && (
           <AlertTitle

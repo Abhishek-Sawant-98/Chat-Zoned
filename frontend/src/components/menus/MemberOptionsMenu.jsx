@@ -50,7 +50,7 @@ const MemberOptionsMenu = ({
     </span>
   );
   const updateView = (data) => {
-    dispatch(toggleRefresh(!refresh));
+    dispatch(toggleRefresh());
     dispatch(setSelectedChat(data));
   };
 

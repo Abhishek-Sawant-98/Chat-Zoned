@@ -111,7 +111,7 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
 
   const updateView = (data) => {
     dispatch(setGroupInfo(data));
-    dispatch(toggleRefresh(!refresh));
+    dispatch(toggleRefresh());
     dispatch(setSelectedChat(data)); // To update messages view
   };
 

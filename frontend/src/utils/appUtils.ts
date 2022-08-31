@@ -72,7 +72,7 @@ export const truncateWords = (
 };
 
 export const getOneToOneChatReceiver = memoize(
-  (loggedInUser: UserType, chatUsers: ChatType[]) => {
+  (loggedInUser: UserType, chatUsers: UserType[]) => {
     if (!chatUsers?.length || !loggedInUser) return;
     return loggedInUser._id !== chatUsers[0]?._id ? chatUsers[0] : chatUsers[1];
   }

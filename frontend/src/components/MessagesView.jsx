@@ -335,7 +335,7 @@ const MessagesView = ({
 
       if (isSocketConnected) clientSocket?.emit("new msg sent", data);
       fetchMessages();
-      dispatch(toggleRefresh(!refresh));
+      dispatch(toggleRefresh());
     } catch (error) {
       displayError(error, "Couldn't Send Message");
       setSending(false);
@@ -363,7 +363,7 @@ const MessagesView = ({
       displaySuccess("Message Deleted Successfully");
       setMessages(messages.filter((msg) => msg?._id !== clickedMsgId));
       dispatch(setLoading(false));
-      dispatch(toggleRefresh(!refresh));
+      dispatch(toggleRefresh());
       setSending(false);
       return "msgActionDone";
     } catch (error) {
@@ -445,7 +445,7 @@ const MessagesView = ({
 
       if (isSocketConnected) clientSocket?.emit("msg updated", data);
       fetchMessages({ updatingMsg: true });
-      dispatch(toggleRefresh(!refresh));
+      dispatch(toggleRefresh());
       setMsgFileRemoved(false);
     } catch (error) {
       displayError(error, "Couldn't Update Message");
@@ -518,7 +518,7 @@ const MessagesView = ({
       .off("new msg received")
       .on("new msg received", (newMsg, notifications) => {
         const { chat } = newMsg;
-        dispatch(toggleRefresh(!refresh));
+        dispatch(toggleRefresh());
         if (selectedChat && chat && selectedChat._id === chat._id) {
           newMsg["sent"] = true;
           setMessages([newMsg, ...messages]);
@@ -538,7 +538,7 @@ const MessagesView = ({
       .off("remove deleted msg")
       .on("remove deleted msg", (deletedMsgData) => {
         const { deletedMsgId, chat } = deletedMsgData;
-        dispatch(toggleRefresh(!refresh));
+        dispatch(toggleRefresh());
         if (selectedChat && chat && selectedChat._id === chat._id) {
           setMessages(messages.filter((m) => m?._id !== deletedMsgId));
         } else {
@@ -560,7 +560,7 @@ const MessagesView = ({
       .on("update modified msg", (updatedMsg) => {
         if (!updatedMsg) return;
         const { chat } = updatedMsg;
-        dispatch(toggleRefresh(!refresh));
+        dispatch(toggleRefresh());
         if (selectedChat && chat && selectedChat._id === chat._id) {
           updatedMsg["sent"] = true;
           updatedMsg["chat"] = updatedMsg.chat?._id;

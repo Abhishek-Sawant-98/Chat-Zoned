@@ -1,6 +1,12 @@
 import { AddAPhoto } from "@mui/icons-material";
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+  useState,
+  useRef,
+  ChangeEventHandler,
+  LegacyRef,
+  ChangeEvent,
+} from "react";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 import axios from "../../utils/axios";
 import { CircularProgress } from "@mui/material";
 import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
@@ -12,8 +18,25 @@ import {
 } from "../../store/slices/FormfieldSlice";
 import { displayToast } from "../../store/slices/ToastSlice";
 import { setLoggedInUser } from "../../store/slices/AppSlice";
+import {
+  AxiosErrorType,
+  ButtonEventHandler,
+  falsyType,
+  ToastData,
+} from "../../utils/AppTypes";
+import { useAppDispatch, useAppSelector } from "../../store/storeHooks";
+import { AxiosRequestConfig } from "axios";
 
 const DEFAULT_USER_DP = process.env.REACT_APP_DEFAULT_USER_DP;
+
+interface UserData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  profilePic: Blob | string;
+  profilePicUrl: string | undefined;
+}
 
 const Register = () => {
   const {
@@ -24,30 +47,32 @@ const Register = () => {
     inputFieldClassName,
     btnSubmitClassName,
     btnResetClassName,
-  } = useSelector(selectFormfieldState);
+  } = useAppSelector(selectFormfieldState);
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const navigate: NavigateFunction = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const imgInput = useRef();
+  const imgInput = useRef<HTMLInputElement>();
 
   const [userData, setUserData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    profilePic: null,
+    profilePic: "",
     profilePicUrl: DEFAULT_USER_DP,
-  });
+  } as UserData);
 
   const { name, email, password, confirmPassword, profilePic, profilePicUrl } =
     userData;
 
-  const handleChangeFor = (prop) => (e) => {
-    setUserData({ ...userData, [prop]: e.target.value });
-  };
+  const handleChangeFor =
+    (prop: string): ChangeEventHandler<HTMLInputElement> =>
+    (e) => {
+      setUserData({ ...userData, [prop]: e.target.value });
+    };
 
-  const handleRegister = async (e) => {
+  const handleRegister: ButtonEventHandler = async (e: MouseEvent) => {
     e.preventDefault();
     // return dispatch(setLoading(true));
 
@@ -58,7 +83,7 @@ const Register = () => {
           type: "warning",
           duration: 3000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
     }
 
@@ -69,7 +94,7 @@ const Register = () => {
           type: "warning",
           duration: 3000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
     }
 
@@ -81,7 +106,7 @@ const Register = () => {
           type: "warning",
           duration: 3000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
     }
 
@@ -92,7 +117,7 @@ const Register = () => {
           type: "warning",
           duration: 3000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
     }
     dispatch(setLoading(true));
@@ -104,7 +129,11 @@ const Register = () => {
     formData.append("email", email);
     formData.append("password", password);
     try {
-      const { data } = await axios.post("/api/user/register", formData, config);
+      const { data } = await axios.post(
+        "/api/user/register",
+        formData,
+        config as AxiosRequestConfig
+      );
       // Success toast : register successful
       dispatch(
         displayToast({
@@ -113,7 +142,7 @@ const Register = () => {
           type: "success",
           duration: 5000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
       localStorage.setItem("loggedInUser", JSON.stringify(data));
       dispatch(setLoggedInUser(data));
@@ -123,30 +152,34 @@ const Register = () => {
       dispatch(
         displayToast({
           title: "Registration Failed",
-          message: error.response?.data?.message || error.message,
+          message:
+            (error as AxiosErrorType).response?.data?.message ||
+            (error as Error).message,
           type: "error",
           duration: 4000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
       dispatch(setLoading(false));
     }
   };
 
-  const handleReset = (e) => {
+  const handleReset: ButtonEventHandler = (e: MouseEvent) => {
     e.preventDefault();
     setUserData({
       name: "",
       email: "",
       password: "",
       confirmPassword: "",
-      profilePic: null,
+      profilePic: "",
       profilePicUrl: DEFAULT_USER_DP,
     });
+    if (!imgInput || !imgInput.current) return;
     imgInput.current.value = "";
   };
 
-  const handleImgInputChange = (e) => {
+  const handleImgInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+    if (!e || !e.target || !e.target.files) return;
     const image = e.target.files[0];
     if (!image) return;
 
@@ -158,11 +191,12 @@ const Register = () => {
           type: "warning",
           duration: 5000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
     }
 
     if (image.size >= TWO_MB) {
+      if (!imgInput || !imgInput.current) return;
       imgInput.current.value = "";
       return dispatch(
         displayToast({
@@ -170,7 +204,7 @@ const Register = () => {
           type: "warning",
           duration: 3000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
     }
     setUserData({
@@ -197,7 +231,7 @@ const Register = () => {
           id="register__selectPic"
           className={`selectPicIcon position-absolute p-2 d-flex ${disableIfLoading} justify-content-center align-items-center bg-success rounded-circle pointer`}
           onClick={() => {
-            if (!loading) imgInput.current.click();
+            if (!loading) imgInput?.current?.click();
           }}
         >
           <AddAPhoto className="text-light fs-6" />
@@ -208,7 +242,7 @@ const Register = () => {
           onChange={handleImgInputChange}
           name="profilepic"
           id="register__img_input"
-          ref={imgInput}
+          ref={imgInput as LegacyRef<HTMLInputElement>}
           className={`d-none`}
         />
       </section>

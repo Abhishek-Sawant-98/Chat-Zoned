@@ -12,11 +12,12 @@ import {
   DialogTitle,
   IconButton,
 } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 import { setSelectedChat } from "../../store/slices/AppSlice";
 import { hideDialog } from "../../store/slices/CustomDialogSlice";
 import { selectFormfieldState } from "../../store/slices/FormfieldSlice";
+import { useAppDispatch, useAppSelector } from "../../store/storeHooks";
+import { CustomDialogState } from "../../utils/AppTypes";
 import { truncateString } from "../../utils/appUtils";
 
 export const btnHoverStyle = { ":hover": { backgroundColor: "#93c2f727" } };
@@ -33,10 +34,10 @@ const CustomDialog = ({
   showDialogActions,
   showDialogClose,
   closeDialog,
-}) => {
-  const { loading, disableIfLoading } = useSelector(selectFormfieldState);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+}: CustomDialogState) => {
+  const { loading, disableIfLoading } = useAppSelector(selectFormfieldState);
+  const dispatch = useAppDispatch();
+  const navigate: NavigateFunction = useNavigate();
   const {
     isFullScreen,
     isOpen,
@@ -53,6 +54,7 @@ const CustomDialog = ({
   };
 
   const handleYes = async () => {
+    if (!action) return;
     const result = await action();
     if (
       result === "profileUpdated" ||

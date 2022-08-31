@@ -4,15 +4,14 @@ import Register from "../components/authentication/Register";
 import LottieAnimation from "../components/utils/LottieAnimation";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import animationData from "../animations/chat-gif.json";
-import { useDispatch, useSelector } from "react-redux";
 import { selectAppState } from "../store/slices/AppSlice";
 import { selectFormfieldState } from "../store/slices/FormfieldSlice";
 import type { UserType } from "../utils/AppTypes";
+import { useAppSelector } from "../store/storeHooks";
 
 const HomePage = () => {
-  const { loggedInUser } = useSelector(selectAppState);
-  const { disableIfLoading } = useSelector(selectFormfieldState);
-  const dispatch = useDispatch();
+  const { loggedInUser } = useAppSelector(selectAppState);
+  const { disableIfLoading } = useAppSelector(selectFormfieldState);
   const appGif = useRef<HTMLDivElement>();
 
   const [showLogin, setShowLogin] = useState(true);

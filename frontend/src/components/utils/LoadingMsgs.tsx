@@ -1,6 +1,6 @@
 import { Skeleton } from "@mui/material";
 
-const LoadingMsgs = ({ count }) => {
+const LoadingMsgs = ({ count }: { count: number }) => {
   const skeletonStyle = { backgroundColor: "#777" };
   return (
     <>

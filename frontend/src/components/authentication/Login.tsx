@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { ChangeEventHandler, useState } from "react";
 import axios from "../../utils/axios";
 import { useNavigate } from "react-router-dom";
 import { CircularProgress } from "@mui/material";
 import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
-import { useDispatch, useSelector } from "react-redux";
 import { setLoggedInUser } from "../../store/slices/AppSlice";
 import {
   selectFormfieldState,
@@ -11,6 +10,13 @@ import {
 } from "../../store/slices/FormfieldSlice";
 import { displayToast } from "../../store/slices/ToastSlice";
 import { getAxiosConfig } from "../../utils/appUtils";
+import { useAppDispatch, useAppSelector } from "../../store/storeHooks";
+import {
+  AxiosErrorType,
+  ButtonEventHandler,
+  ToastData,
+} from "../../utils/AppTypes";
+import { AxiosRequestConfig } from "axios";
 
 const Login = () => {
   const {
@@ -21,9 +27,9 @@ const Login = () => {
     inputFieldClassName,
     btnSubmitClassName,
     btnResetClassName,
-  } = useSelector(selectFormfieldState);
+  } = useAppSelector(selectFormfieldState);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
@@ -33,14 +39,16 @@ const Login = () => {
   });
   const { email, password } = userCredentials;
 
-  const handleChangeFor = (prop) => (e) => {
-    setUserCredentials({
-      ...userCredentials,
-      [prop]: e.target.value,
-    });
-  };
+  const handleChangeFor =
+    (prop: string): ChangeEventHandler<HTMLInputElement> =>
+    (e) => {
+      setUserCredentials({
+        ...userCredentials,
+        [prop]: e.target.value,
+      });
+    };
 
-  const handleLogin = async (e) => {
+  const handleLogin: ButtonEventHandler = async (e: MouseEvent) => {
     e.preventDefault();
     // return dispatch(setLoading(true));
     if (!email || !password) {
@@ -50,7 +58,7 @@ const Login = () => {
           type: "warning",
           duration: 5000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
     }
     dispatch(setLoading(true));
@@ -59,7 +67,7 @@ const Login = () => {
       const { data } = await axios.post(
         "/api/user/login",
         { email, password },
-        config
+        config as AxiosRequestConfig
       );
       // Success toast : login successful
       dispatch(
@@ -69,7 +77,7 @@ const Login = () => {
           type: "success",
           duration: 5000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
 
       localStorage.setItem("loggedInUser", JSON.stringify(data));
@@ -80,17 +88,19 @@ const Login = () => {
       dispatch(
         displayToast({
           title: "Login Failed",
-          message: error.response?.data?.message || error.message,
+          message:
+            (error as AxiosErrorType).response?.data?.message ||
+            (error as Error).message,
           type: "error",
           duration: 5000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
       dispatch(setLoading(false));
     }
   };
 
-  const handleReset = (e) => {
+  const handleReset: ButtonEventHandler = (e: MouseEvent) => {
     e.preventDefault();
     setUserCredentials({
       email: "",
@@ -98,7 +108,7 @@ const Login = () => {
     });
   };
 
-  const setGuestCredentials = (e) => {
+  const setGuestCredentials: ButtonEventHandler = (e: MouseEvent) => {
     e.preventDefault();
     setUserCredentials({
       email: "guest.user@gmail.com",

@@ -1,13 +1,24 @@
 import { Refresh } from "@mui/icons-material";
-import { Component } from "react";
+import { Component, ErrorInfo, ReactNode } from "react";
 
-export class ErrorBoundary extends Component {
-  constructor(props) {
+interface Props {
+  children?: ReactNode;
+}
+
+interface State {
+  error: Error | null;
+  errorInfo: ErrorInfo | null;
+}
+
+export class ErrorBoundary extends Component<Props, State> {
+  state: State;
+  
+  constructor(props: Props) {
     super(props);
     this.state = { error: null, errorInfo: null };
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Catch errors in any components below and re-render with error message
     this.setState({ error, errorInfo });
   }
@@ -24,7 +35,7 @@ export class ErrorBoundary extends Component {
               {this.state.error.toString()}
             </h4>
             <h6 className="container text-info my-3">
-              {this.state.errorInfo.componentStack}
+              {this.state?.errorInfo?.componentStack}
             </h6>
             <button
               className="btn btn-outline-secondary text-light px-3 rounded-pill"
@@ -34,7 +45,7 @@ export class ErrorBoundary extends Component {
             </button>
           </div>
         ) : (
-          <>{this.props.children}</>
+          <>{this.props?.children}</>
         )}
       </div>
     );

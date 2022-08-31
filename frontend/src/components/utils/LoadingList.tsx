@@ -1,6 +1,12 @@
 import { Skeleton } from "@mui/material";
 
-const LoadingList = ({ listOf, dpRadius, count }) => {
+interface Props {
+  listOf: string;
+  dpRadius: string;
+  count: number;
+}
+
+const LoadingList = ({ listOf, dpRadius, count }: Props) => {
   const skeletonStyle = { backgroundColor: "#999" };
   return (
     <>

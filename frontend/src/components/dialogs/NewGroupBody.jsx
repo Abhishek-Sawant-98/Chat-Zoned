@@ -99,7 +99,7 @@ const NewGroupBody = ({ closeChildDialog }) => {
       );
 
       dispatch(setLoading(false));
-      dispatch(toggleRefresh(!refresh));
+      dispatch(toggleRefresh());
       closeChildDialog();
       // Close Parent Dialog as well
       dispatch(hideDialog());
@@ -170,7 +170,11 @@ const NewGroupBody = ({ closeChildDialog }) => {
           src={chatDisplayPicUrl}
           alt="displayPic"
         />
-        <CustomTooltip title="Edit Group Display Pic" placement="top-start" arrow>
+        <CustomTooltip
+          title="Edit Group Display Pic"
+          placement="top-start"
+          arrow
+        >
           <i
             id="editGroupDPTooltip"
             tabIndex={2}
