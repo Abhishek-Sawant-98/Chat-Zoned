@@ -37,6 +37,7 @@ export interface ChatInterface {
   lastMessage?: MessageType;
   updatedAt?: string;
   removedUser?: UserType;
+  receiverEmail?: string | falsyType;
   users: UserType[];
   __v?: number;
   _id: string;

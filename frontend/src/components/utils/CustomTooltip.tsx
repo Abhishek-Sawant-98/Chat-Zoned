@@ -3,18 +3,22 @@ import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 
 interface StyledProps {
   className: string;
+  children: any;
+  title: string;
+  placement: any;
+  arrow: boolean;
 }
 
 const getCustomTooltip = (arrowStyles: any, tooltipStyles: any) =>
-  styled<React.JSXElementConstructor<StyledProps>>(
-    ({ className, ...props }): any => (
+  styled(
+    ({ className, children, title, placement, arrow }: StyledProps): any => (
       <Tooltip
-        title="CustomTooltip"
-        {...props}
-        arrow
+        title={title}
+        placement={placement}
+        arrow={arrow}
         classes={{ popper: className }}
       >
-        <></>
+        {children}
       </Tooltip>
     )
   )(({ theme }) => ({

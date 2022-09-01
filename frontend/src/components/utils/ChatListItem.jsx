@@ -8,8 +8,8 @@ import {
   VideoFile,
 } from "@mui/icons-material";
 import { Avatar } from "@mui/material";
-import { useSelector } from "react-redux";
 import { selectAppState } from "../../store/slices/AppSlice";
+import { useAppSelector } from "../../store/storeHooks";
 import {
   dateStringOf,
   isImageFile,
@@ -17,7 +17,7 @@ import {
   msgTimeStringOf,
   truncateString,
 } from "../../utils/appUtils";
-import getCustomTooltip from "../utils/CustomTooltip";
+import getCustomTooltip from "./CustomTooltip";
 import TypingIndicator from "./TypingIndicator";
 
 const arrowStyles = { color: "#A30CA7" };
@@ -33,7 +33,7 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
 const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
-  const { selectedChat, loggedInUser } = useSelector(selectAppState);
+  const { selectedChat, loggedInUser } = useAppSelector(selectAppState);
   const {
     _id,
     chatName,
