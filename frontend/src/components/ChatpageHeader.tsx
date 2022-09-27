@@ -1,6 +1,6 @@
 import { Notifications, Search } from "@mui/icons-material";
 import { Avatar, IconButton } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { SetStateAction, useEffect, useRef, useState } from "react";
 import NotificationsMenu from "./menus/NotificationsMenu";
 import ProfileSettingsMenu from "./menus/ProfileSettingsMenu";
 import SearchUsersDrawer from "./utils/SearchUsersDrawer";
@@ -9,6 +9,17 @@ import animationData from "../animations/chat-gif.json";
 import LottieAnimation from "./utils/LottieAnimation";
 import { useSelector } from "react-redux";
 import { selectAppState } from "../store/slices/AppSlice";
+import {
+  ChatType,
+  ClickEventHandler,
+  DialogBodySetter,
+  SpanRef,
+} from "../utils/AppTypes";
+
+interface Props {
+  chats: ChatType[];
+  setDialogBody: DialogBodySetter;
+}
 
 const arrowStyles = { color: "#666" };
 const tooltipStyles = {
@@ -21,18 +32,24 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const ChatpageHeader = ({ chats, setDialogBody }) => {
+const ChatpageHeader = ({ chats, setDialogBody }: Props) => {
   const { loggedInUser } = useSelector(selectAppState);
-  const appGif = useRef();
+  const appGif = useRef<HTMLSpanElement>();
   const notifCount = loggedInUser?.notifications?.length || "";
 
   const [animateNotif, setAnimateNotif] = useState(false);
-  const [notificationsMenuAnchor, setNotificationsMenuAnchor] = useState(null);
+  const [notificationsMenuAnchor, setNotificationsMenuAnchor] =
+    useState<HTMLElement | null>(null);
   const [profileSettingsMenuAnchor, setProfileSettingsMenuAnchor] =
-    useState(null);
+    useState<HTMLElement | null>(null);
 
-  const openNotificationMenu = (e) => setNotificationsMenuAnchor(e.target);
-  const openProfileSettingsMenu = (e) => setProfileSettingsMenuAnchor(e.target);
+  const openNotificationMenu: ClickEventHandler = (e: MouseEvent) =>
+    setNotificationsMenuAnchor(e.target as SetStateAction<HTMLElement | null>);
+
+  const openProfileSettingsMenu: ClickEventHandler = (e: MouseEvent) =>
+    setProfileSettingsMenuAnchor(
+      e.target as SetStateAction<HTMLElement | null>
+    );
 
   // For opening/closing 'search users' left drawer
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -54,6 +71,7 @@ const ChatpageHeader = ({ chats, setDialogBody }) => {
       <CustomTooltip
         title="Search Users to Start or Open a Chat"
         placement="bottom-start"
+        className=""
         arrow
       >
         <button
@@ -73,7 +91,7 @@ const ChatpageHeader = ({ chats, setDialogBody }) => {
       {/* App Logo */}
       <div className={`d-flex align-items-center ms-3 ms-md-0`}>
         <LottieAnimation
-          ref={appGif}
+          ref={appGif as SpanRef}
           className={"d-none d-sm-inline-block mt-2 me-sm-1 me-md-2"}
           style={{ width: "35px", height: "35px" }}
           animationData={animationData}
@@ -85,7 +103,12 @@ const ChatpageHeader = ({ chats, setDialogBody }) => {
 
       {/* User notification and profile settings icons */}
       <div>
-        <CustomTooltip title={`Notifications`} placement="bottom-end" arrow>
+        <CustomTooltip
+          title={`Notifications`}
+          placement="bottom-end"
+          className=""
+          arrow
+        >
           <IconButton
             className="position-relative mx-1"
             onClick={openNotificationMenu}
@@ -120,7 +143,7 @@ const ChatpageHeader = ({ chats, setDialogBody }) => {
         </CustomTooltip>
         <CustomTooltip
           title="Profile Settings"
-          size="small"
+          className=""
           placement="bottom-end"
           arrow
         >
@@ -141,11 +164,11 @@ const ChatpageHeader = ({ chats, setDialogBody }) => {
         </CustomTooltip>
         <NotificationsMenu
           chats={chats}
-          anchor={notificationsMenuAnchor}
+          anchor={notificationsMenuAnchor as HTMLElement}
           setAnchor={setNotificationsMenuAnchor}
         />
         <ProfileSettingsMenu
-          anchor={profileSettingsMenuAnchor}
+          anchor={profileSettingsMenuAnchor as HTMLElement}
           setAnchor={setProfileSettingsMenuAnchor}
           setDialogBody={setDialogBody}
         />

@@ -18,14 +18,28 @@ import {
   setLoading,
 } from "../../store/slices/FormfieldSlice";
 import { displayToast } from "../../store/slices/ToastSlice";
+import {
+  AxiosErrorType,
+  ClickEventHandler,
+  StateSetter,
+  ToastData,
+  UserType,
+} from "../../utils/AppTypes";
+import { useAppDispatch, useAppSelector } from "../../store/storeHooks";
+import { AxiosRequestConfig } from "axios";
 
-const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
+interface Props {
+  isDrawerOpen: boolean;
+  setIsDrawerOpen: StateSetter<boolean>;
+}
+
+const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }: Props) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const { loggedInUser } = useSelector(selectAppState);
-  const { loading } = useSelector(selectFormfieldState);
-  const dispatch = useDispatch();
-  const searchUserInput = useRef(null);
+  const [searchResults, setSearchResults] = useState<UserType[]>([]);
+  const { loggedInUser } = useAppSelector(selectAppState);
+  const { loading } = useAppSelector(selectFormfieldState);
+  const dispatch = useAppDispatch();
+  const searchUserInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isDrawerOpen) {
@@ -38,15 +52,18 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
   const handleClose = () => setIsDrawerOpen(false);
 
   // Debouncing fetchUsers method to limit the no. of API calls
-  const searchUsers = debounce(async (e) => {
-    const query = e.target?.value?.trim();
+  const searchUsers = debounce(async (e: InputEvent) => {
+    const query = (e.target as HTMLInputElement)?.value?.trim();
     setSearchQuery(query);
     if (!query) return setSearchResults([]);
 
     dispatch(setLoading(true));
     const config = getAxiosConfig({ loggedInUser });
     try {
-      const { data } = await axios.get(`/api/user?search=${query}`, config);
+      const { data } = await axios.get(
+        `/api/user?search=${query}`,
+        config as AxiosRequestConfig
+      );
 
       dispatch(setLoading(false));
       setSearchResults(data);
@@ -54,23 +71,29 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
       dispatch(
         displayToast({
           title: "Couldn't Fetch Users",
-          message: error.response?.data?.message || error.message,
+          message:
+            (error as AxiosErrorType).response?.data?.message ||
+            (error as Error).message,
           type: "error",
           duration: 5000,
           position: "bottom-left",
-        })
+        } as ToastData)
       );
       dispatch(setLoading(false));
     }
   }, 800);
 
   // Create/Retreive chat when a user item is clicked
-  const createOrRetrieveChat = async (userId) => {
+  const createOrRetrieveChat = async (userId: string) => {
     handleClose();
     dispatch(setLoading(true));
     const config = getAxiosConfig({ loggedInUser });
     try {
-      const { data } = await axios.post(`/api/chat`, { userId }, config);
+      const { data } = await axios.post(
+        `/api/chat`,
+        { userId },
+        config as AxiosRequestConfig
+      );
 
       dispatch(setLoading(false));
       dispatch(setSelectedChat(data));
@@ -80,14 +103,24 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
       dispatch(
         displayToast({
           title: "Couldn't Create/Retrieve Chat",
-          message: error.response?.data?.message || error.message,
+          message:
+            (error as AxiosErrorType).response?.data?.message ||
+            (error as Error).message,
           type: "error",
           duration: 4000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
       dispatch(setLoading(false));
     }
+  };
+
+  const onUserItemClick: ClickEventHandler = (e: MouseEvent) => {
+    const userId =
+      (e.target as HTMLElement).dataset.user ||
+      (e.target as HTMLImageElement).alt;
+    if (!userId) return;
+    createOrRetrieveChat(userId);
   };
 
   return (
@@ -136,7 +169,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
           clearInput={() => {
             setSearchQuery("");
             setSearchResults([]);
-            searchUserInput.current.focus();
+            searchUserInput?.current?.focus();
           }}
         />
         {/* Search Results */}
@@ -147,18 +180,14 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }) => {
           <div
             // 'Event delegation' (add only one event listener for
             // parent element instead of adding for each child element)
-            onClick={(e) => {
-              const userId = e.target.dataset.user || e.target.alt;
-              if (!userId) return;
-              createOrRetrieveChat(userId);
-            }}
+            onClick={onUserItemClick}
           >
             {loading ? (
               <LoadingList listOf="User" dpRadius={"42px"} count={8} />
             ) : searchResults.length > 0 ? (
-              searchResults.map((user) => (
+              searchResults.map((user: UserType) => (
                 <UserListItem
-                  key={user._id}
+                  key={user?._id}
                   user={user}
                   truncateValues={[27, 24]}
                 />

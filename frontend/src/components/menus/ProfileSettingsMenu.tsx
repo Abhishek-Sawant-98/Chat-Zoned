@@ -5,7 +5,6 @@ import axios from "../../utils/axios";
 import ChangePasswordBody from "../dialogs/ChangePasswordBody";
 import EditProfileBody from "../dialogs/EditProfileBody";
 import MenuItemText from "../utils/MenuItemText";
-import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
   setLoggedInUser,
@@ -20,10 +19,25 @@ import {
 import { displayToast } from "../../store/slices/ToastSlice";
 import { useNavigate } from "react-router-dom";
 import { getAxiosConfig } from "../../utils/appUtils";
+import {
+  AnchorSetter,
+  AxiosErrorType,
+  EditPwdData,
+  EditPwdDataOptions,
+  ToastData,
+} from "../../utils/AppTypes";
+import { AxiosRequestConfig } from "axios";
+import { useAppDispatch, useAppSelector } from "../../store/storeHooks";
 
-const ProfileSettingsMenu = ({ anchor, setAnchor, setDialogBody }) => {
-  const { loggedInUser } = useSelector(selectAppState);
-  const dispatch = useDispatch();
+interface Props {
+  anchor: HTMLElement;
+  setAnchor: AnchorSetter;
+  setDialogBody: (el: React.ReactNode) => void;
+}
+
+const ProfileSettingsMenu = ({ anchor, setAnchor, setDialogBody }: Props) => {
+  const { loggedInUser } = useAppSelector(selectAppState);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const displaySuccess = (
@@ -36,7 +50,7 @@ const ProfileSettingsMenu = ({ anchor, setAnchor, setDialogBody }) => {
         type: "success",
         duration,
         position: "bottom-center",
-      })
+      } as ToastData)
     );
   };
 
@@ -47,22 +61,25 @@ const ProfileSettingsMenu = ({ anchor, setAnchor, setDialogBody }) => {
         type: "warning",
         duration: 5000,
         position: "top-center",
-      })
+      } as ToastData)
     );
   };
 
   const isGuestUser = loggedInUser?.email === "guest.user@gmail.com";
 
   // Edit Password Config
-  let editPasswordData;
+  let editPasswordData: EditPwdData;
 
-  const getUpdatedState = (updatedState, options) => {
+  const getUpdatedState = (
+    updatedState: EditPwdData,
+    options?: EditPwdDataOptions
+  ) => {
     editPasswordData = updatedState;
     if (options?.submitUpdatedPassword)
       updatePassword({ enterKeyPressed: true });
   };
 
-  const updatePassword = async (options) => {
+  const updatePassword = async (options: { enterKeyPressed: boolean }) => {
     const { currentPassword, newPassword, confirmNewPassword } =
       editPasswordData;
 
@@ -81,7 +98,7 @@ const ProfileSettingsMenu = ({ anchor, setAnchor, setDialogBody }) => {
       await axios.put(
         "/api/user/update/password",
         { currentPassword, newPassword },
-        config
+        config as AxiosRequestConfig
       );
       displaySuccess(
         "Password Updated Successfully. Please Login Again with Updated Password",
@@ -102,11 +119,13 @@ const ProfileSettingsMenu = ({ anchor, setAnchor, setDialogBody }) => {
       dispatch(
         displayToast({
           title: "Password Update Failed",
-          message: error.response?.data?.message || error.message,
+          message:
+            (error as AxiosErrorType).response?.data?.message ||
+            (error as Error).message,
           type: "error",
           duration: 5000,
           position: "top-center",
-        })
+        } as ToastData)
       );
       dispatch(setLoading(false));
     }
@@ -121,7 +140,7 @@ const ProfileSettingsMenu = ({ anchor, setAnchor, setDialogBody }) => {
         type: "success",
         duration: 1500,
         position: "bottom-center",
-      })
+      } as ToastData)
     );
     return "loggingOut";
   };
@@ -167,6 +186,7 @@ const ProfileSettingsMenu = ({ anchor, setAnchor, setDialogBody }) => {
 
   return (
     <Menu
+      open={Boolean(anchor)}
       menuAnchor={anchor}
       setMenuAnchor={setAnchor}
       transformOrigin={{ vertical: "top", horizontal: "right" }}

@@ -83,7 +83,7 @@ const CustomDialog = ({
         },
       }}
       className={`user-select-none ${disableIfLoading}`}
-      open={isOpen}
+      open={isOpen as boolean}
       onClose={handleDialogClose}
     >
       <DialogTitle

@@ -10,20 +10,32 @@ import {
   setSelectedChat,
 } from "../../store/slices/AppSlice";
 import { getOneToOneChatReceiver, truncateString } from "../../utils/appUtils";
+import {
+  AnchorSetter,
+  ChatType,
+  ClickEventHandler,
+  MessageType,
+} from "../../utils/AppTypes";
 
-const NotificationsMenu = ({ chats, anchor, setAnchor }) => {
+interface Props {
+  chats: ChatType[];
+  anchor: HTMLElement;
+  setAnchor: AnchorSetter;
+}
+
+const NotificationsMenu = ({ chats, anchor, setAnchor }: Props) => {
   const { loggedInUser } = useSelector(selectAppState);
   const dispatch = useDispatch();
-  const notifs = [...loggedInUser?.notifications];
-  const notifGroups = {};
+  const notifs = [...(loggedInUser?.notifications as MessageType[])];
+  const notifGroups: any = {};
 
-  notifs.forEach((notif) => {
+  notifs.forEach((notif: MessageType) => {
     // Notifications grouped by 'chat'
-    const notifChat = notif.chat;
-    const chatId = notifChat._id;
-    const chatName = notifChat.isGroupChat
-      ? `group===${notifChat.chatName}`
-      : getOneToOneChatReceiver(loggedInUser, notifChat.users).name;
+    const notifChat = notif?.chat as ChatType;
+    const chatId = notifChat?._id;
+    const chatName = notifChat?.isGroupChat
+      ? `group===${notifChat?.chatName}`
+      : getOneToOneChatReceiver(loggedInUser, notifChat?.users).name;
     const notifGroupId = `${chatId}---${chatName}`;
     if (notifGroups[notifGroupId]) {
       ++notifGroups[notifGroupId];
@@ -32,13 +44,16 @@ const NotificationsMenu = ({ chats, anchor, setAnchor }) => {
     }
   });
 
-  const chatNotifClickHandler = (e) => {
+  const chatNotifClickHandler: ClickEventHandler = (e: MouseEvent) => {
     const chatNotifId =
-      e.target.dataset.notifGroup || e.target.parentNode.dataset.notifGroup;
+      (e.target as HTMLElement).dataset.notifGroup ||
+      ((e.target as HTMLElement).parentNode as HTMLElement).dataset.notifGroup;
     if (!chatNotifId) return;
 
     const chatId = chatNotifId.split("---")[0];
-    const chatToBeOpened = chats.find((chat) => chat._id === chatId);
+    const chatToBeOpened = chats.find(
+      (chat: ChatType) => chat?._id === chatId
+    ) as ChatType;
     dispatch(setSelectedChat(chatToBeOpened));
     dispatch(setFetchMsgs(true)); // To fetch selected chat msgs
     dispatch(setDeleteNotifsOfChat(chatId));
@@ -47,6 +62,7 @@ const NotificationsMenu = ({ chats, anchor, setAnchor }) => {
 
   return (
     <Menu
+      open={Boolean(anchor)}
       menuAnchor={anchor}
       setMenuAnchor={setAnchor}
       transformOrigin={{ vertical: "top", horizontal: "right" }}

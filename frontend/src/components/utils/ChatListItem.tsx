@@ -10,6 +10,7 @@ import {
 import { Avatar } from "@mui/material";
 import { selectAppState } from "../../store/slices/AppSlice";
 import { useAppSelector } from "../../store/storeHooks";
+import { ChatType, MessageType } from "../../utils/AppTypes";
 import {
   dateStringOf,
   isImageFile,
@@ -32,8 +33,15 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
+interface Props {
+  chat: ChatType;
+  chatNotifCount: number | string;
+  typingChatUser: string;
+}
+
+const ChatListItem = ({ chat, chatNotifCount, typingChatUser }: Props) => {
   const { selectedChat, loggedInUser } = useAppSelector(selectAppState);
+  if (!chat) return <></>;
   const {
     _id,
     chatName,
@@ -54,7 +62,9 @@ const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
     .replaceAll("<span>", "")
     .replaceAll("</span>", "");
 
-  const lastMsgDate = new Date(lastMessage?.createdAt);
+  const lastMsgDate = new Date(
+    (lastMessage as MessageType)?.createdAt as string
+  );
   const lastMsgDateString = msgDateStringOf(lastMsgDate);
 
   const lastMsgFileUrl = lastMessage?.fileUrl;
@@ -92,10 +102,11 @@ const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
       <CustomTooltip
         title={`View ${isGroupChat ? "Group DP" : "Profile Pic"}`}
         placement="top-start"
+        className=""
         arrow
       >
         <Avatar
-          src={chatDisplayPic}
+          src={chatDisplayPic as string}
           alt={chatName}
           data-chat={_id}
           data-has-notifs={chatNotifCount}
@@ -155,7 +166,10 @@ const ChatListItem = ({ chat, chatNotifCount, typingChatUser }) => {
         {/* Last Message Data */}
         {typingChatUser ? (
           <span style={{ color: "#73F76D", margin: "-6px 0px -4px -30px" }}>
-            <TypingIndicator typingChatUser={typingChatUser} />
+            <TypingIndicator
+              showAvatar={false}
+              typingChatUser={typingChatUser}
+            />
           </span>
         ) : (
           (lastMessage || lastMessage === null || isGroupChat) && (

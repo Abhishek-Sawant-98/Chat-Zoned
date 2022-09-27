@@ -1,16 +1,10 @@
-import {
-  AxiosConfig,
-  AxiosOptions,
-  ChatType,
-  falsyType,
-  UserType,
-} from "./AppTypes";
+import { AxiosConfig, AxiosOptions, UserType } from "./AppTypes";
 
 // Convert a normal function to a 'debounced' function
 export const debounce = function (
   func: Function,
   delay: number = 500,
-  context: any
+  context?: any
 ) {
   let timer: NodeJS.Timeout;
   return (...args: any[]) => {
@@ -47,9 +41,9 @@ export const memoize = function (func: Function) {
 // Truncate a sentence/string
 export const truncateString = memoize(
   (
-    str: string | falsyType,
-    limit: number | falsyType,
-    index: number | falsyType
+    str: string | null,
+    limit: number | null,
+    index: number | null
   ) => {
     if (!str || !limit || !index) return "";
     return str.length > limit ? `${str.substring(0, index)}...` : str;
@@ -58,9 +52,9 @@ export const truncateString = memoize(
 
 // Truncate each word of a sentence/string
 export const truncateWords = (
-  sentence: string | falsyType,
-  limit: number | falsyType,
-  index: number | falsyType
+  sentence: string | null,
+  limit: number | null,
+  index: number | null
 ) => {
   if (!sentence || !limit || !index) return "";
   const words = sentence.split(" ");
@@ -78,7 +72,7 @@ export const getOneToOneChatReceiver = memoize(
   }
 );
 
-export const msgTimeStringOf = memoize((msgDate: Date | falsyType) => {
+export const msgTimeStringOf = memoize((msgDate: Date) => {
   if (!msgDate) return "";
   let hours = msgDate.getHours();
   let minutes = msgDate.getMinutes();
@@ -87,14 +81,14 @@ export const msgTimeStringOf = memoize((msgDate: Date | falsyType) => {
   return `${hours}:${minutes < 10 ? "0" : ""}${minutes}${am_or_pm}`;
 });
 
-export const dateStringOf = memoize((date: Date | falsyType) => {
+export const dateStringOf = memoize((date: Date) => {
   return date
     ? `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
     : "";
 });
 
 // Impure function, so can't memoize
-export const msgDateStringOf = (currDate: Date | falsyType) => {
+export const msgDateStringOf = (currDate: Date) => {
   if (!currDate) return "";
   const months = [
     "January",
@@ -124,7 +118,7 @@ export const msgDateStringOf = (currDate: Date | falsyType) => {
       } ${currDate.getFullYear()}`;
 };
 
-export const parseInnerHTML = (innerHTML: string | falsyType) => {
+export const parseInnerHTML = (innerHTML: string) => {
   return (
     innerHTML
       ?.replaceAll("<br>", "")
@@ -149,7 +143,7 @@ export const setCaretPosition = (node: HTMLElement) => {
   sel?.addRange(range);
 };
 
-export const getAxiosConfig = (options: AxiosOptions | falsyType) => {
+export const getAxiosConfig = (options: AxiosOptions) => {
   if (!options) return;
   const { loggedInUser, formData, blob } = options;
   const config: AxiosConfig = {
@@ -170,7 +164,7 @@ export const ONE_MB = 1048576;
 export const TWO_MB = 2097152;
 export const FIVE_MB = 5242880;
 
-export const getFileSizeString = memoize((fileSize: number | falsyType) => {
+export const getFileSizeString = memoize((fileSize: number) => {
   return !fileSize
     ? ""
     : fileSize > ONE_MB

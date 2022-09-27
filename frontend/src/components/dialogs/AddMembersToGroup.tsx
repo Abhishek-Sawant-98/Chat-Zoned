@@ -7,26 +7,33 @@ import SearchInput from "../utils/SearchInput";
 import NewGroupBody from "./NewGroupBody";
 import ChildDialog from "../utils/ChildDialog";
 import LoadingList from "../utils/LoadingList";
-import { useDispatch, useSelector } from "react-redux";
 import { selectAppState, setGroupInfo } from "../../store/slices/AppSlice";
 import { selectChildDialogState } from "../../store/slices/ChildDialogSlice";
 import { displayToast } from "../../store/slices/ToastSlice";
 import { setDialogAction } from "../../store/slices/CustomDialogSlice";
+import { useAppDispatch, useAppSelector } from "../../store/storeHooks";
+import { AxiosErrorType, ToastData, UserType } from "../../utils/AppTypes";
+import { AxiosRequestConfig } from "axios";
 
-const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
-  const { loggedInUser, groupInfo } = useSelector(selectAppState);
-  const { childDialogMethods } = useSelector(selectChildDialogState);
-  const dispatch = useDispatch();
+interface Props {
+  getAddedMembers?: ((addedMembers: UserType[]) => void) | null;
+  forCreateGroup?: boolean;
+}
+
+const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }: Props) => {
+  const { loggedInUser, groupInfo } = useAppSelector(selectAppState);
+  const { childDialogMethods } = useAppSelector(selectChildDialogState);
+  const dispatch = useAppDispatch();
 
   const [groupData, setGroupData] = useState(groupInfo);
   const [fetching, setFetching] = useState(false);
-  const groupMembers = groupData?.users;
+  const groupMembers = groupData?.users as UserType[];
   const [isMemberSelected, setIsMemberSelected] = useState(false);
-  const [addedMembers, setAddedMembers] = useState([]);
+  const [addedMembers, setAddedMembers] = useState<UserType[]>([]);
 
-  const searchUserInput = useRef(null);
+  const searchUserInput = useRef<HTMLInputElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<UserType[]>([]);
   const { setChildDialogBody, displayChildDialog, closeChildDialog } =
     childDialogMethods;
   const [showDialogActions, setShowDialogActions] = useState(true);
@@ -45,12 +52,13 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
           type: "warning",
           duration: 3000,
           position: "top-center",
-        })
+        } as ToastData)
       );
     }
     setShowDialogActions(false);
     setShowDialogClose(false);
     dispatch(setGroupInfo(groupData));
+    if (!setChildDialogBody || !displayChildDialog) return;
     setChildDialogBody(<NewGroupBody closeChildDialog={closeChildDialog} />);
     displayChildDialog({
       title: "Create New Group",
@@ -69,11 +77,11 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
 
   useEffect(() => {
     // For add more group members
-    if (!forCreateGroup) getAddedMembers([...addedMembers]);
+    if (!forCreateGroup && getAddedMembers) getAddedMembers([...addedMembers]);
   }, [addedMembers]);
 
-  const searchUsers = debounce(async (e) => {
-    const query = e.target?.value?.trim();
+  const searchUsers = debounce(async (e: InputEvent) => {
+    const query = (e.target as HTMLInputElement)?.value?.trim();
     setSearchQuery(query);
     if (!query) return setSearchResults([]);
 
@@ -82,13 +90,16 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
 
     const config = getAxiosConfig({ loggedInUser });
     try {
-      const { data } = await axios.get(`/api/user?search=${query}`, config);
+      const { data } = await axios.get(
+        `/api/user?search=${query}`,
+        config as AxiosRequestConfig
+      );
 
       // Remove all the already added members from search results
       let membersNotAdded = [...data];
-      groupMembers.forEach((addedMember) => {
+      groupMembers?.forEach((addedMember) => {
         membersNotAdded = membersNotAdded.filter(
-          (m) => m._id !== addedMember._id
+          (m) => m._id !== addedMember?._id
         );
       });
 
@@ -98,24 +109,26 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
       dispatch(
         displayToast({
           title: "Couldn't Fetch Users",
-          message: error.response?.data?.message || error.message,
+          message:
+            (error as AxiosErrorType).response?.data?.message ||
+            (error as Error).message,
           type: "error",
           duration: 5000,
           position: "bottom-left",
-        })
+        } as ToastData)
       );
       setFetching(false);
     }
   }, 800);
 
-  const unselectUser = (user) => {
+  const unselectUser = (user: UserType) => {
     if (!user) return;
     setGroupData({
       ...groupData,
-      users: groupMembers.filter((u) => u._id !== user._id),
+      users: groupMembers?.filter((u: UserType) => u?._id !== user._id),
     });
     // Remove user from added member list
-    setAddedMembers(addedMembers.filter((u) => u._id !== user._id));
+    setAddedMembers(addedMembers.filter((u: UserType) => u?._id !== user._id));
     // Add removed user to search result list
     setSearchResults([user, ...searchResults]);
   };
@@ -131,7 +144,7 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
           backgroundColor: "#303030",
         }}
       >
-        {addedMembers?.map((user) => (
+        {addedMembers?.map((user: UserType) => (
           <Chip
             key={user?._id}
             className="userChip text-light bg-success rounded-pill fs-6"
@@ -156,7 +169,8 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
         clearInput={() => {
           setSearchQuery("");
           setSearchResults([]);
-          searchUserInput.current.focus();
+          if (!searchUserInput) return;
+          searchUserInput.current?.focus();
         }}
       />
       {/* Search Results */}
@@ -167,20 +181,29 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
         <div
           // 'Event delegation'
           onClick={(e) => {
-            const userId = e.target.dataset.user || e.target.alt;
+            const userId =
+              (e.target as HTMLElement).dataset.user ||
+              (e.target as HTMLImageElement).alt;
             if (!userId) return;
 
             if (!isMemberSelected) setIsMemberSelected(true);
             // Add selected user to tag list
-            const selectedUser = searchResults.find((u) => u._id === userId);
+            const selectedUser = searchResults.find(
+              (u: UserType) => u?._id === userId
+            );
             setGroupData({
               ...groupData,
               users: [...groupMembers, selectedUser],
             });
             // Add selected user to added member list
-            setAddedMembers([...addedMembers, selectedUser]);
+            setAddedMembers([
+              ...(addedMembers as UserType[]),
+              selectedUser as UserType,
+            ]);
             // Remove selected user from search result list
-            setSearchResults(searchResults.filter((u) => u._id !== userId));
+            setSearchResults(
+              searchResults.filter((u: UserType) => u?._id !== userId)
+            );
           }}
         >
           {fetching ? (
@@ -188,7 +211,7 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }) => {
           ) : searchResults.length > 0 ? (
             searchResults.map((user) => (
               <UserListItem
-                key={user._id}
+                key={(user as UserType)?._id}
                 user={user}
                 truncateValues={[21, 18]}
               />

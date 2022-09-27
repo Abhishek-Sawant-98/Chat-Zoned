@@ -12,7 +12,7 @@ interface State {
 
 export class ErrorBoundary extends Component<Props, State> {
   state: State;
-  
+
   constructor(props: Props) {
     super(props);
     this.state = { error: null, errorInfo: null };

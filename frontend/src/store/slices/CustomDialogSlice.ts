@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { CustomDialogState, DialogData, falsyType } from "../../utils/AppTypes";
+import { CustomDialogState, DialogData } from "../../utils/AppTypes";
 import type { RootState } from "../store";
 
 // isFullScreen,
@@ -36,7 +36,7 @@ const CustomDialogSlice = createSlice({
     hideDialog: (state) => {
       state.dialogData["isOpen"] = false;
     },
-    setDialogAction: (state, action: PayloadAction<Function | falsyType>) => {
+    setDialogAction: (state, action: PayloadAction<Function | null>) => {
       state.dialogData["action"] = action.payload;
     },
     setDialogTitle: (state, action: PayloadAction<string>) => {

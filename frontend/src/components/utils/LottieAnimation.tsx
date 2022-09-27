@@ -7,16 +7,16 @@ interface GifProps {
   animationData: any;
 }
 
-const AppGif = forwardRef<HTMLDivElement, GifProps>((props, gifRef) => {
+const AppGif = forwardRef<HTMLSpanElement, GifProps>((props, gifRef) => {
   const { className, style, animationData } = props;
 
   useEffect(() => {
     lottie.loadAnimation({
-      container: (gifRef as React.MutableRefObject<HTMLDivElement>)?.current,
+      container: (gifRef as React.MutableRefObject<HTMLSpanElement>)?.current,
       animationData: animationData,
     });
   }, []);
-  return <div ref={gifRef} className={className} style={style}></div>;
+  return <span ref={gifRef} className={className} style={style}></span>;
 });
 
 export default AppGif;

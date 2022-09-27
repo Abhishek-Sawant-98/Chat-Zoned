@@ -22,6 +22,25 @@ import {
 import { displayToast } from "../../store/slices/ToastSlice";
 import { setLoading } from "../../store/slices/FormfieldSlice";
 import { hideDialog } from "../../store/slices/CustomDialogSlice";
+import {
+  AnchorSetter,
+  AxiosErrorType,
+  ChatType,
+  ChildDialogMethods,
+  ErrorType,
+  ToastData,
+  UserType,
+} from "../../utils/AppTypes";
+import { AxiosRequestConfig } from "axios";
+
+interface Props {
+  anchor: HTMLElement;
+  setAnchor: AnchorSetter;
+  clickedMember: UserType;
+  setShowDialogActions: (flag: boolean) => void;
+  setShowDialogClose: (flag: boolean) => void;
+  childDialogMethods: ChildDialogMethods;
+}
 
 const MemberOptionsMenu = ({
   anchor,
@@ -30,16 +49,16 @@ const MemberOptionsMenu = ({
   setShowDialogActions,
   setShowDialogClose,
   childDialogMethods,
-}) => {
-  const { loggedInUser, refresh, groupInfo, clientSocket, isSocketConnected } =
+}: Props) => {
+  const { loggedInUser, groupInfo, clientSocket, isSocketConnected } =
     useSelector(selectAppState);
   const dispatch = useDispatch();
 
   const { setChildDialogBody, displayChildDialog } = childDialogMethods;
   const isLoggedInUserGroupAdmin = groupInfo?.groupAdmins?.some(
-    (admin) => admin?._id === loggedInUser?._id
+    (admin: UserType) => admin?._id === loggedInUser?._id
   );
-  const clickedMemberName = truncateString(
+  const clickedMemberName: string = truncateString(
     clickedMember?.name?.split(" ")[0],
     12,
     9
@@ -49,23 +68,26 @@ const MemberOptionsMenu = ({
       {clickedMemberName}
     </span>
   );
-  const updateView = (data) => {
+  const updateView = (data: ChatType) => {
     dispatch(toggleRefresh());
     dispatch(setSelectedChat(data));
   };
 
   const displayError = (
-    error = "Oops! Something went wrong",
-    title = "Operation Failed"
+    error: ErrorType = "Oops! Something went wrong",
+    title: string = "Operation Failed"
   ) => {
     dispatch(
       displayToast({
         title,
-        message: error.response?.data?.message || error.message,
+        message:
+          (error as AxiosErrorType).response?.data?.message ||
+          (error as Error)?.message ||
+          error,
         type: "error",
         duration: 5000,
         position: "bottom-center",
-      })
+      } as ToastData)
     );
   };
 
@@ -78,7 +100,7 @@ const MemberOptionsMenu = ({
       const { data } = await axios.post(
         `/api/chat`,
         { userId: clickedMember?._id },
-        config
+        config as AxiosRequestConfig
       );
 
       dispatch(setLoading(false));
@@ -86,7 +108,7 @@ const MemberOptionsMenu = ({
       dispatch(setFetchMsgs(true));
       dispatch(setDeleteNotifsOfChat(data._id));
     } catch (error) {
-      displayError(error, "Couldn't Create/Retrieve Chat");
+      displayError(error as ErrorType, "Couldn't Create/Retrieve Chat");
       dispatch(setLoading(false));
     }
   };
@@ -94,6 +116,8 @@ const MemberOptionsMenu = ({
   const openViewProfileDialog = () => {
     setShowDialogActions(false);
     setShowDialogClose(true);
+    if (!setChildDialogBody || !displayChildDialog) return;
+
     setChildDialogBody(
       <ViewProfileBody
         memberProfilePic={clickedMember?.profilePic}
@@ -111,7 +135,7 @@ const MemberOptionsMenu = ({
       const { data } = await axios.post(
         `/api/chat/group/make-admin`,
         { userId: clickedMember?._id, chatId: groupInfo?._id },
-        config
+        config as AxiosRequestConfig
       );
       if (isSocketConnected) {
         clientSocket.emit("grp updated", {
@@ -126,13 +150,13 @@ const MemberOptionsMenu = ({
           type: "success",
           duration: 4000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
       dispatch(setGroupInfo(data));
       updateView(data);
       dispatch(setLoading(false));
     } catch (error) {
-      displayError(error, "Make Group Admin Failed");
+      displayError(error as ErrorType, "Make Group Admin Failed");
       dispatch(setLoading(false));
     }
   };
@@ -144,7 +168,7 @@ const MemberOptionsMenu = ({
       const { data } = await axios.put(
         `/api/chat/group/dismiss-admin`,
         { userId: clickedMember?._id, chatId: groupInfo?._id },
-        config
+        config as AxiosRequestConfig
       );
       if (isSocketConnected) {
         clientSocket.emit("grp updated", {
@@ -159,14 +183,14 @@ const MemberOptionsMenu = ({
           type: "info",
           duration: 4000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
       dispatch(setLoading(false));
       dispatch(setGroupInfo(data));
       updateView(data);
       return "membersUpdated";
     } catch (error) {
-      displayError(error, "Dismiss As Group Admin Failed");
+      displayError(error as ErrorType, "Dismiss As Group Admin Failed");
       dispatch(setLoading(false));
       return "membersUpdated";
     }
@@ -183,7 +207,7 @@ const MemberOptionsMenu = ({
           isGroupAdmin: clickedMember?.isGroupAdmin,
           chatId: groupInfo?._id,
         },
-        config
+        config as AxiosRequestConfig
       );
 
       data["removedUser"] = clickedMember;
@@ -199,14 +223,14 @@ const MemberOptionsMenu = ({
           type: "info",
           duration: 4000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
       dispatch(setLoading(false));
       dispatch(setGroupInfo(data));
       updateView(data);
       return "membersUpdated";
     } catch (error) {
-      displayError(error, "Remove From Group Failed");
+      displayError(error as ErrorType, "Remove From Group Failed");
       dispatch(setLoading(false));
       return "membersUpdated";
     }
@@ -216,6 +240,8 @@ const MemberOptionsMenu = ({
   const openDismissAsAdminConfirmDialog = () => {
     setShowDialogActions(true);
     setShowDialogClose(false);
+    if (!setChildDialogBody || !displayChildDialog) return;
+
     setChildDialogBody(
       <>Are you sure you want to dismiss {styledMemberName} as group admin?</>
     );
@@ -231,6 +257,8 @@ const MemberOptionsMenu = ({
   const openRemoveFromGroupConfirmDialog = () => {
     setShowDialogActions(true);
     setShowDialogClose(false);
+    if (!setChildDialogBody || !displayChildDialog) return;
+
     setChildDialogBody(
       <>Are you sure you want to remove {styledMemberName} from this group?</>
     );
@@ -245,6 +273,7 @@ const MemberOptionsMenu = ({
 
   return (
     <Menu
+      open={Boolean(anchor)}
       menuAnchor={anchor}
       setMenuAnchor={setAnchor}
       transformOrigin={{ vertical: "top", horizontal: "right" }}

@@ -1,9 +1,10 @@
 import { KeyboardArrowDown } from "@mui/icons-material";
 import { Avatar } from "@mui/material";
-import { useSelector } from "react-redux";
 import { selectAppState } from "../../store/slices/AppSlice";
+import { useAppSelector } from "../../store/storeHooks";
+import { UserType } from "../../utils/AppTypes";
 import { truncateString } from "../../utils/appUtils";
-import getCustomTooltip from "../utils/CustomTooltip";
+import getCustomTooltip from "./CustomTooltip";
 
 const arrowStyles = { color: "#E6480C" };
 const tooltipStyles = {
@@ -16,8 +17,14 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const GroupMemberItem = ({ user, truncateValues }) => {
-  const { loggedInUser } = useSelector(selectAppState);
+interface Props {
+  user: UserType;
+  truncateValues: number[];
+}
+
+const GroupMemberItem = ({ user, truncateValues }: Props) => {
+  const { loggedInUser } = useAppSelector(selectAppState);
+  if (!user) return <></>;
   const { _id, name, email, profilePic } = user;
   const [max, index] = truncateValues;
   const isLoggedInUser = _id === loggedInUser?._id;
@@ -49,6 +56,7 @@ const GroupMemberItem = ({ user, truncateValues }) => {
         data-user={_id}
         title={`${isLoggedInUser ? "" : `${name} (${email})`}`}
         placement="top-start"
+        className=""
         arrow
       >
         <Avatar

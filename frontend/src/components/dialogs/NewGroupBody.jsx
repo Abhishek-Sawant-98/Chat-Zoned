@@ -33,7 +33,7 @@ const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 const DEFAULT_GROUP_DP = process.env.REACT_APP_DEFAULT_GROUP_DP;
 
 const NewGroupBody = ({ closeChildDialog }) => {
-  const { loggedInUser, refresh, groupInfo, clientSocket, isSocketConnected } =
+  const { loggedInUser, groupInfo, clientSocket, isSocketConnected } =
     useSelector(selectAppState);
   const {
     loading,

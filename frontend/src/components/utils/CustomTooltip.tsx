@@ -3,13 +3,16 @@ import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 
 interface StyledProps {
   className: string;
-  children: any;
+  children: React.ReactElement<any, any>;
   title: string;
   placement: any;
   arrow: boolean;
 }
 
-const getCustomTooltip = (arrowStyles: any, tooltipStyles: any) =>
+const getCustomTooltip = (
+  arrowStyles: React.CSSProperties,
+  tooltipStyles: React.CSSProperties
+) =>
   styled(
     ({ className, children, title, placement, arrow }: StyledProps): any => (
       <Tooltip

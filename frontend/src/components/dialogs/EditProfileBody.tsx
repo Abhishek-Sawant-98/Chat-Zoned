@@ -1,5 +1,5 @@
 import { Edit } from "@mui/icons-material";
-import { useEffect, useRef, useState } from "react";
+import { SetStateAction, useEffect, useRef, useState } from "react";
 import axios from "../../utils/axios";
 import EditNameBody from "./EditNameBody";
 import { CircularProgress, IconButton } from "@mui/material";
@@ -13,7 +13,6 @@ import {
   TWO_MB,
 } from "../../utils/appUtils";
 import ChildDialog from "../utils/ChildDialog";
-import { useDispatch, useSelector } from "react-redux";
 import {
   selectFormfieldState,
   setLoading,
@@ -21,6 +20,15 @@ import {
 import { selectAppState, setLoggedInUser } from "../../store/slices/AppSlice";
 import { selectChildDialogState } from "../../store/slices/ChildDialogSlice";
 import { displayToast } from "../../store/slices/ToastSlice";
+import { useAppDispatch, useAppSelector } from "../../store/storeHooks";
+import {
+  AxiosErrorType,
+  ClickEventHandler,
+  ErrorType,
+  ToastData,
+  UserType,
+} from "../../utils/AppTypes";
+import { AxiosRequestConfig } from "axios";
 
 const arrowStyles = { color: "#111" };
 const tooltipStyles = {
@@ -34,27 +42,33 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
+interface ProfileData {
+  profilePicUrl: string;
+  name: string;
+  email: string;
+}
+
 const EditProfileBody = () => {
-  const { loggedInUser } = useSelector(selectAppState);
-  const { loading, disableIfLoading } = useSelector(selectFormfieldState);
-  const { childDialogMethods } = useSelector(selectChildDialogState);
-  const dispatch = useDispatch();
+  const { loggedInUser } = useAppSelector(selectAppState);
+  const { loading, disableIfLoading } = useAppSelector(selectFormfieldState);
+  const { childDialogMethods } = useAppSelector(selectChildDialogState);
+  const dispatch = useAppDispatch();
   const { setChildDialogBody, displayChildDialog, closeChildDialog } =
     childDialogMethods;
 
-  const [profileData, setProfileData] = useState({
-    profilePicUrl: loggedInUser?.profilePic,
-    name: loggedInUser?.name,
-    email: loggedInUser?.email,
+  const [profileData, setProfileData] = useState<ProfileData>({
+    profilePicUrl: loggedInUser?.profilePic as string,
+    name: loggedInUser?.name as string,
+    email: loggedInUser?.email as string,
   });
   const [editProfilePicMenuAnchor, setEditProfilePicMenuAnchor] =
-    useState(null);
+    useState<HTMLElement | null>(null);
 
   useEffect(() => {
     setProfileData({
       ...profileData,
-      profilePicUrl: loggedInUser?.profilePic,
-      name: loggedInUser?.name,
+      profilePicUrl: loggedInUser?.profilePic as string,
+      name: loggedInUser?.name as string,
     });
   }, [loggedInUser]);
 
@@ -65,22 +79,25 @@ const EditProfileBody = () => {
         type: "warning",
         duration,
         position: "top-center",
-      })
+      } as ToastData)
     );
   };
 
   const displayError = (
-    error = "Oops! Something went wrong",
+    error: ErrorType = "Oops! Something went wrong",
     title = "Operation Failed"
   ) => {
     dispatch(
       displayToast({
         title,
-        message: error.response?.data?.message || error.message,
+        message:
+          (error as AxiosErrorType).response?.data?.message ||
+          (error as Error)?.message ||
+          error,
         type: "error",
         duration: 5000,
         position: "top-center",
-      })
+      } as ToastData)
     );
   };
 
@@ -91,7 +108,7 @@ const EditProfileBody = () => {
         type: "success",
         duration: 3000,
         position: "bottom-center",
-      })
+      } as ToastData)
     );
   };
 
@@ -99,28 +116,31 @@ const EditProfileBody = () => {
   const [uploading, setUploading] = useState(false);
 
   const { profilePicUrl, name, email } = profileData;
-  const imgInput = useRef();
+  const imgInput = useRef<HTMLInputElement>();
   const isGuestUser = loggedInUser?.email === "guest.user@gmail.com";
 
-  const persistUpdatedUser = (updatedUser) => {
+  const persistUpdatedUser = (updatedUser: UserType) => {
     // localStorage persists updated user even after page refresh
     localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
     dispatch(setLoggedInUser(updatedUser));
   };
 
   // Click a button/icon upon 'Enter' or 'Space' keydown
-  const clickOnKeydown = (e) => {
+  const clickOnKeydown: React.KeyboardEventHandler<HTMLButtonElement> = (e) => {
     if (e.key === " " || e.key === "Enter") {
-      e.target.click();
+      (e.target as HTMLElement).click();
     }
   };
 
   // Update Profile Pic
-  const handleImgInputChange = async (e) => {
-    const image = e.target.files[0];
-    if (!image) return;
+  const handleImgInputChange: React.ChangeEventHandler<
+    HTMLInputElement
+  > = async (e) => {
+    if (!e.target?.files) return;
+    const imageFile = e.target.files[0];
+    if (!imageFile) return;
 
-    if (!isImageFile(image.name)) {
+    if (!isImageFile(imageFile.name)) {
       return dispatch(
         displayToast({
           title: "Invalid Image File",
@@ -128,11 +148,12 @@ const EditProfileBody = () => {
           type: "warning",
           duration: 5000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
     }
 
-    if (image.size >= TWO_MB) {
+    if (imageFile.size >= TWO_MB) {
+      if (!imgInput?.current) return;
       imgInput.current.value = "";
       return displayWarning("Please Select an Image Smaller than 2 MB", 4000);
     }
@@ -141,26 +162,26 @@ const EditProfileBody = () => {
     const config = getAxiosConfig({ loggedInUser, formData: true });
 
     const formData = new FormData();
-    formData.append("profilePic", image);
-    formData.append("currentProfilePic", loggedInUser?.profilePic);
-    formData.append("cloudinary_id", loggedInUser?.cloudinary_id);
+    formData.append("profilePic", imageFile);
+    formData.append("currentProfilePic", loggedInUser?.profilePic as string);
+    formData.append("cloudinary_id", loggedInUser?.cloudinary_id as string);
 
     try {
       const { data } = await axios.put(
         "/api/user/update/profile-pic",
         formData,
-        config
+        config as AxiosRequestConfig
       );
       displaySuccess("ProfilePic Updated Successfully");
       dispatch(setLoading(false));
       setUploading(false);
       persistUpdatedUser({
         ...data,
-        token: loggedInUser.token,
-        expiryTime: loggedInUser.expiryTime,
+        token: loggedInUser?.token,
+        expiryTime: loggedInUser?.expiryTime,
       });
     } catch (error) {
-      displayError(error, "ProfilePic Update Failed");
+      displayError(error as ErrorType, "ProfilePic Update Failed");
       dispatch(setLoading(false));
       setUploading(false);
     }
@@ -176,32 +197,35 @@ const EditProfileBody = () => {
           currentProfilePic: loggedInUser?.profilePic,
           cloudinary_id: loggedInUser?.cloudinary_id,
         },
-        config
+        config as AxiosRequestConfig
       );
       displaySuccess("ProfilePic Deleted Successfully");
       dispatch(setLoading(false));
       persistUpdatedUser({
         ...data,
-        token: loggedInUser.token,
-        expiryTime: loggedInUser.expiryTime,
+        token: loggedInUser?.token,
+        expiryTime: loggedInUser?.expiryTime,
       });
       return "profileUpdated";
     } catch (error) {
-      displayError(error, "ProfilePic Deletion Failed");
+      displayError(error as ErrorType, "ProfilePic Deletion Failed");
       dispatch(setLoading(false));
     }
   };
 
   // Edited Name config
-  let editedName;
+  let editedName: string;
 
-  const getUpdatedName = (updatedValue, options) => {
+  const getUpdatedName = (
+    updatedValue: string,
+    options?: { submitUpdatedName: boolean }
+  ) => {
     editedName = updatedValue;
     if (options?.submitUpdatedName)
       updateProfileName({ enterKeyPressed: true });
   };
 
-  const updateProfileName = async (options) => {
+  const updateProfileName = async (options?: { enterKeyPressed: boolean }) => {
     if (!editedName) return displayWarning("Please Enter a Valid Name");
 
     dispatch(setLoading(true));
@@ -210,28 +234,29 @@ const EditProfileBody = () => {
       const { data } = await axios.put(
         "/api/user/update/name",
         { newUserName: editedName },
-        config
+        config as AxiosRequestConfig
       );
       displaySuccess("Name Updated Successfully");
       dispatch(setLoading(false));
       persistUpdatedUser({
         ...data,
-        token: loggedInUser.token,
-        expiryTime: loggedInUser.expiryTime,
+        token: loggedInUser?.token,
+        expiryTime: loggedInUser?.expiryTime,
       });
-      if (options?.enterKeyPressed) closeChildDialog();
+      if (options?.enterKeyPressed && closeChildDialog) closeChildDialog();
       else return "profileUpdated";
     } catch (error) {
-      displayError(error, "Name Update Failed");
+      displayError(error as ErrorType, "Name Update Failed");
       dispatch(setLoading(false));
     }
   };
 
   // Open edit name dialog
-  const openEditNameDialog = () => {
+  const openEditNameDialog: React.MouseEventHandler<HTMLButtonElement> = () => {
+    if (!setChildDialogBody || !displayChildDialog) return;
     setChildDialogBody(
       <EditNameBody
-        originalName={loggedInUser?.name}
+        originalName={loggedInUser?.name as string}
         getUpdatedName={getUpdatedName}
         placeholder="Enter New Name"
       />
@@ -247,6 +272,7 @@ const EditProfileBody = () => {
 
   // Open delete photo confirm dialog
   const openDeletePhotoConfirmDialog = () => {
+    if (!setChildDialogBody || !displayChildDialog) return;
     setChildDialogBody(<>Are you sure you want to delete this profile pic?</>);
     displayChildDialog({
       title: "Delete Profile Pic",
@@ -257,8 +283,8 @@ const EditProfileBody = () => {
     });
   };
 
-  const openEditProfilePicMenu = (e) => {
-    setEditProfilePicMenuAnchor(e.target);
+  const openEditProfilePicMenu: ClickEventHandler = (e: MouseEvent) => {
+    setEditProfilePicMenuAnchor(e.target as SetStateAction<HTMLElement | null>);
   };
 
   return (
@@ -279,11 +305,16 @@ const EditProfileBody = () => {
           <img
             className="img-fluid d-flex mx-auto border border-2 border-primary rounded-circle mt-1"
             id="viewedit__profilePic"
-            src={profilePicUrl}
+            src={profilePicUrl as string}
             alt="profilePic"
           />
           {!isGuestUser && (
-            <CustomTooltip title="Edit Profile Pic" placement="top-start" arrow>
+            <CustomTooltip
+              title="Edit Profile Pic"
+              className=""
+              placement="top-start"
+              arrow
+            >
               <i
                 id="editProfilePic"
                 tabIndex={2}
@@ -297,9 +328,9 @@ const EditProfileBody = () => {
           )}
           {/* Edit/Delete profile pic menu */}
           <EditPicMenu
-            anchor={editProfilePicMenuAnchor}
+            anchor={editProfilePicMenuAnchor as HTMLElement}
             setAnchor={setEditProfilePicMenuAnchor}
-            selectProfilePic={() => imgInput.current.click()}
+            selectProfilePic={() => imgInput?.current?.click()}
             openDeletePhotoConfirmDialog={openDeletePhotoConfirmDialog}
             deletePhotoCondition={
               !loggedInUser?.profilePic?.endsWith("user_dqzjdz.png")
@@ -311,7 +342,7 @@ const EditProfileBody = () => {
             onChange={handleImgInputChange}
             name="profilepic"
             id="editProfilePic"
-            ref={imgInput}
+            ref={imgInput as React.LegacyRef<HTMLInputElement>}
             className={`d-none`}
             disabled={loading}
           />
@@ -320,7 +351,12 @@ const EditProfileBody = () => {
       {/* View Name */}
       <section className={`dialogField text-center mb-2`}>
         <div className="input-group" style={{ marginTop: "-15px" }}>
-          <CustomTooltip title={name} placement="top" arrow>
+          <CustomTooltip
+            title={name as string}
+            placement="top"
+            className=""
+            arrow
+          >
             <div
               className="w-100 h1 fw-bold mx-4 text-info"
               style={{ fontSize: "32px", wordWrap: "break-word" }}
@@ -329,7 +365,7 @@ const EditProfileBody = () => {
             </div>
           </CustomTooltip>
           {!isGuestUser && (
-            <CustomTooltip title="Edit Name" placement="top" arrow>
+            <CustomTooltip title="Edit Name" placement="top" className="" arrow>
               <IconButton
                 tabIndex={3}
                 onKeyDown={clickOnKeydown}
@@ -353,8 +389,9 @@ const EditProfileBody = () => {
         style={{ marginTop: "-10px" }}
       >
         <CustomTooltip
-          title={email?.length > 24 ? email : ""}
+          title={((email?.length as number) > 24 ? email : "") as string}
           placement="bottom"
+          className=""
           arrow
         >
           <span className="h4" style={{ color: "lightblue" }}>
@@ -363,7 +400,7 @@ const EditProfileBody = () => {
         </CustomTooltip>
       </section>
       {/* Child confirmation dialog */}
-      <ChildDialog />
+      <ChildDialog showChildDialogActions={true} showChildDialogClose={false} />
     </>
   );
 };

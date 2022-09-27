@@ -1,17 +1,10 @@
 import { AddAPhoto } from "@mui/icons-material";
-import {
-  useState,
-  useRef,
-  ChangeEventHandler,
-  LegacyRef,
-  ChangeEvent,
-} from "react";
+import { useState, useRef, ChangeEventHandler, LegacyRef } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import axios from "../../utils/axios";
 import { CircularProgress } from "@mui/material";
 import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
 import { getAxiosConfig, isImageFile, TWO_MB } from "../../utils/appUtils";
-import { useDispatch, useSelector } from "react-redux";
 import {
   selectFormfieldState,
   setLoading,
@@ -20,8 +13,7 @@ import { displayToast } from "../../store/slices/ToastSlice";
 import { setLoggedInUser } from "../../store/slices/AppSlice";
 import {
   AxiosErrorType,
-  ButtonEventHandler,
-  falsyType,
+  ClickEventHandler,
   ToastData,
 } from "../../utils/AppTypes";
 import { useAppDispatch, useAppSelector } from "../../store/storeHooks";
@@ -72,7 +64,7 @@ const Register = () => {
       setUserData({ ...userData, [prop]: e.target.value });
     };
 
-  const handleRegister: ButtonEventHandler = async (e: MouseEvent) => {
+  const handleRegister: ClickEventHandler = async (e: MouseEvent) => {
     e.preventDefault();
     // return dispatch(setLoading(true));
 
@@ -164,7 +156,7 @@ const Register = () => {
     }
   };
 
-  const handleReset: ButtonEventHandler = (e: MouseEvent) => {
+  const handleReset: ClickEventHandler = (e: MouseEvent) => {
     e.preventDefault();
     setUserData({
       name: "",

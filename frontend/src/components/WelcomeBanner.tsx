@@ -1,13 +1,14 @@
 import { useRef } from "react";
-import { useSelector } from "react-redux";
 import letsChatAnimData from "../animations/letsChatGif.json";
 import { selectAppState } from "../store/slices/AppSlice";
+import { useAppSelector } from "../store/storeHooks";
+import { SpanRef } from "../utils/AppTypes";
 import { truncateString } from "../utils/appUtils";
 import LottieAnimation from "./utils/LottieAnimation";
 
-const WelcomeBanner = ({ isNewUser }) => {
-  const { loggedInUser } = useSelector(selectAppState);
-  const letsChatGif = useRef(null);
+const WelcomeBanner = ({ isNewUser }: { isNewUser: boolean }) => {
+  const { loggedInUser } = useAppSelector(selectAppState);
+  const letsChatGif = useRef<HTMLSpanElement>(null);
   return (
     <div className="d-flex flex-column justify-content-start align-items-center h-100">
       {!isNewUser && (
@@ -25,7 +26,7 @@ const WelcomeBanner = ({ isNewUser }) => {
         </h2>
       )}
       <LottieAnimation
-        ref={letsChatGif}
+        ref={letsChatGif as SpanRef}
         className={"d-inline-block mt-3"}
         style={{ marginBottom: 50, height: "50%" }}
         animationData={letsChatAnimData}

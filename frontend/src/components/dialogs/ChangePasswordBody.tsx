@@ -1,19 +1,24 @@
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { ChangeEventHandler, useEffect, useState } from "react";
 import { selectFormfieldState } from "../../store/slices/FormfieldSlice";
+import { useAppSelector } from "../../store/storeHooks";
+import { EditPwdData, EditPwdDataOptions } from "../../utils/AppTypes";
 import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
 
-const ChangePasswordBody = ({ getUpdatedState }) => {
+interface Props {
+  getUpdatedState: (data: EditPwdData, options?: EditPwdDataOptions) => void;
+}
+
+const ChangePasswordBody = ({ getUpdatedState }: Props) => {
   const {
     loading,
     disableIfLoading,
     formLabelClassName,
     formFieldClassName,
     inputFieldClassName,
-  } = useSelector(selectFormfieldState);
+  } = useAppSelector(selectFormfieldState);
 
   const [showPassword, setShowPassword] = useState(false);
-  const [changePasswordData, setChangePasswordData] = useState({
+  const [changePasswordData, setChangePasswordData] = useState<EditPwdData>({
     currentPassword: "",
     newPassword: "",
     confirmNewPassword: "",
@@ -22,16 +27,21 @@ const ChangePasswordBody = ({ getUpdatedState }) => {
   const { currentPassword, newPassword, confirmNewPassword } =
     changePasswordData;
 
-  const handleChangeFor = (prop) => (e) => {
-    setChangePasswordData({ ...changePasswordData, [prop]: e.target.value });
-  };
+  const handleChangeFor =
+    (prop: string): ChangeEventHandler<HTMLInputElement> =>
+    (e) => {
+      setChangePasswordData({
+        ...changePasswordData,
+        [prop]: e.target?.value,
+      });
+    };
 
   useEffect(() => {
     // Return updated state to profile settings menu
     getUpdatedState(changePasswordData);
   }, [changePasswordData]);
 
-  const onEnterKeyDown = (e) => {
+  const onEnterKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === "Enter") {
       // Submit updated password data
       getUpdatedState(changePasswordData, { submitUpdatedPassword: true });

@@ -215,13 +215,12 @@ const MessagesView = ({
   const loadMedia = async (fileId, options) => {
     if (!fileId || !options) return;
     setLoadingMediaId(fileId);
-    const { fileName, isAudio } = options;
     const config = getAxiosConfig({ loggedInUser, blob: true });
     try {
       const { data } = await axios.get(`/api/message/files/${fileId}`, config);
 
       const mediaSrc = URL.createObjectURL(new Blob([data]));
-      viewMedia(mediaSrc, { fileName, isAudio });
+      viewMedia(mediaSrc, options);
     } catch (error) {
       displayError(error, "Couldn't Load Media");
       setLoadingMediaId("");
@@ -860,6 +859,7 @@ const MessagesView = ({
             />
             {fileAttached && !msgEditMode && (
               <AttachmentPreview
+                isEditMode={false}
                 attachmentData={attachmentData}
                 discardAttachment={discardAttachment}
                 CustomTooltip={CustomTooltip}

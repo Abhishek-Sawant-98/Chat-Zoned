@@ -8,9 +8,10 @@ import {
   KeyboardArrowDown,
 } from "@mui/icons-material";
 import { Avatar, CircularProgress, IconButton } from "@mui/material";
-import { forwardRef, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { forwardRef, MutableRefObject, useEffect, useRef } from "react";
 import { selectAppState } from "../../store/slices/AppSlice";
+import { useAppSelector } from "../../store/storeHooks";
+import { AttachmentFileData, MessageType, SpanRef } from "../../utils/AppTypes";
 import {
   msgTimeStringOf,
   msgDateStringOf,
@@ -25,6 +26,19 @@ const IconButtonSx = {
   ":hover": { backgroundColor: "#cccccc20" },
 };
 
+interface Props {
+  downloadingFileId: string;
+  loadingMediaId: string;
+  msgEditMode: boolean;
+  clickedMsgId: string;
+  msgFileRemoved: boolean;
+  CustomTooltip: any;
+  msgSent: boolean;
+  currMsg: MessageType;
+  prevMsg: MessageType;
+  attachmentData: any;
+}
+
 const Message = forwardRef(
   (
     {
@@ -38,26 +52,46 @@ const Message = forwardRef(
       currMsg,
       prevMsg,
       attachmentData,
-    },
-    editableMsgRef
+    }: Props,
+    editableMsgRef: React.ForwardedRef<HTMLSpanElement>
   ) => {
-    const msgContentRef = useRef(null); // Local ref (in non-edit mode)
-    const { loggedInUser, selectedChat } = useSelector(selectAppState);
-    const { fileUrl, file_id, file_name } = currMsg;
-    const { _id, profilePic, name, email } = currMsg?.sender;
-    const isLoggedInUser = _id === loggedInUser._id;
+    const { loggedInUser, selectedChat } = useAppSelector(selectAppState);
+
+    const fileUrl = currMsg?.fileUrl;
+    const file_id = currMsg?.file_id;
+    const file_name = currMsg?.file_name;
+
+    const _id = currMsg?.sender?._id;
+    const profilePic = currMsg?.sender?.profilePic;
+    const name = currMsg?.sender?.name;
+    const email = currMsg?.sender?.email;
+
+    const isLoggedInUser = _id === loggedInUser?._id;
     const senderData = `${profilePic}===${name}===${email}`;
+    const isSameSender = _id === prevMsg?.sender?._id;
+    const currMsgDate = new Date(currMsg?.createdAt as string);
+    const prevMsgDate = new Date(prevMsg?.createdAt as string);
+    const msgContentRef = useRef<HTMLSpanElement>(null); // Local ref (in non-edit mode)
     const currMsgId = isLoggedInUser ? currMsg?._id : null;
     const isClickedMsgCurrMsg = clickedMsgId === currMsgId;
-    const isSameSender = _id === prevMsg?.sender._id;
-    const currMsgDate = new Date(currMsg.createdAt);
-    const prevMsgDate = new Date(prevMsg?.createdAt);
+    const isEditMode = msgEditMode && isClickedMsgCurrMsg;
     const isOtherDay = dateStringOf(currMsgDate) !== dateStringOf(prevMsgDate);
     const showCurrSender =
       !isLoggedInUser &&
       selectedChat?.isGroupChat &&
       (!isSameSender || isOtherDay);
-    const isEditMode = msgEditMode && isClickedMsgCurrMsg;
+
+    useEffect(() => {
+      if (isEditMode) {
+        setCaretPosition((editableMsgRef as SpanRef)?.current);
+      }
+    }, [msgEditMode]);
+
+    useEffect(() => {
+      if (msgContentRef?.current) {
+        msgContentRef.current.innerHTML = currMsg?.content as string;
+      }
+    }, []);
 
     const fileEditIcons = (
       <>
@@ -81,18 +115,6 @@ const Message = forwardRef(
         </CustomTooltip>
       </>
     );
-
-    useEffect(() => {
-      if (msgContentRef?.current) {
-        msgContentRef.current.innerHTML = currMsg?.content;
-      }
-    }, []);
-
-    useEffect(() => {
-      if (isEditMode) {
-        setCaretPosition(editableMsgRef?.current);
-      }
-    }, [msgEditMode]);
 
     return (
       <>
@@ -191,16 +213,19 @@ const Message = forwardRef(
             {currMsg?.fileUrl && !isEditMode && (
               <MsgAttachment
                 msgSent={msgSent}
+                isPreview={false}
                 isEditMode={isEditMode}
                 fileEditIcons={fileEditIcons}
                 downloadingFileId={downloadingFileId}
                 loadingMediaId={loadingMediaId}
-                fileData={{
-                  msgId: currMsgId,
-                  fileUrl,
-                  file_id,
-                  file_name,
-                }}
+                fileData={
+                  {
+                    msgId: currMsgId,
+                    fileUrl,
+                    file_id,
+                    file_name,
+                  } as AttachmentFileData
+                }
               />
             )}
             {isEditMode && attachmentData?.attachment && (
@@ -218,15 +243,18 @@ const Message = forwardRef(
                 <MsgAttachment
                   msgSent={msgSent}
                   isEditMode={isEditMode}
+                  isPreview={false}
                   fileEditIcons={fileEditIcons}
                   downloadingFileId={downloadingFileId}
                   loadingMediaId={loadingMediaId}
-                  fileData={{
-                    msgId: currMsgId,
-                    fileUrl,
-                    file_id,
-                    file_name,
-                  }}
+                  fileData={
+                    {
+                      msgId: currMsgId,
+                      fileUrl,
+                      file_id,
+                      file_name,
+                    } as AttachmentFileData
+                  }
                 />
               )}
             <div
@@ -242,7 +270,11 @@ const Message = forwardRef(
                 style={{ outline: "none" }}
                 contentEditable={isEditMode}
                 data-msg-created-at={currMsg?.createdAt}
-                ref={isEditMode ? editableMsgRef : msgContentRef}
+                ref={
+                  (isEditMode
+                    ? editableMsgRef
+                    : msgContentRef) as React.LegacyRef<HTMLSpanElement>
+                }
               ></span>
               <span
                 data-msg={currMsgId}

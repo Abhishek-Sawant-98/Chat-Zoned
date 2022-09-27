@@ -16,9 +16,13 @@ import {
 import animationData from "../../animations/app-loading.json";
 import LottieAnimation from "./LottieAnimation";
 import { useRef } from "react";
-import { MsgAttachmentProps } from "../../utils/AppTypes";
+import {
+  AttachmentFileData,
+  SpanRef,
+  MsgAttachmentProps,
+} from "../../utils/AppTypes";
 
-const IMG_BASE_URL = process.env.REACT_APP_CLOUDINARY_BASE_URL;
+const IMG_BASE_URL = process.env.REACT_APP_CLOUDINARY_BASE_URL as string;
 
 const MsgAttachment = ({
   msgSent,
@@ -36,14 +40,14 @@ const MsgAttachment = ({
   }`;
   const iconStyles = `${isPreview && !isEditMode ? "fs-1" : "fs-2"}`;
 
-  let { fileUrl, file_id, file_name, size } = fileData;
+  let { fileUrl, file_id, file_name, size } = fileData as AttachmentFileData;
   const fileContents = file_name.split("===") || [];
   file_name = fileContents[0] || file_name;
   const isMediaFile = fileContents[1]?.includes(":");
   const mediaContents = isMediaFile ? fileContents[1].split("+++") : [];
   const mediaFileType = mediaContents[1];
   const mediaFileSize = getFileSizeString(mediaContents[2]);
-  const loadingGif = useRef(null);
+  const loadingGif = useRef<HTMLSpanElement>(null);
 
   let fileSize = mediaContents[0] || parseInt(fileContents[1]) || size || "";
 
@@ -199,7 +203,7 @@ const MsgAttachment = ({
                   style={{ fontSize: 40 }}
                 />
                 <LottieAnimation
-                  ref={loadingGif}
+                  ref={loadingGif as SpanRef}
                   className={`position-absolute ${displayWhileLoadingMedia}`}
                   style={{
                     marginBottom: 0,
@@ -239,7 +243,7 @@ const MsgAttachment = ({
                   className={`playMedia ${hideWhileLoadingMedia}`}
                 />
                 <LottieAnimation
-                  ref={loadingGif}
+                  ref={loadingGif as SpanRef}
                   className={`position-absolute ${displayWhileLoadingMedia}`}
                   style={{
                     marginBottom: 0,

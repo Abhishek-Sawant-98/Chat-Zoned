@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import { setChildDialogMethods } from "../../store/slices/ChildDialogSlice";
+import { useAppDispatch } from "../../store/storeHooks";
+import { DialogData } from "../../utils/AppTypes";
 import CustomDialog from "./CustomDialog";
+
+interface Props {
+  showChildDialogActions: boolean;
+  showChildDialogClose: boolean;
+}
 
 const ChildDialog = ({
   showChildDialogActions = true,
   showChildDialogClose = false,
-}) => {
+}: Props) => {
   // Child Dialog config
-  const [childDialogData, setChildDialogData] = useState({
+  const [childDialogData, setChildDialogData] = useState<DialogData>({
     isOpen: false,
     title: "Child Dialog",
     nolabel: "NO",
@@ -16,13 +22,16 @@ const ChildDialog = ({
     loadingYeslabel: "Updating...",
     action: () => {},
   });
-  const [childDialogBody, setChildDialogBody] = useState(<></>);
-  const dispatch = useDispatch();
-  const displayChildDialog = (options) =>
+  const [childDialogBody, setChildDialogBody] = useState<React.ReactNode>(
+    <></>
+  );
+  const dispatch = useAppDispatch();
+
+  const displayChildDialog = (options: DialogData) =>
     setChildDialogData({ ...options, isOpen: true });
 
-  const closeChildDialog = (data) =>
-    setChildDialogData({ ...data, isOpen: false });
+  const closeChildDialog = () =>
+    setChildDialogData({ ...childDialogData, isOpen: false });
 
   useEffect(() => {
     dispatch(

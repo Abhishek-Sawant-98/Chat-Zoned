@@ -3,6 +3,7 @@ import { IconButton } from "@mui/material";
 import { forwardRef, LegacyRef, MutableRefObject, useState } from "react";
 import { useSelector } from "react-redux";
 import { selectFormfieldState } from "../../store/slices/FormfieldSlice";
+import { InputRef } from "../../utils/AppTypes";
 
 interface Props {
   searchHandler: Function;
@@ -11,7 +12,7 @@ interface Props {
   clearInput: Function;
 }
 
-type InputRef = MutableRefObject<HTMLInputElement>;
+
 
 const SearchInput = forwardRef<HTMLInputElement, Props>((props, inputRef) => {
   const { searchHandler, autoFocus, placeholder, clearInput } = props;

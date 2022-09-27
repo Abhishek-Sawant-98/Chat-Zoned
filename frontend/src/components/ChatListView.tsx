@@ -13,7 +13,6 @@ import getCustomTooltip from "./utils/CustomTooltip";
 import FullSizeImage from "./utils/FullSizeImage";
 import LoadingList from "./utils/LoadingList";
 import SearchInput from "./utils/SearchInput";
-import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
   setDeleteNotifsOfChat,
@@ -27,8 +26,28 @@ import {
 } from "../store/slices/CustomDialogSlice";
 import { displayToast } from "../store/slices/ToastSlice";
 import GettingStarted from "./GettingStarted";
+import {
+  AxiosErrorType,
+  ChatType,
+  ClickEventHandler,
+  DialogBodySetter,
+  InputRef,
+  MessageType,
+  StateSetter,
+  ToastData,
+} from "../utils/AppTypes";
+import { useAppDispatch, useAppSelector } from "../store/storeHooks";
+import { AxiosRequestConfig } from "axios";
 
 const DEFAULT_GROUP_DP = process.env.REACT_APP_DEFAULT_GROUP_DP;
+
+interface Props {
+  chats: ChatType[];
+  setChats: StateSetter<ChatType[]>;
+  loadingMsgs: boolean;
+  setDialogBody: DialogBodySetter;
+  typingChatUsers: string[];
+}
 
 const arrowStyles = { color: "#666" };
 const tooltipStyles = {
@@ -47,14 +66,15 @@ const ChatListView = ({
   loadingMsgs,
   setDialogBody,
   typingChatUsers,
-}) => {
-  const { loggedInUser, selectedChat, refresh } = useSelector(selectAppState);
-  const notifs = [...loggedInUser?.notifications];
-  const dispatch = useDispatch();
+}: Props) => {
+  const { loggedInUser, selectedChat, refresh } =
+    useAppSelector(selectAppState);
+  const notifs = [...(loggedInUser?.notifications as MessageType[])];
+  const dispatch = useAppDispatch();
 
   const [loading, setLoading] = useState(true);
-  const [filteredChats, setFilteredChats] = useState(chats);
-  const searchChatInput = useRef();
+  const [filteredChats, setFilteredChats] = useState<ChatType[]>(chats);
+  const searchChatInput = useRef<HTMLInputElement>();
 
   const openCreateGroupChatDialog = () => {
     dispatch(
@@ -77,13 +97,13 @@ const ChatListView = ({
     );
   };
 
-  const displayFullSizeImage = (e) => {
+  const displayFullSizeImage = (e: MouseEvent) => {
     dispatch(setShowDialogActions(false));
     setDialogBody(<FullSizeImage event={e} />);
     dispatch(
       displayDialog({
         isFullScreen: true,
-        title: e.target?.alt || "Display Pic",
+        title: (e.target as HTMLImageElement)?.alt || "Display Pic",
       })
     );
   };
@@ -91,13 +111,17 @@ const ChatListView = ({
   const fetchChats = async () => {
     const config = getAxiosConfig({ loggedInUser });
     try {
-      const { data } = await axios.get(`/api/chat`, config);
+      const { data } = await axios.get(
+        `/api/chat`,
+        config as AxiosRequestConfig
+      );
 
       const mappedChats = data
-        .map((chat) => {
+        .map((chat: ChatType) => {
+          if (!chat) return null;
           const { isGroupChat, users } = chat;
 
-          if (!isGroupChat) {
+          if (!isGroupChat && chat) {
             const receiver = getOneToOneChatReceiver(loggedInUser, users);
             chat["chatName"] = receiver?.name;
             chat["receiverEmail"] = receiver?.email;
@@ -105,7 +129,10 @@ const ChatListView = ({
           }
           return chat;
         })
-        .filter((chat) => chat.lastMessage !== undefined || chat.isGroupChat);
+        .filter(
+          (chat: ChatType) =>
+            chat?.lastMessage !== undefined || chat?.isGroupChat
+        );
 
       setChats(mappedChats);
       setFilteredChats(mappedChats);
@@ -114,19 +141,23 @@ const ChatListView = ({
       dispatch(
         displayToast({
           title: "Couldn't Fetch Chats",
-          message: error.response?.data?.message || error.message,
+          message:
+            (error as AxiosErrorType).response?.data?.message ||
+            (error as Error).message,
           type: "error",
           duration: 5000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
       if (loading) setLoading(false);
     }
   };
 
   // Debouncing filterChats method to limit the no. of fn calls
-  const searchChats = debounce((e) => {
-    const chatNameInput = e.target.value?.toLowerCase().trim();
+  const searchChats = debounce((e: InputEvent) => {
+    const chatNameInput = (e.target as HTMLInputElement).value
+      ?.toLowerCase()
+      .trim();
     if (!chatNameInput) return setFilteredChats(chats);
     setFilteredChats(
       chats.filter((chat) =>
@@ -134,6 +165,32 @@ const ChatListView = ({
       )
     );
   }, 600);
+
+  const onChatItemClick: ClickEventHandler = (e: MouseEvent) => {
+    const { dataset } = e.target as HTMLElement;
+    const parentDataset = ((e.target as HTMLElement)?.parentNode as HTMLElement)
+      .dataset;
+    const clickedChatId = dataset.chat || parentDataset.chat;
+    const hasNotifs = dataset.hasNotifs || parentDataset.hasNotifs;
+    if (!clickedChatId) return;
+
+    if (
+      (e.target as HTMLElement).className?.toString().includes("MuiAvatar-img")
+    ) {
+      return displayFullSizeImage(e);
+    }
+    const clickedChat = filteredChats.find(
+      (chat: ChatType) => chat?._id === clickedChatId
+    ) as ChatType;
+    if (clickedChat?._id === selectedChat?._id) return;
+    dispatch(setSelectedChat(clickedChat));
+    dispatch(setFetchMsgs(true)); // To fetch selected chat msgs
+    if (clickedChat?.isGroupChat)
+      dispatch(setGroupInfo(clickedChat as ChatType));
+
+    // Delete notifications if notif badge is present
+    if (hasNotifs) dispatch(setDeleteNotifsOfChat(clickedChatId));
+  };
 
   useEffect(() => {
     fetchChats();
@@ -154,6 +211,7 @@ const ChatListView = ({
           <CustomTooltip
             title="Create New Group Chat"
             placement="bottom-end"
+            className=""
             arrow
           >
             <button
@@ -169,7 +227,7 @@ const ChatListView = ({
       {chats?.length > 0 && (
         <section className="searchChat">
           <SearchInput
-            ref={searchChatInput}
+            ref={searchChatInput as InputRef}
             searchHandler={searchChats}
             autoFocus={false}
             placeholder="Search Chat"
@@ -185,41 +243,24 @@ const ChatListView = ({
           <div
             // 'Event delegation' (add only one event listener for
             // parent element instead of adding for each child element)
-            onClick={(e) => {
-              const { dataset } = e.target;
-              const parentDataset = e.target.parentNode.dataset;
-              const clickedChatId = dataset.chat || parentDataset.chat;
-              const hasNotifs = dataset.hasNotifs || parentDataset.hasNotifs;
-              if (!clickedChatId) return;
-
-              if (e.target.className?.toString().includes("MuiAvatar-img")) {
-                return displayFullSizeImage(e);
-              }
-              const clickedChat = filteredChats.find(
-                (chat) => chat._id === clickedChatId
-              );
-              if (clickedChat._id === selectedChat?._id) return;
-              dispatch(setSelectedChat(clickedChat));
-              dispatch(setFetchMsgs(true)); // To fetch selected chat msgs
-              if (clickedChat?.isGroupChat) dispatch(setGroupInfo(clickedChat));
-
-              // Delete notifications if notif badge is present
-              if (hasNotifs) dispatch(setDeleteNotifsOfChat(clickedChatId));
-            }}
+            onClick={onChatItemClick}
           >
-            {filteredChats.map((chat) => {
+            {filteredChats.map((chat: ChatType) => {
               let chatNotifCount = 0;
-              notifs?.forEach((notif) => {
-                if (notif.chat._id === chat._id) ++chatNotifCount;
+              notifs?.forEach((notif: MessageType) => {
+                if ((notif?.chat as ChatType)?._id === chat?._id)
+                  ++chatNotifCount;
               });
               return (
                 <ChatListItem
-                  key={chat._id}
+                  key={chat?._id}
                   chat={chat}
-                  chatNotifCount={chatNotifCount || ""}
-                  typingChatUser={typingChatUsers?.find(
-                    (u) => u?.toString()?.split("---")[0] === chat._id
-                  )}
+                  chatNotifCount={chatNotifCount || "" as number | string}
+                  typingChatUser={
+                    typingChatUsers?.find(
+                      (u) => u?.toString()?.split("---")[0] === chat?._id
+                    ) as string
+                  }
                 />
               );
             })}

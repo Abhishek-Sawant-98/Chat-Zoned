@@ -22,7 +22,6 @@ import axios from "../utils/axios";
 import { useAppDispatch, useAppSelector } from "../store/storeHooks";
 import {
   ChatType,
-  GroupInfo,
   MessageType,
   ToastData,
   UserType,
@@ -42,10 +41,10 @@ const ChatsPage = () => {
   );
   const dispatch = useAppDispatch();
   const navigate: NavigateFunction = useNavigate();
-  const [loadingMsgs, setLoadingMsgs] = useState(false);
-  const [dialogBody, setDialogBody] = useState(<></>);
-  const [chats, setChats] = useState([] as ChatType[]);
-  const [typingChatUsers, setTypingChatUsers] = useState([] as string[]);
+  const [loadingMsgs, setLoadingMsgs] = useState<boolean>(false);
+  const [dialogBody, setDialogBody] = useState<React.ReactNode>(<></>);
+  const [chats, setChats] = useState<ChatType[]>([]);
+  const [typingChatUsers, setTypingChatUsers] = useState<string[]>([]);
 
   useEffect(() => {
     // localStorage persists data even after page refresh, unlike state
@@ -117,7 +116,7 @@ const ChatsPage = () => {
               groupData = null;
             }
             dispatch(setSelectedChat(groupData));
-            dispatch(setGroupInfo(groupData as GroupInfo));
+            dispatch(setGroupInfo(groupData as ChatType));
             if (
               isGroupInfoDialogOpen &&
               createdAdmin?._id === loggedInUser?._id

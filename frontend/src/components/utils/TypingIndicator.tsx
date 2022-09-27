@@ -1,10 +1,15 @@
 import { Avatar } from "@mui/material";
-import LottieAnimation from "../utils/LottieAnimation";
+import LottieAnimation from "./LottieAnimation";
 import typingAnimData from "../../animations/typing.json";
 import { useRef } from "react";
 
-const TypingIndicator = ({ typingChatUser, showAvatar }) => {
-  const typingGif = useRef(null);
+interface Props {
+  typingChatUser: string;
+  showAvatar: boolean;
+}
+
+const TypingIndicator = ({ typingChatUser, showAvatar }: Props) => {
+  const typingGif = useRef<HTMLSpanElement>(null);
   const typingUserData = typingChatUser?.toString().split("---") || [];
   const typingUserName = typingUserData[1] || "";
   const isGroupChat = typingUserData[3] === "true";

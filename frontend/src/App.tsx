@@ -3,7 +3,7 @@ import { Suspense, lazy, useRef } from "react";
 import animationData from "./animations/app-loading.json";
 import LottieAnimation from "./components/utils/LottieAnimation";
 import ErrorBoundary from "./pages/ErrorBoundary";
-import type { lazyComponent } from "./utils/AppTypes";
+import type { lazyComponent, SpanRef } from "./utils/AppTypes";
 
 const HomePage: lazyComponent = lazy(() => import("./pages/HomePage"));
 const ChatsPage: lazyComponent = lazy(() => import("./pages/ChatsPage"));
@@ -12,7 +12,7 @@ const AppToast: lazyComponent = lazy(
 );
 
 function App() {
-  const loadingGif = useRef<HTMLDivElement>(null);
+  const loadingGif = useRef<HTMLSpanElement>(null);
   return (
     <div className="App">
       <ErrorBoundary>
@@ -20,7 +20,7 @@ function App() {
           fallback={
             <div style={{ marginTop: 150 }}>
               <LottieAnimation
-                ref={loadingGif}
+                ref={loadingGif as SpanRef}
                 className={"d-inline-block"}
                 style={{ marginBottom: 10, height: 110 }}
                 animationData={animationData}

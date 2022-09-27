@@ -1,3 +1,5 @@
+import { SetStateAction } from "react";
+
 // Reusable type declarations
 export interface UserInterface {
   cloudinary_id: string;
@@ -5,44 +7,44 @@ export interface UserInterface {
   expiryTime: number;
   name: string;
   notifications: MessageType[];
+  isGroupAdmin?: boolean;
   profilePic: string;
   token: string;
   _id: string;
 }
-export type falsyType = null | undefined;
-export type UserType = UserInterface | falsyType;
+export type UserType = UserInterface | null;
+
+export interface ChatInterface {
+  chatDisplayPic: string | File | null;
+  chatDisplayPicUrl?: string | null;
+  chatName?: string;
+  cloudinary_id?: string;
+  createdAt?: string;
+  groupAdmins?: UserType[];
+  isGroupChat?: boolean;
+  lastMessage?: MessageType;
+  updatedAt?: string;
+  removedUser?: UserType;
+  receiverEmail?: string | null;
+  users: UserType[];
+  __v?: number;
+  _id?: string;
+}
+export type ChatType = ChatInterface | null;
 
 export interface MessageInterface {
-  chat: string;
+  chat: string | ChatType;
   content: string;
   createdAt: string;
-  fileUrl?: string | falsyType;
-  file_id?: string | falsyType;
-  file_name?: string | falsyType;
+  fileUrl?: string | null;
+  file_id?: string | null;
+  file_name?: string | null;
   sender: UserType;
   updatedAt?: string;
   __v?: number;
   _id: string;
 }
-export type MessageType = MessageInterface | falsyType;
-
-export interface ChatInterface {
-  chatDisplayPic: string | File | falsyType;
-  chatDisplayPicUrl?: string | falsyType;
-  chatName?: string;
-  cloudinary_id: string;
-  createdAt: string;
-  groupAdmins?: UserType[];
-  isGroupChat: boolean;
-  lastMessage?: MessageType;
-  updatedAt?: string;
-  removedUser?: UserType;
-  receiverEmail?: string | falsyType;
-  users: UserType[];
-  __v?: number;
-  _id: string;
-}
-export type ChatType = ChatInterface | falsyType;
+export type MessageType = MessageInterface | null;
 
 export type lazyComponent = React.LazyExoticComponent<() => JSX.Element>;
 
@@ -61,14 +63,6 @@ export interface AxiosConfig {
 }
 
 // AppSlice types
-export interface GroupInfoInterface {
-  chatDisplayPic: string | File | falsyType;
-  chatDisplayPicUrl: string | falsyType;
-  chatName: string | falsyType;
-  users: UserType[];
-}
-export type GroupInfo = GroupInfoInterface | falsyType;
-
 export interface AppState {
   loggedInUser: UserType;
   selectedChat: ChatType;
@@ -82,9 +76,9 @@ export interface AppState {
 
 // ChildDialogSlice types
 export interface ChildDialogMethods {
-  setChildDialogBody: Function | falsyType;
-  displayChildDialog: Function | falsyType;
-  closeChildDialog: Function | falsyType;
+  setChildDialogBody: ((node: React.ReactNode) => void) | null;
+  displayChildDialog: ((options: DialogData) => void) | null;
+  closeChildDialog: (() => void) | null;
 }
 
 export interface ChildDialogState {
@@ -94,12 +88,12 @@ export interface ChildDialogState {
 // CustomDialogSlice types
 export interface DialogData {
   isFullScreen?: boolean;
-  isOpen: boolean;
+  isOpen?: boolean;
   title: string;
-  nolabel: string;
-  yeslabel: string;
-  loadingYeslabel: string;
-  action: Function | falsyType;
+  nolabel?: string;
+  yeslabel?: string;
+  loadingYeslabel?: string;
+  action?: Function | null;
 }
 
 export interface CustomDialogState {
@@ -107,7 +101,7 @@ export interface CustomDialogState {
   dialogData: DialogData;
   showDialogActions: boolean;
   showDialogClose?: boolean;
-  closeDialog?: Function;
+  closeDialog?: (() => void) | null;
 }
 
 // FormfieldSlice types
@@ -143,19 +137,48 @@ export interface AxiosErrorType {
   };
 }
 
-export type ButtonEventHandler = MouseEventHandler<HTMLButtonElement>;
+export interface EditPwdData {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+export interface EditPwdDataOptions {
+  submitUpdatedPassword: boolean;
+}
+
+export type ClickEventHandler = MouseEventHandler<HTMLElement>;
+export type DialogBodySetter = (node: React.ReactNode) => void;
+export type InputRef = MutableRefObject<HTMLInputElement>;
+export type SpanRef = MutableRefObject<HTMLSpanElement>;
+export type StateSetter<T> = Dispatch<SetStateAction<T>>;
+export type AnchorSetter = StateSetter<HTMLElement | null>;
+export type ErrorType = AxiosErrorType | Error | string;
 
 export interface AttachmentData {
   attachmentData: any;
-  attachmentPreviewUrl: string | falsyType;
+  attachmentPreviewUrl: string | null;
+}
+
+export interface FileData {
+  fileName: string | null;
+  isAudio: boolean;
+}
+
+export interface AttachmentFileData {
+  msgId?: string;
+  fileUrl: string;
+  file_id: string;
+  file_name: string;
+  size?: number;
 }
 
 export interface MsgAttachmentProps {
   msgSent?: boolean;
   isEditMode: boolean;
-  fileEditIcons: any;
-  downloadingFileId?: string | falsyType;
-  loadingMediaId?: string | falsyType;
+  fileEditIcons: React.ReactNode;
+  downloadingFileId?: string | null;
+  loadingMediaId?: string | null;
   isPreview: boolean;
-  fileData: any;
+  fileData: FileData | AttachmentFileData;
 }

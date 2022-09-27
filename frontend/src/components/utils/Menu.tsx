@@ -1,4 +1,6 @@
-import { Menu as MuiMenu } from "@mui/material";
+import { Menu as MuiMenu, MenuProps } from "@mui/material";
+import { Dispatch, SetStateAction } from "react";
+import { AnchorSetter } from "../../utils/AppTypes";
 
 export const menuPaperProps = {
   elevation: 0,
@@ -20,20 +22,25 @@ export const menuItemProps = {
 
 export const menuIconProps = { color: "lightblue" };
 
+interface AnchorProps {
+  menuAnchor: HTMLElement;
+  setMenuAnchor: AnchorSetter;
+}
+
 const Menu = ({
   children,
+  open,
   menuAnchor,
   setMenuAnchor,
   transformOrigin,
   anchorOrigin,
-}) => {
-  const isMenuOpen = Boolean(menuAnchor);
+}: MenuProps & AnchorProps) => {
   const closeMenu = () => setMenuAnchor(null);
 
   return (
     <MuiMenu
       anchorEl={menuAnchor}
-      open={isMenuOpen}
+      open={open}
       onClose={closeMenu}
       onClick={closeMenu}
       PaperProps={menuPaperProps}

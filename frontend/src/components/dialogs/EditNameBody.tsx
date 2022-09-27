@@ -1,11 +1,29 @@
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { selectFormfieldState } from "../../store/slices/FormfieldSlice";
+import { useAppSelector } from "../../store/storeHooks";
 
-const EditNameBody = ({ originalName, getUpdatedName, placeholder }) => {
+interface Props {
+  originalName: string;
+  getUpdatedName: Function;
+  placeholder: string;
+}
+
+const EditNameBody = ({ originalName, getUpdatedName, placeholder }: Props) => {
   const { loading, formFieldClassName, inputFieldClassName } =
-    useSelector(selectFormfieldState);
+    useAppSelector(selectFormfieldState);
   const [name, setName] = useState(originalName);
+
+  const onChangeHandler: React.ChangeEventHandler<HTMLInputElement> = (e) =>
+    setName(e.target.value);
+
+  const onKeyDownHandler: React.KeyboardEventHandler<HTMLInputElement> = (
+    e
+  ) => {
+    if (e.key === "Enter") {
+      // Submit updated group name
+      getUpdatedName(name, { submitUpdatedName: true });
+    }
+  };
 
   useEffect(() => {
     getUpdatedName(name);
@@ -19,13 +37,8 @@ const EditNameBody = ({ originalName, getUpdatedName, placeholder }) => {
       <input
         type="text"
         value={name}
-        onChange={(e) => setName(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            // Submit updated group name
-            getUpdatedName(name, { submitUpdatedName: true });
-          }
-        }}
+        onChange={onChangeHandler}
+        onKeyDown={onKeyDownHandler}
         name="editname"
         autoFocus
         className={`${inputFieldClassName} mt-1`}

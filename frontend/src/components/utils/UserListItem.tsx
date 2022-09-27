@@ -1,6 +1,7 @@
 import { Avatar } from "@mui/material";
+import { UserType } from "../../utils/AppTypes";
 import { truncateString } from "../../utils/appUtils";
-import getCustomTooltip from "../utils/CustomTooltip";
+import getCustomTooltip from "./CustomTooltip";
 
 const arrowStyles = { color: "#A30CA7" };
 const tooltipStyles = {
@@ -14,7 +15,13 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const UserListItem = ({ user, truncateValues }) => {
+interface Props {
+  user: UserType;
+  truncateValues: number[];
+}
+
+const UserListItem = ({ user, truncateValues }: Props) => {
+  if (!user) return <></>;
   const { _id, name, email, profilePic } = user;
   const [max, index] = truncateValues;
 
@@ -27,6 +34,7 @@ const UserListItem = ({ user, truncateValues }) => {
         data-user={_id}
         title={`${name} (${email})`}
         placement="top-start"
+        className=""
         arrow
       >
         <Avatar

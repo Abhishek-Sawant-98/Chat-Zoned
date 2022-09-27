@@ -13,7 +13,7 @@ import { getAxiosConfig } from "../../utils/appUtils";
 import { useAppDispatch, useAppSelector } from "../../store/storeHooks";
 import {
   AxiosErrorType,
-  ButtonEventHandler,
+  ClickEventHandler,
   ToastData,
 } from "../../utils/AppTypes";
 import { AxiosRequestConfig } from "axios";
@@ -48,7 +48,7 @@ const Login = () => {
       });
     };
 
-  const handleLogin: ButtonEventHandler = async (e: MouseEvent) => {
+  const handleLogin: ClickEventHandler = async (e: MouseEvent) => {
     e.preventDefault();
     // return dispatch(setLoading(true));
     if (!email || !password) {
@@ -100,7 +100,7 @@ const Login = () => {
     }
   };
 
-  const handleReset: ButtonEventHandler = (e: MouseEvent) => {
+  const handleReset: ClickEventHandler = (e: MouseEvent) => {
     e.preventDefault();
     setUserCredentials({
       email: "",
@@ -108,7 +108,7 @@ const Login = () => {
     });
   };
 
-  const setGuestCredentials: ButtonEventHandler = (e: MouseEvent) => {
+  const setGuestCredentials: ClickEventHandler = (e: MouseEvent) => {
     e.preventDefault();
     setUserCredentials({
       email: "guest.user@gmail.com",

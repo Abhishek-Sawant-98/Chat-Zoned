@@ -6,13 +6,15 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 import animationData from "../animations/chat-gif.json";
 import { selectAppState } from "../store/slices/AppSlice";
 import { selectFormfieldState } from "../store/slices/FormfieldSlice";
-import type { UserType } from "../utils/AppTypes";
+import type { SpanRef, UserType } from "../utils/AppTypes";
 import { useAppSelector } from "../store/storeHooks";
+
+const COPYRIGHT_YEAR = new Date().getFullYear();
 
 const HomePage = () => {
   const { loggedInUser } = useAppSelector(selectAppState);
   const { disableIfLoading } = useAppSelector(selectFormfieldState);
-  const appGif = useRef<HTMLDivElement>();
+  const appGif = useRef<HTMLSpanElement>();
 
   const [showLogin, setShowLogin] = useState(true);
   const navigate: NavigateFunction = useNavigate();
@@ -31,7 +33,7 @@ const HomePage = () => {
         <section className="homepage container-fluid d-flex flex-column p-4">
           <section className="homepage__header container pt-0 pb-2 ps-1 pe-4 mb-2 user-select-none">
             <LottieAnimation
-              ref={appGif as React.Ref<HTMLDivElement>}
+              ref={appGif as SpanRef}
               className={"d-inline-block me-2"}
               style={{ width: "35px", height: "35px" }}
               animationData={animationData}
@@ -69,7 +71,7 @@ const HomePage = () => {
       )}
       {showLogin && (
         <div className={`footer fs-5 w-75 text-light`}>
-          &copy; 2022 Made with 💙 by &nbsp;
+          &copy; {COPYRIGHT_YEAR} Made with 💙 by &nbsp;
           <a
             id="footerLink"
             className="text-decoration-none"

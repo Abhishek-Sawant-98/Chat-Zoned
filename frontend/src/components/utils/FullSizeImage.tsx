@@ -1,7 +1,13 @@
 const FILE_STYLES = { width: "90vw", height: "82vh", borderRadius: 10 };
-const PLACEHOLDER_IMG = process.env.REACT_APP_PLACEHOLDER_IMG_URL;
+const PLACEHOLDER_IMG = process.env.REACT_APP_PLACEHOLDER_IMG_URL as string;
 
-const FullSizeImage = ({ event, audioSrc, videoSrc }) => {
+interface Props {
+  event: any;
+  audioSrc?: string;
+  videoSrc?: string;
+}
+
+const FullSizeImage = ({ event, audioSrc, videoSrc }: Props) => {
   return (
     <div className="d-flex justify-content-center align-items-center h-100">
       {audioSrc ? (

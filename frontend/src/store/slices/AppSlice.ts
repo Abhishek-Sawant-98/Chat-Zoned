@@ -2,8 +2,6 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   AppState,
   ChatType,
-  falsyType,
-  GroupInfo,
   UserType,
 } from "../../utils/AppTypes";
 import type { RootState } from "../store";
@@ -38,7 +36,7 @@ const AppSlice = createSlice({
     toggleRefresh: (state) => {
       state.refresh = !state.refresh;
     },
-    setGroupInfo: (state, action: PayloadAction<GroupInfo>) => {
+    setGroupInfo: (state, action: PayloadAction<ChatType>) => {
       state.groupInfo = action.payload;
     },
     setFetchMsgs: (state, action: PayloadAction<boolean>) => {
@@ -47,7 +45,7 @@ const AppSlice = createSlice({
     setDeleteNotifsOfChat: (state, action: PayloadAction<string>) => {
       state.deleteNotifsOfChat = action.payload;
     },
-    setClientSocket: (state, action: PayloadAction<Object | falsyType>) => {
+    setClientSocket: (state, action: PayloadAction<Object | null>) => {
       state.clientSocket = action.payload;
     },
     setSocketConnected: (state, action: PayloadAction<boolean>) => {
