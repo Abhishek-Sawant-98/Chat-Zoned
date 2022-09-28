@@ -26,7 +26,7 @@
 ## Deployed Links 👇
 
 ### Heroku  👉 <https://chat-zoned.herokuapp.com> 🚀
-### Railway  👉 <https://chat-zoned.up.railway.app/> 🚀
+### Railway  👉 <https://chat-zoned.up.railway.app> 🚀
 
 </div>
 
