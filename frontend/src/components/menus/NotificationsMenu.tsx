@@ -44,7 +44,7 @@ const NotificationsMenu = ({ chats, anchor, setAnchor }: Props) => {
     }
   });
 
-  const chatNotifClickHandler: ClickEventHandler = (e: MouseEvent) => {
+  const chatNotifClickHandler: ClickEventHandler = (e) => {
     const chatNotifId =
       (e.target as HTMLElement).dataset.notifGroup ||
       ((e.target as HTMLElement).parentNode as HTMLElement).dataset.notifGroup;

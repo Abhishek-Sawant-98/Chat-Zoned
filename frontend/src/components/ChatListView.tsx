@@ -97,7 +97,7 @@ const ChatListView = ({
     );
   };
 
-  const displayFullSizeImage = (e: MouseEvent) => {
+  const displayFullSizeImage = (e: React.MouseEvent) => {
     dispatch(setShowDialogActions(false));
     setDialogBody(<FullSizeImage event={e} />);
     dispatch(
@@ -166,7 +166,7 @@ const ChatListView = ({
     );
   }, 600);
 
-  const onChatItemClick: ClickEventHandler = (e: MouseEvent) => {
+  const onChatItemClick: ClickEventHandler = (e) => {
     const { dataset } = e.target as HTMLElement;
     const parentDataset = ((e.target as HTMLElement)?.parentNode as HTMLElement)
       .dataset;
@@ -211,7 +211,6 @@ const ChatListView = ({
           <CustomTooltip
             title="Create New Group Chat"
             placement="bottom-end"
-            className=""
             arrow
           >
             <button
@@ -255,7 +254,7 @@ const ChatListView = ({
                 <ChatListItem
                   key={chat?._id}
                   chat={chat}
-                  chatNotifCount={chatNotifCount || "" as number | string}
+                  chatNotifCount={chatNotifCount || ("" as number | string)}
                   typingChatUser={
                     typingChatUsers?.find(
                       (u) => u?.toString()?.split("---")[0] === chat?._id

@@ -1,23 +1,21 @@
 import { Clear, Search } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
-import { forwardRef, LegacyRef, MutableRefObject, useState } from "react";
-import { useSelector } from "react-redux";
+import { forwardRef, LegacyRef, useState } from "react";
 import { selectFormfieldState } from "../../store/slices/FormfieldSlice";
-import { InputRef } from "../../utils/AppTypes";
+import { useAppSelector } from "../../store/storeHooks";
+import { ChangeEventHandler, InputRef } from "../../utils/AppTypes";
 
 interface Props {
-  searchHandler: Function;
+  searchHandler: ChangeEventHandler;
   autoFocus: boolean;
   placeholder: string;
-  clearInput: Function;
+  clearInput: () => void;
 }
-
-
 
 const SearchInput = forwardRef<HTMLInputElement, Props>((props, inputRef) => {
   const { searchHandler, autoFocus, placeholder, clearInput } = props;
   const { disableIfLoading, formFieldClassName, inputFieldClassName } =
-    useSelector(selectFormfieldState);
+    useAppSelector(selectFormfieldState);
 
   // To display/hide clear search (<Close />) icon when typing
   const [typing, setTyping] = useState(false);
@@ -28,6 +26,11 @@ const SearchInput = forwardRef<HTMLInputElement, Props>((props, inputRef) => {
     setTyping(false); // Hide '<Close />' icon
     (inputRef as InputRef).current.focus();
     clearInput();
+  };
+
+  const onChangeHandler: ChangeEventHandler = (e) => {
+    setTyping(Boolean(e.target.value.trim()));
+    searchHandler(e);
   };
 
   return (
@@ -42,10 +45,7 @@ const SearchInput = forwardRef<HTMLInputElement, Props>((props, inputRef) => {
         <input
           type="text"
           ref={inputRef as LegacyRef<HTMLInputElement>}
-          onChange={(e) => {
-            setTyping(Boolean(e.target.value.trim()));
-            searchHandler(e);
-          }}
+          onChange={onChangeHandler}
           autoFocus={autoFocus}
           placeholder={placeholder}
           className={`${inputFieldClassName

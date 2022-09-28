@@ -1,38 +1,42 @@
-import { useEffect, useRef, useState } from "react";
+import { SetStateAction, useEffect, useRef, useState } from "react";
 import { debounce } from "../../utils/appUtils";
 import SearchInput from "../utils/SearchInput";
 import GroupMemberItem from "../utils/GroupMemberItem";
 import MemberOptionsMenu from "../menus/MemberOptionsMenu";
 import ChildDialog from "../utils/ChildDialog";
-import { useSelector } from "react-redux";
 import { selectAppState } from "../../store/slices/AppSlice";
 import { selectChildDialogState } from "../../store/slices/ChildDialogSlice";
+import { useAppSelector } from "../../store/storeHooks";
+import { ClickEventHandler, UserType } from "../../utils/AppTypes";
 
-let filteredMembersCache = [];
+let filteredMembersCache: UserType[] = [];
 
 const ViewGroupMembers = () => {
-  const { loggedInUser, groupInfo } = useSelector(selectAppState);
-  const { childDialogMethods } = useSelector(selectChildDialogState);
+  const { loggedInUser, groupInfo } = useAppSelector(selectAppState);
+  const { childDialogMethods } = useAppSelector(selectChildDialogState);
   const [showDialogActions, setShowDialogActions] = useState(true);
   const [showDialogClose, setShowDialogClose] = useState(false);
   const groupMembers = groupInfo?.users;
   const admins = groupInfo?.groupAdmins;
-  const [clickedMember, setClickedMember] = useState(null);
-  const [memberOptionsMenuAnchor, setMemberOptionsMenuAnchor] = useState(null);
+  const [clickedMember, setClickedMember] = useState<UserType | null>(null);
+  const [memberOptionsMenuAnchor, setMemberOptionsMenuAnchor] =
+    useState<HTMLElement | null>(null);
   // LoggedInUser and Group Admins should be at the top
   const sortMembers = () => {
     return [
       loggedInUser,
-      ...admins?.filter((admin) => admin?._id !== loggedInUser?._id),
+      ...admins?.filter((admin: UserType) => admin?._id !== loggedInUser?._id),
       ...groupMembers?.filter(
-        (member) =>
+        (member: UserType) =>
           member?._id !== loggedInUser?._id &&
-          admins?.every((admin) => admin?._id !== member?._id)
+          admins?.every((admin: UserType) => admin?._id !== member?._id)
       ),
     ].map((member) => {
       return {
         ...member,
-        isGroupAdmin: admins?.some((admin) => member?._id === admin?._id),
+        isGroupAdmin: admins?.some(
+          (admin: UserType) => member?._id === admin?._id
+        ),
       };
     });
   };
@@ -45,11 +49,14 @@ const ViewGroupMembers = () => {
   }, [groupInfo]);
 
   const filterMemberInput = useRef(null);
-  const [filteredMembers, setFilteredMembers] = useState(filteredMembersCache);
+  const [filteredMembers, setFilteredMembers] =
+    useState<UserType[]>(filteredMembersCache);
 
   // Debouncing filterMembers method to limit the no. of fn calls
-  const filterMembers = debounce((e) => {
-    const memberNameInput = e.target?.value?.toLowerCase().trim();
+  const filterMembers = debounce((e: KeyboardEvent) => {
+    const memberNameInput = (e.target as HTMLInputElement)?.value
+      ?.toLowerCase()
+      .trim();
     if (!memberNameInput) {
       return setFilteredMembers(filteredMembersCache);
     }
@@ -62,7 +69,27 @@ const ViewGroupMembers = () => {
     );
   }, 600);
 
-  const openMemberOptionsMenu = (e) => setMemberOptionsMenuAnchor(e.target);
+  const onGroupMemberItemClick: ClickEventHandler = (e) => {
+    const userId =
+      (e.target as HTMLElement)?.dataset.user ||
+      ((e.target as HTMLElement)?.parentNode as HTMLElement).dataset.user ||
+      (e.target as HTMLImageElement).alt;
+    if (userId) {
+      // Don't display member options menu for loggedInUser
+      if (loggedInUser?._id === userId) return;
+
+      setClickedMember(
+        filteredMembers?.find((m: UserType) => m?._id === userId) as UserType
+      );
+      openMemberOptionsMenu(e);
+    }
+  };
+
+  const openMemberOptionsMenu: ClickEventHandler = (e) =>
+    setMemberOptionsMenuAnchor(e.target as SetStateAction<HTMLElement | null>);
+
+  const clearInputHandler: () => void = () =>
+    setFilteredMembers(filteredMembersCache);
 
   return (
     <div
@@ -80,7 +107,7 @@ const ViewGroupMembers = () => {
           searchHandler={filterMembers}
           autoFocus={false}
           placeholder="Search Member"
-          clearInput={() => setFilteredMembers(filteredMembersCache)}
+          clearInput={clearInputHandler}
         />
       </section>
       {/* Member list */}
@@ -89,25 +116,11 @@ const ViewGroupMembers = () => {
           <div
             // 'Event delegation' (add only one event listener for
             // parent element instead of adding for each child element)
-            onClick={(e) => {
-              const userId =
-                e.target?.dataset.user ||
-                e.target.parentNode.dataset.user ||
-                e.target.alt;
-              if (userId) {
-                // Don't display member options menu for loggedInUser
-                if (loggedInUser?._id === userId) return;
-
-                setClickedMember(
-                  filteredMembers?.find((m) => m?._id === userId)
-                );
-                openMemberOptionsMenu(e);
-              }
-            }}
+            onClick={onGroupMemberItemClick}
           >
-            {filteredMembers.map((member) => (
+            {filteredMembers.map((member: UserType) => (
               <GroupMemberItem
-                key={member._id}
+                key={member?._id}
                 user={member}
                 truncateValues={[21, 18]}
               />
@@ -120,7 +133,7 @@ const ViewGroupMembers = () => {
         )}
       </section>
       <MemberOptionsMenu
-        anchor={memberOptionsMenuAnchor}
+        anchor={memberOptionsMenuAnchor as HTMLElement}
         setAnchor={setMemberOptionsMenuAnchor}
         clickedMember={clickedMember}
         setShowDialogActions={setShowDialogActions}

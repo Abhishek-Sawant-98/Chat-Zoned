@@ -1,7 +1,7 @@
-import { ChangeEventHandler, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { selectFormfieldState } from "../../store/slices/FormfieldSlice";
 import { useAppSelector } from "../../store/storeHooks";
-import { EditPwdData, EditPwdDataOptions } from "../../utils/AppTypes";
+import { ChangeEventHandler, EditPwdData, EditPwdDataOptions, KeyboardEventHandler } from "../../utils/AppTypes";
 import PasswordVisibilityToggle from "../utils/PasswordVisibilityToggle";
 
 interface Props {
@@ -28,7 +28,7 @@ const ChangePasswordBody = ({ getUpdatedState }: Props) => {
     changePasswordData;
 
   const handleChangeFor =
-    (prop: string): ChangeEventHandler<HTMLInputElement> =>
+    (prop: string): ChangeEventHandler =>
     (e) => {
       setChangePasswordData({
         ...changePasswordData,
@@ -41,7 +41,7 @@ const ChangePasswordBody = ({ getUpdatedState }: Props) => {
     getUpdatedState(changePasswordData);
   }, [changePasswordData]);
 
-  const onEnterKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+  const onEnterKeyDown: KeyboardEventHandler = (e) => {
     if (e.key === "Enter") {
       // Submit updated password data
       getUpdatedState(changePasswordData, { submitUpdatedPassword: true });

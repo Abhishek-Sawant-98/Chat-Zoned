@@ -1,5 +1,10 @@
 import { Close } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
+import {
+  AttachmentData,
+  CustomTooltipType,
+  FileMetaData,
+} from "../../utils/AppTypes";
 import { truncateString } from "../../utils/appUtils";
 import MsgAttachment from "./MsgAttachment";
 
@@ -7,9 +12,9 @@ const PLACEHOLDER_IMG = process.env.REACT_APP_PLACEHOLDER_IMG_URL;
 
 interface Props {
   isEditMode: boolean;
-  attachmentData: any;
-  CustomTooltip: any;
-  fileEditIcons: any;
+  attachmentData: AttachmentData;
+  CustomTooltip: CustomTooltipType;
+  fileEditIcons?: React.ReactNode;
 }
 
 const AttachmentPreview = ({
@@ -18,10 +23,8 @@ const AttachmentPreview = ({
   CustomTooltip,
   fileEditIcons,
 }: Props) => {
-  const {
-    attachment: { name, type, size },
-    attachmentPreviewUrl,
-  } = attachmentData;
+  const { name, type, size } = attachmentData?.attachment as FileMetaData;
+  const { attachmentPreviewUrl } = attachmentData;
 
   const FILE_WRAPPER_CLASS = `${
     isEditMode ? "h-100" : "mt-4 h-50"
@@ -129,7 +132,7 @@ const AttachmentPreview = ({
             fileEditIcons={fileEditIcons}
             isPreview={true}
             fileData={{
-              fileUrl: attachmentPreviewUrl,
+              fileUrl: attachmentPreviewUrl as string,
               file_id: "",
               file_name: name,
               size,

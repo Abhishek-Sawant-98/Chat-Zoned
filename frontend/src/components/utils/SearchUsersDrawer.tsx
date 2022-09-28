@@ -115,7 +115,7 @@ const SearchUsersDrawer = ({ isDrawerOpen, setIsDrawerOpen }: Props) => {
     }
   };
 
-  const onUserItemClick: ClickEventHandler = (e: MouseEvent) => {
+  const onUserItemClick: ClickEventHandler = (e) => {
     const userId =
       (e.target as HTMLElement).dataset.user ||
       (e.target as HTMLImageElement).alt;

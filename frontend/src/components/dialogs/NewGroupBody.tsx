@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { SetStateAction, useRef, useState } from "react";
 import { Edit, KeyboardDoubleArrowLeft } from "@mui/icons-material";
 import getCustomTooltip from "../utils/CustomTooltip";
 import { getAxiosConfig, isImageFile, TWO_MB } from "../../utils/appUtils";
@@ -6,7 +6,6 @@ import EditPicMenu from "../menus/EditPicMenu";
 import axios from "../../utils/axios";
 import { Button, CircularProgress, DialogActions } from "@mui/material";
 import { btnCustomStyle, btnHoverStyle } from "../utils/CustomDialog";
-import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
   setGroupInfo,
@@ -18,6 +17,16 @@ import {
 } from "../../store/slices/FormfieldSlice";
 import { displayToast } from "../../store/slices/ToastSlice";
 import { hideDialog } from "../../store/slices/CustomDialogSlice";
+import {
+  AxiosErrorType,
+  ChangeEventHandler,
+  ClickEventHandler,
+  KeyboardEventHandler,
+  ToastData,
+  UserType,
+} from "../../utils/AppTypes";
+import { useAppDispatch, useAppSelector } from "../../store/storeHooks";
+import { AxiosRequestConfig } from "axios";
 
 const arrowStyles = { color: "#111" };
 const tooltipStyles = {
@@ -32,25 +41,30 @@ const tooltipStyles = {
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 const DEFAULT_GROUP_DP = process.env.REACT_APP_DEFAULT_GROUP_DP;
 
-const NewGroupBody = ({ closeChildDialog }) => {
+interface Props {
+  closeChildDialog: () => void;
+}
+
+const NewGroupBody = ({ closeChildDialog }: Props) => {
   const { loggedInUser, groupInfo, clientSocket, isSocketConnected } =
-    useSelector(selectAppState);
+    useAppSelector(selectAppState);
   const {
     loading,
     disableIfLoading,
     formFieldClassName,
     inputFieldClassName,
     formLabelClassName,
-  } = useSelector(selectFormfieldState);
-  const dispatch = useDispatch();
+  } = useAppSelector(selectFormfieldState);
+  const dispatch = useAppDispatch();
 
   const { chatDisplayPicUrl, chatName } = groupInfo;
-  const [editGroupDpMenuAnchor, setEditGroupDpMenuAnchor] = useState(null);
-  const imgInput = useRef();
+  const [editGroupDpMenuAnchor, setEditGroupDpMenuAnchor] =
+    useState<HTMLElement | null>(null);
+  const imgInput = useRef<HTMLInputElement | null>(null);
 
   // Click a button/icon upon 'Enter' or 'Space' keydown
-  const clickOnKeydown = (e) => {
-    if (e.key === " " || e.key === "Enter") e.target.click();
+  const clickOnKeydown: KeyboardEventHandler = (e) => {
+    if (e.key === " " || e.key === "Enter") (e.target as HTMLElement)?.click();
   };
 
   const displayWarning = (message = "Warning", duration = 3000) => {
@@ -60,7 +74,7 @@ const NewGroupBody = ({ closeChildDialog }) => {
         type: "warning",
         duration,
         position: "top-center",
-      })
+      } as ToastData)
     );
   };
 
@@ -80,11 +94,18 @@ const NewGroupBody = ({ closeChildDialog }) => {
       const formData = new FormData();
       formData.append("displayPic", chatDisplayPic);
       formData.append("chatName", chatName);
-      formData.append("users", JSON.stringify(users?.map((user) => user?._id)));
+      formData.append(
+        "users",
+        JSON.stringify(users?.map((user: UserType) => user?._id))
+      );
 
-      const { data } = await axios.post("/api/chat/group", formData, config);
+      const { data } = await axios.post(
+        "/api/chat/group",
+        formData,
+        config as AxiosRequestConfig
+      );
       if (isSocketConnected) {
-        clientSocket.emit("new grp created", {
+        clientSocket.emit("new_grp_created", {
           admin: loggedInUser,
           newGroup: data,
         });
@@ -95,7 +116,7 @@ const NewGroupBody = ({ closeChildDialog }) => {
           type: "success",
           duration: 2000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
 
       dispatch(setLoading(false));
@@ -107,20 +128,24 @@ const NewGroupBody = ({ closeChildDialog }) => {
       dispatch(
         displayToast({
           title: "Couldn't Create Group",
-          message: error.response?.data?.message || error.message,
+          message:
+            (error as AxiosErrorType).response?.data?.message ||
+            (error as Error)?.message ||
+            error,
           type: "error",
           duration: 5000,
           position: "top-center",
-        })
+        } as ToastData)
       );
     }
   };
 
-  const handleImgInputChange = (e) => {
-    const image = e.target.files[0];
-    if (!image) return;
+  const handleImgInputChange: ChangeEventHandler = (e) => {
+    if (!e.target?.files) return;
+    const imageFile = e.target.files[0];
+    if (!imageFile) return;
 
-    if (!isImageFile(image.name)) {
+    if (!isImageFile(imageFile.name)) {
       return dispatch(
         displayToast({
           title: "Invalid Image File",
@@ -128,24 +153,25 @@ const NewGroupBody = ({ closeChildDialog }) => {
           type: "warning",
           duration: 5000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
     }
 
-    if (image.size >= TWO_MB) {
+    if (imageFile.size >= TWO_MB) {
+      if (!imgInput?.current) return;
       imgInput.current.value = "";
       return displayWarning("Please Select an Image Smaller than 2 MB", 4000);
     }
     dispatch(
       setGroupInfo({
         ...groupInfo,
-        chatDisplayPic: image,
-        chatDisplayPicUrl: URL.createObjectURL(image),
+        chatDisplayPic: imageFile,
+        chatDisplayPicUrl: URL.createObjectURL(imageFile),
       })
     );
   };
 
-  const handleReset = (e) => {
+  const handleReset: ClickEventHandler = (e) => {
     e.preventDefault();
     dispatch(
       setGroupInfo({
@@ -154,11 +180,12 @@ const NewGroupBody = ({ closeChildDialog }) => {
         chatDisplayPicUrl: DEFAULT_GROUP_DP,
       })
     );
+    if (!imgInput?.current) return;
     imgInput.current.value = "";
   };
 
-  const openEditGroupDpMenu = (e) => {
-    setEditGroupDpMenuAnchor(e.target);
+  const openEditGroupDpMenu: ClickEventHandler = (e) => {
+    setEditGroupDpMenuAnchor(e.target as SetStateAction<HTMLElement | null>);
   };
 
   return (
@@ -187,9 +214,9 @@ const NewGroupBody = ({ closeChildDialog }) => {
         </CustomTooltip>
         {/* Edit/Delete profile pic menu */}
         <EditPicMenu
-          anchor={editGroupDpMenuAnchor}
+          anchor={editGroupDpMenuAnchor as HTMLElement}
           setAnchor={setEditGroupDpMenuAnchor}
-          selectProfilePic={() => imgInput.current.click()}
+          selectProfilePic={() => imgInput?.current?.click()}
           openDeletePhotoConfirmDialog={handleReset}
           deletePhotoCondition={
             !chatDisplayPicUrl?.endsWith("group_mbuvht.png")

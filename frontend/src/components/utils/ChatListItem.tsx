@@ -102,7 +102,6 @@ const ChatListItem = ({ chat, chatNotifCount, typingChatUser }: Props) => {
       <CustomTooltip
         title={`View ${isGroupChat ? "Group DP" : "Profile Pic"}`}
         placement="top-start"
-        className=""
         arrow
       >
         <Avatar

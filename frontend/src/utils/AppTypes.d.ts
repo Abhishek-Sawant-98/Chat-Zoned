@@ -1,3 +1,5 @@
+import { StyledComponent } from "@emotion/styled";
+import { TooltipProps } from "@mui/material";
 import { SetStateAction } from "react";
 
 // Reusable type declarations
@@ -33,7 +35,7 @@ export interface ChatInterface {
 export type ChatType = ChatInterface | null;
 
 export interface MessageInterface {
-  chat: string | ChatType;
+  chat: ChatType | string;
   content: string;
   createdAt: string;
   fileUrl?: string | null;
@@ -41,6 +43,7 @@ export interface MessageInterface {
   file_name?: string | null;
   sender: UserType;
   updatedAt?: string;
+  sent?: boolean;
   __v?: number;
   _id: string;
 }
@@ -143,11 +146,21 @@ export interface EditPwdData {
   confirmNewPassword: string;
 }
 
+export interface ProfileData {
+  memberProfilePic?: string;
+  memberName?: string;
+  memberEmail?: string;
+}
+
 export interface EditPwdDataOptions {
   submitUpdatedPassword: boolean;
 }
 
-export type ClickEventHandler = MouseEventHandler<HTMLElement>;
+// Event handlers
+export type ClickEventHandler = React.MouseEventHandler<HTMLElement>;
+export type ChangeEventHandler = React.ChangeEventHandler<HTMLInputElement>;
+export type KeyboardEventHandler = React.KeyboardEventHandler<HTMLElement>;
+
 export type DialogBodySetter = (node: React.ReactNode) => void;
 export type InputRef = MutableRefObject<HTMLInputElement>;
 export type SpanRef = MutableRefObject<HTMLSpanElement>;
@@ -155,9 +168,19 @@ export type StateSetter<T> = Dispatch<SetStateAction<T>>;
 export type AnchorSetter = StateSetter<HTMLElement | null>;
 export type ErrorType = AxiosErrorType | Error | string;
 
+export type CustomTooltipType = StyledComponent<TooltipProps, {}, {}>;
+
+export interface FileMetaData {
+  name: string;
+  type: string;
+  size: number;
+}
+
 export interface AttachmentData {
-  attachmentData: any;
+  attachment: File | string | FileMetaData;
   attachmentPreviewUrl: string | null;
+  content?: string;
+  mediaDuration?: string;
 }
 
 export interface FileData {

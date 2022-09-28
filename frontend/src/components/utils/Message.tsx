@@ -1,3 +1,4 @@
+import { StyledComponent } from "@emotion/styled";
 import {
   AttachFile,
   Close,
@@ -7,11 +8,11 @@ import {
   Edit,
   KeyboardArrowDown,
 } from "@mui/icons-material";
-import { Avatar, CircularProgress, IconButton } from "@mui/material";
-import { forwardRef, MutableRefObject, useEffect, useRef } from "react";
+import { Avatar, CircularProgress, IconButton, TooltipProps } from "@mui/material";
+import { forwardRef, useEffect, useRef } from "react";
 import { selectAppState } from "../../store/slices/AppSlice";
 import { useAppSelector } from "../../store/storeHooks";
-import { AttachmentFileData, MessageType, SpanRef } from "../../utils/AppTypes";
+import { AttachmentData, AttachmentFileData, CustomTooltipType, MessageType, SpanRef } from "../../utils/AppTypes";
 import {
   msgTimeStringOf,
   msgDateStringOf,
@@ -32,11 +33,11 @@ interface Props {
   msgEditMode: boolean;
   clickedMsgId: string;
   msgFileRemoved: boolean;
-  CustomTooltip: any;
+  CustomTooltip: CustomTooltipType;
   msgSent: boolean;
   currMsg: MessageType;
   prevMsg: MessageType;
-  attachmentData: any;
+  attachmentData: AttachmentData;
 }
 
 const Message = forwardRef(

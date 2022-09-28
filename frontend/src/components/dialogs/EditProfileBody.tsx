@@ -23,8 +23,10 @@ import { displayToast } from "../../store/slices/ToastSlice";
 import { useAppDispatch, useAppSelector } from "../../store/storeHooks";
 import {
   AxiosErrorType,
+  ChangeEventHandler,
   ClickEventHandler,
   ErrorType,
+  KeyboardEventHandler,
   ToastData,
   UserType,
 } from "../../utils/AppTypes";
@@ -126,16 +128,14 @@ const EditProfileBody = () => {
   };
 
   // Click a button/icon upon 'Enter' or 'Space' keydown
-  const clickOnKeydown: React.KeyboardEventHandler<HTMLButtonElement> = (e) => {
+  const clickOnKeydown: KeyboardEventHandler = (e) => {
     if (e.key === " " || e.key === "Enter") {
       (e.target as HTMLElement).click();
     }
   };
 
   // Update Profile Pic
-  const handleImgInputChange: React.ChangeEventHandler<
-    HTMLInputElement
-  > = async (e) => {
+  const handleImgInputChange: ChangeEventHandler = async (e) => {
     if (!e.target?.files) return;
     const imageFile = e.target.files[0];
     if (!imageFile) return;
@@ -252,7 +252,7 @@ const EditProfileBody = () => {
   };
 
   // Open edit name dialog
-  const openEditNameDialog: React.MouseEventHandler<HTMLButtonElement> = () => {
+  const openEditNameDialog: ClickEventHandler = () => {
     if (!setChildDialogBody || !displayChildDialog) return;
     setChildDialogBody(
       <EditNameBody
@@ -283,7 +283,7 @@ const EditProfileBody = () => {
     });
   };
 
-  const openEditProfilePicMenu: ClickEventHandler = (e: MouseEvent) => {
+  const openEditProfilePicMenu: ClickEventHandler = (e) => {
     setEditProfilePicMenuAnchor(e.target as SetStateAction<HTMLElement | null>);
   };
 
@@ -309,12 +309,7 @@ const EditProfileBody = () => {
             alt="profilePic"
           />
           {!isGuestUser && (
-            <CustomTooltip
-              title="Edit Profile Pic"
-              className=""
-              placement="top-start"
-              arrow
-            >
+            <CustomTooltip title="Edit Profile Pic" placement="top-start" arrow>
               <i
                 id="editProfilePic"
                 tabIndex={2}
@@ -351,12 +346,7 @@ const EditProfileBody = () => {
       {/* View Name */}
       <section className={`dialogField text-center mb-2`}>
         <div className="input-group" style={{ marginTop: "-15px" }}>
-          <CustomTooltip
-            title={name as string}
-            placement="top"
-            className=""
-            arrow
-          >
+          <CustomTooltip title={name as string} placement="top" arrow>
             <div
               className="w-100 h1 fw-bold mx-4 text-info"
               style={{ fontSize: "32px", wordWrap: "break-word" }}
@@ -365,7 +355,7 @@ const EditProfileBody = () => {
             </div>
           </CustomTooltip>
           {!isGuestUser && (
-            <CustomTooltip title="Edit Name" placement="top" className="" arrow>
+            <CustomTooltip title="Edit Name" placement="top" arrow>
               <IconButton
                 tabIndex={3}
                 onKeyDown={clickOnKeydown}
@@ -391,7 +381,6 @@ const EditProfileBody = () => {
         <CustomTooltip
           title={((email?.length as number) > 24 ? email : "") as string}
           placement="bottom"
-          className=""
           arrow
         >
           <span className="h4" style={{ color: "lightblue" }}>

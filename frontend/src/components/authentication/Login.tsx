@@ -48,7 +48,7 @@ const Login = () => {
       });
     };
 
-  const handleLogin: ClickEventHandler = async (e: MouseEvent) => {
+  const handleLogin: ClickEventHandler = async (e) => {
     e.preventDefault();
     // return dispatch(setLoading(true));
     if (!email || !password) {
@@ -100,7 +100,7 @@ const Login = () => {
     }
   };
 
-  const handleReset: ClickEventHandler = (e: MouseEvent) => {
+  const handleReset: ClickEventHandler = (e) => {
     e.preventDefault();
     setUserCredentials({
       email: "",
@@ -108,7 +108,7 @@ const Login = () => {
     });
   };
 
-  const setGuestCredentials: ClickEventHandler = (e: MouseEvent) => {
+  const setGuestCredentials: ClickEventHandler = (e) => {
     e.preventDefault();
     setUserCredentials({
       email: "guest.user@gmail.com",

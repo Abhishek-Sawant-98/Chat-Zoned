@@ -43,10 +43,10 @@ const ChatpageHeader = ({ chats, setDialogBody }: Props) => {
   const [profileSettingsMenuAnchor, setProfileSettingsMenuAnchor] =
     useState<HTMLElement | null>(null);
 
-  const openNotificationMenu: ClickEventHandler = (e: MouseEvent) =>
+  const openNotificationMenu: ClickEventHandler = (e) =>
     setNotificationsMenuAnchor(e.target as SetStateAction<HTMLElement | null>);
 
-  const openProfileSettingsMenu: ClickEventHandler = (e: MouseEvent) =>
+  const openProfileSettingsMenu: ClickEventHandler = (e) =>
     setProfileSettingsMenuAnchor(
       e.target as SetStateAction<HTMLElement | null>
     );
@@ -71,7 +71,6 @@ const ChatpageHeader = ({ chats, setDialogBody }: Props) => {
       <CustomTooltip
         title="Search Users to Start or Open a Chat"
         placement="bottom-start"
-        className=""
         arrow
       >
         <button
@@ -103,12 +102,7 @@ const ChatpageHeader = ({ chats, setDialogBody }: Props) => {
 
       {/* User notification and profile settings icons */}
       <div>
-        <CustomTooltip
-          title={`Notifications`}
-          placement="bottom-end"
-          className=""
-          arrow
-        >
+        <CustomTooltip title={`Notifications`} placement="bottom-end" arrow>
           <IconButton
             className="position-relative mx-1"
             onClick={openNotificationMenu}
@@ -141,12 +135,7 @@ const ChatpageHeader = ({ chats, setDialogBody }: Props) => {
             <Notifications className={`text-light`} />
           </IconButton>
         </CustomTooltip>
-        <CustomTooltip
-          title="Profile Settings"
-          className=""
-          placement="bottom-end"
-          arrow
-        >
+        <CustomTooltip title="Profile Settings" placement="bottom-end" arrow>
           <IconButton
             className="mx-md-3 mx-lg-4"
             sx={{

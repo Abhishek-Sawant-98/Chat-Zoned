@@ -34,7 +34,6 @@ const UserListItem = ({ user, truncateValues }: Props) => {
         data-user={_id}
         title={`${name} (${email})`}
         placement="top-start"
-        className=""
         arrow
       >
         <Avatar

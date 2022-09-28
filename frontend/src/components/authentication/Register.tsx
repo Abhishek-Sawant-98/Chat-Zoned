@@ -64,7 +64,7 @@ const Register = () => {
       setUserData({ ...userData, [prop]: e.target.value });
     };
 
-  const handleRegister: ClickEventHandler = async (e: MouseEvent) => {
+  const handleRegister: ClickEventHandler = async (e) => {
     e.preventDefault();
     // return dispatch(setLoading(true));
 
@@ -156,7 +156,7 @@ const Register = () => {
     }
   };
 
-  const handleReset: ClickEventHandler = (e: MouseEvent) => {
+  const handleReset: ClickEventHandler = (e) => {
     e.preventDefault();
     setUserData({
       name: "",

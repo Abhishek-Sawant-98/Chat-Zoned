@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { selectFormfieldState } from "../../store/slices/FormfieldSlice";
 import { useAppSelector } from "../../store/storeHooks";
+import { ChangeEventHandler } from "../../utils/AppTypes";
 
 interface Props {
   originalName: string;
@@ -13,7 +14,7 @@ const EditNameBody = ({ originalName, getUpdatedName, placeholder }: Props) => {
     useAppSelector(selectFormfieldState);
   const [name, setName] = useState(originalName);
 
-  const onChangeHandler: React.ChangeEventHandler<HTMLInputElement> = (e) =>
+  const onChangeHandler: ChangeEventHandler = (e) =>
     setName(e.target.value);
 
   const onKeyDownHandler: React.KeyboardEventHandler<HTMLInputElement> = (

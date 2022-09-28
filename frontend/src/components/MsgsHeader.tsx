@@ -1,8 +1,8 @@
 import { ArrowBack, Close } from "@mui/icons-material";
 import { Avatar, IconButton } from "@mui/material";
-import { useSelector } from "react-redux";
 import { selectAppState } from "../store/slices/AppSlice";
-import { ClickEventHandler } from "../utils/AppTypes";
+import { useAppSelector } from "../store/storeHooks";
+import { ClickEventHandler, CustomTooltipType } from "../utils/AppTypes";
 import { getOneToOneChatReceiver, truncateString } from "../utils/appUtils";
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
   openGroupInfoDialog: ClickEventHandler;
   openViewProfileDialog: ClickEventHandler;
   hideEmojiPicker: ClickEventHandler;
-  CustomTooltip: any;
+  CustomTooltip: CustomTooltipType;
 }
 
 const MsgsHeader = ({
@@ -20,7 +20,7 @@ const MsgsHeader = ({
   hideEmojiPicker,
   CustomTooltip,
 }: Props) => {
-  const { loggedInUser, selectedChat } = useSelector(selectAppState);
+  const { loggedInUser, selectedChat } = useAppSelector(selectAppState);
   const chatName = selectedChat?.isGroupChat
     ? selectedChat?.chatName
     : getOneToOneChatReceiver(loggedInUser, selectedChat?.users)?.name;

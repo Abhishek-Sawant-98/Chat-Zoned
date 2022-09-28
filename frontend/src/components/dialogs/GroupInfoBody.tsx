@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { SetStateAction, useRef, useState } from "react";
 import {
   Delete,
   Edit,
@@ -21,7 +21,6 @@ import AddMembersToGroup from "./AddMembersToGroup";
 import ViewGroupMembers from "./ViewGroupMembers";
 import getCustomTooltip from "../utils/CustomTooltip";
 import FullSizeImage from "../utils/FullSizeImage";
-import { useDispatch, useSelector } from "react-redux";
 import {
   selectAppState,
   setGroupInfo,
@@ -35,6 +34,19 @@ import {
 import { selectChildDialogState } from "../../store/slices/ChildDialogSlice";
 import { displayToast } from "../../store/slices/ToastSlice";
 import { hideDialog } from "../../store/slices/CustomDialogSlice";
+import { useAppDispatch, useAppSelector } from "../../store/storeHooks";
+import {
+  AxiosErrorType,
+  ChangeEventHandler,
+  ChatType,
+  ClickEventHandler,
+  ErrorType,
+  KeyboardEventHandler,
+  MessageType,
+  ToastData,
+  UserType,
+} from "../../utils/AppTypes";
+import { AxiosRequestConfig } from "axios";
 
 const arrowStyles = { color: "#111" };
 const tooltipStyles = {
@@ -48,12 +60,16 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const GroupInfoBody = ({ messages, deleteNotifications }) => {
-  const { loggedInUser, refresh, groupInfo, clientSocket, isSocketConnected } =
-    useSelector(selectAppState);
-  const { childDialogMethods } = useSelector(selectChildDialogState);
-  const { loading, disableIfLoading } = useSelector(selectFormfieldState);
-  const dispatch = useDispatch();
+interface Props {
+  messages: MessageType[];
+}
+
+const GroupInfoBody = ({ messages }: Props) => {
+  const { loggedInUser, groupInfo, clientSocket, isSocketConnected } =
+    useAppSelector(selectAppState);
+  const { childDialogMethods } = useAppSelector(selectChildDialogState);
+  const { loading, disableIfLoading } = useAppSelector(selectFormfieldState);
+  const dispatch = useAppDispatch();
   const { setChildDialogBody, displayChildDialog, closeChildDialog } =
     childDialogMethods;
 
@@ -63,13 +79,14 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
   const admins = groupInfo?.groupAdmins;
 
   const [uploading, setUploading] = useState(false);
-  const [editGroupDpMenuAnchor, setEditGroupDpMenuAnchor] = useState(null);
+  const [editGroupDpMenuAnchor, setEditGroupDpMenuAnchor] =
+    useState<HTMLElement | null>(null);
   const isUserGroupAdmin = admins?.some(
-    (admin) => admin?._id === loggedInUser?._id
+    (admin: UserType) => admin?._id === loggedInUser?._id
   );
   const [showDialogActions, setShowDialogActions] = useState(true);
   const [showDialogClose, setShowDialogClose] = useState(false);
-  const imgInput = useRef(null);
+  const imgInput = useRef<HTMLInputElement | null>(null);
   const btnClassName = "w-100 btn text-light fs-5";
 
   const displayWarning = (message = "Warning", duration = 3000) => {
@@ -79,22 +96,25 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
         type: "warning",
         duration,
         position: "top-center",
-      })
+      } as ToastData)
     );
   };
 
   const displayError = (
-    error = "Oops! Something went wrong",
+    error: ErrorType = "Oops! Something went wrong",
     title = "Operation Failed"
   ) => {
     dispatch(
       displayToast({
         title,
-        message: error.response?.data?.message || error.message,
+        message:
+          (error as AxiosErrorType).response?.data?.message ||
+          (error as Error)?.message ||
+          error,
         type: "error",
         duration: 5000,
         position: "top-center",
-      })
+      } as ToastData)
     );
   };
 
@@ -105,31 +125,34 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
         type: "success",
         duration: 3000,
         position: "bottom-center",
-      })
+      } as ToastData)
     );
   };
 
-  const updateView = (data) => {
+  const updateView = (data: ChatType) => {
     dispatch(setGroupInfo(data));
     dispatch(toggleRefresh());
     dispatch(setSelectedChat(data)); // To update messages view
   };
 
   // Click a button/icon upon 'Enter' or 'Space' keydown
-  const clickOnKeydown = (e) => {
+  const clickOnKeydown: KeyboardEventHandler = (e) => {
     if (e.key === " " || e.key === "Enter") {
-      e.target.click();
+      (e.target as HTMLElement)?.click();
     }
   };
 
   // To retreive added members from `AddMembersToGroup` dialog
   let updatedName = "";
-  const getUpdatedName = (updatedValue, options) => {
+  const getUpdatedName = (
+    updatedValue: string,
+    options: { submitUpdatedName: boolean }
+  ) => {
     updatedName = updatedValue;
     if (options?.submitUpdatedName) updateGroupName({ enterKeyClicked: true });
   };
 
-  const updateGroupName = async (options) => {
+  const updateGroupName = async (options: { enterKeyClicked: boolean }) => {
     if (!updatedName) return displayWarning("Please Enter Valid Group Name");
 
     dispatch(setLoading(true));
@@ -138,11 +161,11 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
       const { data } = await axios.put(
         "/api/chat/group/update-name",
         { groupName: updatedName, chatId: groupInfo?._id },
-        config
+        config as AxiosRequestConfig
       );
 
       if (isSocketConnected) {
-        clientSocket.emit("grp updated", {
+        clientSocket.emit("grp_updated", {
           updater: loggedInUser,
           updatedGroup: data,
         });
@@ -151,20 +174,21 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
 
       dispatch(setLoading(false));
       updateView(data);
-      if (options?.enterKeyClicked) closeChildDialog();
+      if (options?.enterKeyClicked && closeChildDialog) closeChildDialog();
       else return "profileUpdated";
     } catch (error) {
-      displayError(error, "Couldn't Update Group Name");
+      displayError(error as ErrorType, "Couldn't Update Group Name");
       dispatch(setLoading(false));
     }
   };
 
   // Update Group Display Pic
-  const updateGroupDp = async (e) => {
-    const image = e.target.files[0];
-    if (!image) return;
+  const updateGroupDp: ChangeEventHandler = async (e) => {
+    if (!e.target?.files) return;
+    const imageFile = e.target.files[0];
+    if (!imageFile) return;
 
-    if (!isImageFile(image.name)) {
+    if (!isImageFile(imageFile.name)) {
       return dispatch(
         displayToast({
           title: "Invalid Image File",
@@ -172,11 +196,12 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
           type: "warning",
           duration: 5000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
     }
 
-    if (image.size >= TWO_MB) {
+    if (imageFile.size >= TWO_MB) {
+      if (!imgInput?.current) return;
       imgInput.current.value = "";
       return displayWarning("Please Select an Image Smaller than 2 MB", 4000);
     }
@@ -185,7 +210,7 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
     const config = getAxiosConfig({ loggedInUser, formData: true });
 
     const formData = new FormData();
-    formData.append("displayPic", image);
+    formData.append("displayPic", imageFile);
     formData.append("currentDP", groupDP);
     formData.append("cloudinary_id", groupInfo?.cloudinary_id);
     formData.append("chatId", groupInfo?._id);
@@ -193,10 +218,10 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
       const { data } = await axios.put(
         "/api/chat/group/update-dp",
         formData,
-        config
+        config as AxiosRequestConfig
       );
       if (isSocketConnected) {
-        clientSocket.emit("grp updated", {
+        clientSocket.emit("grp_updated", {
           updater: loggedInUser,
           updatedGroup: data,
         });
@@ -206,7 +231,7 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
       setUploading(false);
       updateView(data);
     } catch (error) {
-      displayError(error, "Couldn't Update Group DP");
+      displayError(error as ErrorType, "Couldn't Update Group DP");
       dispatch(setLoading(false));
       setUploading(false);
     }
@@ -223,11 +248,11 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
           cloudinary_id: groupInfo?.cloudinary_id,
           chatId: groupInfo?._id,
         },
-        config
+        config as AxiosRequestConfig
       );
 
       if (isSocketConnected) {
-        clientSocket.emit("grp updated", {
+        clientSocket.emit("grp_updated", {
           updater: loggedInUser,
           updatedGroup: data,
         });
@@ -237,7 +262,7 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
       updateView(data);
       return "profileUpdated";
     } catch (error) {
-      displayError(error, "Couldn't Delete Group DP");
+      displayError(error as ErrorType, "Couldn't Delete Group DP");
       dispatch(setLoading(false));
     }
   };
@@ -255,11 +280,11 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
           isGroupAdmin: isUserGroupAdmin,
           chatId: groupInfo?._id,
         },
-        config
+        config as AxiosRequestConfig
       );
 
       if (isSocketConnected) {
-        clientSocket.emit("grp updated", {
+        clientSocket.emit("grp_updated", {
           updater: loggedInUser,
           updatedGroup: data,
         });
@@ -270,7 +295,7 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
           type: "info",
           duration: 4000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
       dispatch(setLoading(false));
       updateView(null);
@@ -279,11 +304,14 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
       dispatch(
         displayToast({
           title: "Couldn't Exit Group",
-          message: error.response?.data?.message || error.message,
+          message:
+            (error as AxiosErrorType).response?.data?.message ||
+            (error as Error)?.message ||
+            error,
           type: "error",
           duration: 4000,
           position: "bottom-center",
-        })
+        } as ToastData)
       );
       dispatch(setLoading(false));
       return "membersUpdated";
@@ -301,23 +329,25 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
           cloudinary_id: groupInfo?.cloudinary_id,
           chatId: groupInfo?._id,
         },
-        config
+        config as AxiosRequestConfig
       );
       const deleteMessagesPromise = messages?.length
         ? axios.put(
             `/api/message/delete`,
             {
-              messageIds: JSON.stringify(messages?.map((m) => m._id)),
+              messageIds: JSON.stringify(
+                messages?.map((m: MessageType) => m?._id)
+              ),
               isDeleteGroupRequest: true,
             },
-            config
+            config as AxiosRequestConfig
           )
         : Promise.resolve();
 
       // Parallel execution of independent promises
       await Promise.all([deleteGroupPromise, deleteMessagesPromise]);
       if (isSocketConnected) {
-        clientSocket.emit("grp deleted", {
+        clientSocket.emit("grp_deleted", {
           admin: loggedInUser,
           deletedGroup: groupInfo,
         });
@@ -327,7 +357,7 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
       updateView(null);
       dispatch(hideDialog());
     } catch (error) {
-      displayError(error, "Couldn't Delete Group");
+      displayError(error as ErrorType, "Couldn't Delete Group");
       dispatch(setLoading(false));
     }
   };
@@ -336,6 +366,7 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
   const openExitGroupConfirmDialog = () => {
     setShowDialogActions(true);
     setShowDialogClose(false);
+    if (!setChildDialogBody || !displayChildDialog) return;
     setChildDialogBody(
       <>
         {groupMembers?.length === 1
@@ -357,6 +388,7 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
   const openDeleteGroupConfirmDialog = () => {
     setShowDialogActions(true);
     setShowDialogClose(false);
+    if (!setChildDialogBody || !displayChildDialog) return;
     setChildDialogBody(
       <>
         All messages and files related to this group will be deleted and this
@@ -377,6 +409,7 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
   const openEditGroupNameDialog = () => {
     setShowDialogActions(true);
     setShowDialogClose(false);
+    if (!setChildDialogBody || !displayChildDialog) return;
     setChildDialogBody(
       <EditNameBody
         originalName={groupInfo?.chatName}
@@ -396,6 +429,7 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
   // Open delete photo confirm dialog
   const openDeletePhotoConfirmDialog = () => {
     setShowDialogActions(true);
+    if (!setChildDialogBody || !displayChildDialog) return;
     setShowDialogClose(false);
     setChildDialogBody(<>Are you sure you want to delete this display pic?</>);
     displayChildDialog({
@@ -408,8 +442,8 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
   };
 
   // To retreive added members from `AddMembersToGroup` dialog
-  let addedMembers = [];
-  const getAddedMembers = (updatedMembers) => {
+  let addedMembers: UserType[] = [];
+  const getAddedMembers = (updatedMembers: UserType[]) => {
     addedMembers = updatedMembers;
   };
 
@@ -429,10 +463,10 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
           usersToBeAdded: JSON.stringify(addedMembers),
           chatId: groupInfo?._id,
         },
-        config
+        config as AxiosRequestConfig
       );
       if (isSocketConnected) {
-        clientSocket.emit("grp updated", {
+        clientSocket.emit("grp_updated", {
           updater: loggedInUser,
           updatedGroup: data,
         });
@@ -442,7 +476,7 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
       updateView(data);
       return "profileUpdated";
     } catch (error) {
-      displayError(error, "Couldn't Add Members to Group");
+      displayError(error as ErrorType, "Couldn't Add Members to Group");
       dispatch(setLoading(false));
     }
   };
@@ -451,6 +485,8 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
   const openAddMembersDialog = () => {
     setShowDialogActions(true);
     setShowDialogClose(false);
+    if (!setChildDialogBody || !displayChildDialog) return;
+
     setChildDialogBody(<AddMembersToGroup getAddedMembers={getAddedMembers} />);
     displayChildDialog({
       title: "Add Group Members",
@@ -464,24 +500,26 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
   const openViewMembersDialog = () => {
     setShowDialogActions(false);
     setShowDialogClose(true);
+    if (!setChildDialogBody || !displayChildDialog) return;
     setChildDialogBody(<ViewGroupMembers />);
     displayChildDialog({
       title: ``,
     });
   };
 
-  const displayFullSizeImage = (e) => {
+  const displayFullSizeImage: ClickEventHandler = (e) => {
     setShowDialogActions(false);
     setShowDialogClose(true);
+    if (!setChildDialogBody || !displayChildDialog) return;
     setChildDialogBody(<FullSizeImage event={e} />);
     displayChildDialog({
       isFullScreen: true,
-      title: e.target?.alt || "Display Pic",
+      title: (e.target as HTMLImageElement)?.alt || "Display Pic",
     });
   };
 
-  const openEditGroupDpMenu = (e) => {
-    setEditGroupDpMenuAnchor(e.target);
+  const openEditGroupDpMenu: ClickEventHandler = (e) => {
+    setEditGroupDpMenuAnchor(e.target as SetStateAction<HTMLElement | null>);
   };
 
   return (
@@ -522,9 +560,9 @@ const GroupInfoBody = ({ messages, deleteNotifications }) => {
           </CustomTooltip>
           {/* Edit/Delete display pic menu */}
           <EditPicMenu
-            anchor={editGroupDpMenuAnchor}
+            anchor={editGroupDpMenuAnchor as HTMLElement}
             setAnchor={setEditGroupDpMenuAnchor}
-            selectProfilePic={() => imgInput.current.click()}
+            selectProfilePic={() => imgInput?.current?.click()}
             openDeletePhotoConfirmDialog={openDeletePhotoConfirmDialog}
             deletePhotoCondition={!groupDP?.endsWith("group_mbuvht.png")}
           />

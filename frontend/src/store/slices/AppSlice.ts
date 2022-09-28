@@ -1,9 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import {
-  AppState,
-  ChatType,
-  UserType,
-} from "../../utils/AppTypes";
+import { AppState, ChatType, UserType } from "../../utils/AppTypes";
 import type { RootState } from "../store";
 
 const initialState: AppState = {

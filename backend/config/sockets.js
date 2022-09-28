@@ -1,4 +1,4 @@
-import Server from "socket.io";
+import { Server } from "socket.io";
 import {
   addNotification,
   deleteNotifOnMsgDelete,
@@ -6,7 +6,7 @@ import {
 
 // Message event listeners
 const configureMsgEvents = (socket) => {
-  socket.on("new msg sent", async (newMsg) => {
+  socket.on("new_msg_sent", async (newMsg) => {
     const { chat } = newMsg;
     if (!chat) return;
 
@@ -15,13 +15,13 @@ const configureMsgEvents = (socket) => {
         // Emit 'newMsg' to all other users except 'newMsg' sender
         if (userId !== newMsg.sender._id) {
           const { notifications } = await addNotification(newMsg._id, userId);
-          socket.to(userId).emit("new msg received", newMsg, notifications);
+          socket.to(userId).emit("new_msg_received", newMsg, notifications);
         }
       })
     );
   });
 
-  socket.on("msg deleted", async (deletedMsgData) => {
+  socket.on("msg_deleted", async (deletedMsgData) => {
     const { deletedMsgId, senderId, chat } = deletedMsgData;
     if (!deletedMsgId || !senderId || !chat) return;
 
@@ -31,19 +31,19 @@ const configureMsgEvents = (socket) => {
       chat.users.map(async (user) => {
         if (user._id !== senderId) {
           await deleteNotifOnMsgDelete(deletedMsgId, user._id);
-          socket.to(user._id).emit("remove deleted msg", deletedMsgData);
+          socket.to(user._id).emit("remove_deleted_msg", deletedMsgData);
         }
       })
     );
   });
 
-  socket.on("msg updated", (updatedMsg) => {
+  socket.on("msg_updated", (updatedMsg) => {
     const { sender, chat } = updatedMsg;
     if (!sender || !chat) return;
 
     chat.users.forEach((userId) => {
       if (userId !== sender._id) {
-        socket.to(userId).emit("update modified msg", updatedMsg);
+        socket.to(userId).emit("update_modified_msg", updatedMsg);
       }
     });
   });
@@ -51,18 +51,18 @@ const configureMsgEvents = (socket) => {
 
 // Group event listeners
 const configureGroupEvents = (socket) => {
-  socket.on("new grp created", (newGroupData) => {
+  socket.on("new_grp_created", (newGroupData) => {
     const { admin, newGroup } = newGroupData;
     if (!admin || !newGroup) return;
 
     newGroup.users.forEach((user) => {
       if (user._id !== admin._id) {
-        socket.to(user._id).emit("display new grp");
+        socket.to(user._id).emit("display_new_grp");
       }
     });
   });
 
-  socket.on("grp updated", (updatedGroupData) => {
+  socket.on("grp_updated", (updatedGroupData) => {
     // 'updater' is the one who updated the grp (admin/non-admin)
     const { updater, updatedGroup } = updatedGroupData;
     if (!updater || !updatedGroup) return;
@@ -70,22 +70,22 @@ const configureGroupEvents = (socket) => {
 
     updatedGroup.users.forEach((user) => {
       if (user._id !== updater._id) {
-        socket.to(user._id).emit("display updated grp", updatedGroupData);
+        socket.to(user._id).emit("display_updated_grp", updatedGroupData);
       }
     });
     if (removedUser) {
-      socket.to(removedUser._id).emit("display updated grp", updatedGroupData);
+      socket.to(removedUser._id).emit("display_updated_grp", updatedGroupData);
     }
   });
 
-  socket.on("grp deleted", (deletedGroupData) => {
+  socket.on("grp_deleted", (deletedGroupData) => {
     // 'admin' is the one who updated the grp
     const { admin, deletedGroup } = deletedGroupData;
     if (!admin || !deletedGroup) return;
 
     deletedGroup.users.forEach((user) => {
       if (user._id !== admin._id) {
-        socket.to(user._id).emit("remove deleted grp", deletedGroup);
+        socket.to(user._id).emit("remove_deleted_grp", deletedGroup);
       }
     });
   });
@@ -97,16 +97,16 @@ const configureTypingEvents = (socket) => {
     if (!chat || !typingUser) return;
     chat.users?.forEach((user) => {
       if (user?._id !== typingUser?._id) {
-        socket.to(user?._id).emit("display typing", chat, typingUser);
+        socket.to(user?._id).emit("display_typing", chat, typingUser);
       }
     });
   });
 
-  socket.on("stop typing", (chat, typingUser) => {
+  socket.on("stop_typing", (chat, typingUser) => {
     if (!chat || !typingUser) return;
     chat.users?.forEach((user) => {
       if (user?._id !== typingUser?._id) {
-        socket.to(user?._id).emit("hide typing", chat, typingUser);
+        socket.to(user?._id).emit("hide_typing", chat, typingUser);
       }
     });
   });
@@ -118,7 +118,7 @@ const configureDisconnectEvents = (socket) => {
     console.log("user disconnected");
   });
 
-  socket.off("init user", (userId) => {
+  socket.off("init_user", (userId) => {
     console.log("User socket disconnected");
     socket.leave(userId);
   });
@@ -133,14 +133,14 @@ const configureSocketEvents = (server) => {
 
   io.on("connection", (socket) => {
     // Initialize user
-    socket.on("init user", (userId) => {
+    socket.on("init_user", (userId) => {
       socket.join(userId);
-      socket.emit(`user connected`);
+      socket.emit(`user_connected`);
       console.log("user initialized: ", userId);
     });
 
     // Initialize chat
-    socket.on("join chat", (chatId) => {
+    socket.on("join_chat", (chatId) => {
       socket.join(chatId);
       console.log(`User joined chat : ${chatId}`);
     });

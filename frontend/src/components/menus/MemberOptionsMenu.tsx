@@ -138,7 +138,7 @@ const MemberOptionsMenu = ({
         config as AxiosRequestConfig
       );
       if (isSocketConnected) {
-        clientSocket.emit("grp updated", {
+        clientSocket.emit("grp_updated", {
           updater: loggedInUser,
           updatedGroup: data,
           createdAdmin: clickedMember,
@@ -171,7 +171,7 @@ const MemberOptionsMenu = ({
         config as AxiosRequestConfig
       );
       if (isSocketConnected) {
-        clientSocket.emit("grp updated", {
+        clientSocket.emit("grp_updated", {
           updater: loggedInUser,
           updatedGroup: data,
           dismissedAdmin: clickedMember,
@@ -212,7 +212,7 @@ const MemberOptionsMenu = ({
 
       data["removedUser"] = clickedMember;
       if (isSocketConnected) {
-        clientSocket.emit("grp updated", {
+        clientSocket.emit("grp_updated", {
           updater: loggedInUser,
           updatedGroup: data,
         });

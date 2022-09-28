@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { SetStateAction, useEffect, useRef, useState } from "react";
 import { IconButton } from "@mui/material";
 import {
   debounce,
@@ -17,8 +17,7 @@ import LoadingMsgs from "./utils/LoadingMsgs";
 import FullSizeImage from "./utils/FullSizeImage";
 import Message from "./utils/Message";
 import MsgOptionsMenu from "./menus/MsgOptionsMenu";
-import io from "socket.io-client";
-import { useDispatch, useSelector } from "react-redux";
+import { io } from "socket.io-client";
 import {
   selectAppState,
   setClientSocket,
@@ -42,7 +41,24 @@ import AttachmentPreview from "./utils/AttachmentPreview";
 import WelcomeBanner from "./WelcomeBanner";
 import MsgsHeader from "./MsgsHeader";
 import TypingIndicator from "./utils/TypingIndicator";
-import EmojiPicker from "emoji-picker-react";
+import EmojiPicker, { IEmojiData } from "emoji-picker-react";
+import {
+  AttachmentData,
+  AxiosErrorType,
+  ChangeEventHandler,
+  ChatType,
+  ClickEventHandler,
+  ErrorType,
+  FileData,
+  KeyboardEventHandler,
+  MessageType,
+  ProfileData,
+  StateSetter,
+  ToastData,
+  UserType,
+} from "../utils/AppTypes";
+import { useAppDispatch, useAppSelector } from "../store/storeHooks";
+import { AxiosRequestConfig } from "axios";
 
 const arrowStyles = { color: "#111" };
 const tooltipStyles = {
@@ -63,10 +79,19 @@ const iconStyles = {
 };
 
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
-const SOCKET_ENDPOINT = process.env.REACT_APP_SERVER_BASE_URL;
+const SOCKET_ENDPOINT = process.env.REACT_APP_SERVER_BASE_URL as string;
 let msgFileAlreadyExists = false;
 let currentlyTyping = false;
 let preventStopTyping = true;
+
+interface Props {
+  loadingMsgs: boolean;
+  setLoadingMsgs: StateSetter<boolean>;
+  setDialogBody: StateSetter<React.ReactNode>;
+  deletePersistedNotifs: any;
+  isNewUser: boolean;
+  typingChatUser: string;
+}
 
 const MessagesView = ({
   loadingMsgs,
@@ -75,45 +100,50 @@ const MessagesView = ({
   deletePersistedNotifs,
   isNewUser,
   typingChatUser,
-}) => {
+}: Props) => {
   const {
     loggedInUser,
     selectedChat,
     fetchMsgs,
     clientSocket,
     isSocketConnected,
-  } = useSelector(selectAppState);
-  const { disableIfLoading } = useSelector(selectFormfieldState);
-  const dispatch = useDispatch();
+  } = useAppSelector(selectAppState);
+  const { disableIfLoading } = useAppSelector(selectFormfieldState);
+  const dispatch = useAppDispatch();
   const [sending, setSending] = useState(false);
-  const [msgFileRemoved, setMsgFileRemoved] = useState(false);
+  const [isMsgFileRemoved, setIsMsgFileRemoved] = useState("false");
   const [enableMsgSend, setEnableMsgSend] = useState(false);
   const [fileAttached, setFileAttached] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<MessageType[]>([]);
   const [clickedMsgId, setClickedMsgId] = useState("");
   const [dontScrollToBottom, setDontScrollToBottom] = useState(false);
-  const [attachmentData, setAttachmentData] = useState({
+  const [attachmentData, setAttachmentData] = useState<AttachmentData>({
     attachment: "",
     attachmentPreviewUrl: "",
   });
-  const msgListBottom = useRef(null);
-  const msgFileInput = useRef(null);
-  const msgContent = useRef(null);
-  const editableMsgContent = useRef(null);
+  const msgListBottom = useRef<HTMLDivElement | null>(null);
+  const msgFileInput = useRef<HTMLInputElement | null>(null);
+  const msgContent = useRef<HTMLDivElement | null>(null);
+  const editableMsgContent = useRef<React.ReactNode | HTMLElement | null>(null);
   const [downloadingFileId, setDownloadingFileId] = useState("");
   const [loadingMediaId, setLoadingMediaId] = useState("");
   const [msgEditMode, setMsgEditMode] = useState(false);
-  const [msgOptionsMenuAnchor, setMsgOptionsMenuAnchor] = useState(null);
+  const [msgOptionsMenuAnchor, setMsgOptionsMenuAnchor] =
+    useState<HTMLElement | null>(null);
 
-  const resetMsgInput = (options) => {
+  const resetMsgInput = (options?: { discardAttachmentOnly: boolean }) => {
     setAttachmentData({
       attachment: "",
       attachmentPreviewUrl: "",
     });
+    if (!msgFileInput?.current) return;
     msgFileInput.current.value = "";
     setFileAttached(false);
+
     if (options?.discardAttachmentOnly) return;
     setEnableMsgSend(false);
+
+    if (!msgContent?.current) return;
     msgContent.current.innerHTML = "";
   };
 
@@ -122,11 +152,18 @@ const MessagesView = ({
   const onEmojiIconClick = () => {
     preventStopTyping = true;
     setShowEmojiPicker(!showEmojiPicker);
+    let timeout = setTimeout(() => {
+      document
+        .querySelector(".emoji-search")
+        ?.setAttribute("placeholder", "Search an emoji...");
+      clearTimeout(timeout);
+    });
   };
   const hideEmojiPicker = () => {
     if (showEmojiPicker) setShowEmojiPicker(false);
   };
-  const onEmojiClick = (event, emojiObject) => {
+  const onEmojiClick = (event: React.MouseEvent, emojiObject: IEmojiData) => {
+    if (!msgContent?.current) return;
     msgContent.current.innerHTML += emojiObject.emoji;
     setCaretPosition(msgContent.current);
     setEnableMsgSend(true);
@@ -141,24 +178,27 @@ const MessagesView = ({
   const discardAttachment = () =>
     resetMsgInput({ discardAttachmentOnly: true });
 
-  const persistUpdatedUser = (updatedUser) => {
+  const persistUpdatedUser = (updatedUser: UserType) => {
     // localStorage persists updated user even after page refresh
     localStorage.setItem("loggedInUser", JSON.stringify(updatedUser));
     dispatch(setLoggedInUser(updatedUser));
   };
 
   const displayError = (
-    error = "Oops! Something went wrong",
+    error: ErrorType = "Oops! Something went wrong",
     title = "Operation Failed"
   ) => {
     dispatch(
       displayToast({
         title,
-        message: error.response?.data?.message || error.message,
+        message:
+          (error as AxiosErrorType).response?.data?.message ||
+          (error as Error)?.message ||
+          error,
         type: "error",
         duration: 5000,
         position: "bottom-center",
-      })
+      } as ToastData)
     );
   };
 
@@ -169,7 +209,7 @@ const MessagesView = ({
         type: "success",
         duration: 1500,
         position: "bottom-center",
-      })
+      } as ToastData)
     );
   };
 
@@ -177,19 +217,20 @@ const MessagesView = ({
     setLoadingMsgs(false);
     dispatch(setSelectedChat(null));
     resetMsgInput();
-    setMsgFileRemoved(false);
+    setIsMsgFileRemoved("false");
     setMsgEditMode(false);
     setDontScrollToBottom(false);
   };
 
-  const viewMedia = (src, fileData) => {
+  const viewMedia = (e: React.MouseEvent, src: string, fileData: FileData) => {
     if (!src || !fileData) return;
     const { fileName, isAudio } = fileData;
     dispatch(setShowDialogActions(false));
     setDialogBody(
       <FullSizeImage
-        audioSrc={isAudio ? src : null}
-        videoSrc={!isAudio ? src : null}
+        event={e}
+        audioSrc={(isAudio ? src : "") as string}
+        videoSrc={(!isAudio ? src : "") as string}
       />
     );
     dispatch(
@@ -201,39 +242,49 @@ const MessagesView = ({
     setLoadingMediaId("");
   };
 
-  const displayFullSizeImage = (e) => {
+  const displayFullSizeImage: ClickEventHandler = (e) => {
     dispatch(setShowDialogActions(false));
     setDialogBody(<FullSizeImage event={e} />);
     dispatch(
       displayDialog({
         isFullScreen: true,
-        title: e.target?.alt || "Display Pic",
+        title: (e.target as HTMLImageElement)?.alt || "Display Pic",
       })
     );
   };
 
-  const loadMedia = async (fileId, options) => {
+  const loadMedia = async (
+    e: React.MouseEvent,
+    fileId: string,
+    options: FileData
+  ) => {
     if (!fileId || !options) return;
     setLoadingMediaId(fileId);
     const config = getAxiosConfig({ loggedInUser, blob: true });
     try {
-      const { data } = await axios.get(`/api/message/files/${fileId}`, config);
+      const { data } = await axios.get(
+        `/api/message/files/${fileId}`,
+        config as AxiosRequestConfig
+      );
 
       const mediaSrc = URL.createObjectURL(new Blob([data]));
-      viewMedia(mediaSrc, options);
+      viewMedia(e, mediaSrc, options);
     } catch (error) {
-      displayError(error, "Couldn't Load Media");
+      displayError(error as ErrorType, "Couldn't Load Media");
       setLoadingMediaId("");
     }
   };
 
-  const downloadFile = async (fileId) => {
+  const downloadFile = async (fileId: string) => {
     if (!fileId) return;
     setDownloadingFileId(fileId);
     setSending(true);
     const config = getAxiosConfig({ loggedInUser, blob: true });
     try {
-      const { data } = await axios.get(`/api/message/files/${fileId}`, config);
+      const { data } = await axios.get(
+        `/api/message/files/${fileId}`,
+        config as AxiosRequestConfig
+      );
 
       const link = document.createElement("a");
       link.href = URL.createObjectURL(new Blob([data]));
@@ -245,23 +296,23 @@ const MessagesView = ({
       setDownloadingFileId("");
       setSending(false);
     } catch (error) {
-      displayError(error, "Couldn't Download File");
+      displayError(error as ErrorType, "Couldn't Download File");
       setDownloadingFileId("");
       setSending(false);
     }
   };
 
-  const fetchMessages = async (options) => {
+  const fetchMessages = async (options?: { updatingMsg: boolean }) => {
     setLoadingMsgs(true);
     const config = getAxiosConfig({ loggedInUser });
     try {
       const { data } = await axios.get(
         `/api/message/${selectedChat?._id}`,
-        config
+        config as AxiosRequestConfig
       );
       setMessages(
-        data.map((msg) => {
-          msg["sent"] = true;
+        data.map((msg: MessageType) => {
+          if (msg) msg["sent"] = true;
           return msg;
         })
       );
@@ -270,7 +321,7 @@ const MessagesView = ({
       if (options?.updatingMsg) displaySuccess("Message Updated Successfully");
       setSending(false);
     } catch (error) {
-      displayError(error, "Couldn't Fetch Messages");
+      displayError(error as ErrorType, "Couldn't Fetch Messages");
       setLoadingMsgs(false);
       if (fetchMsgs) dispatch(setFetchMsgs(false));
       setSending(false);
@@ -287,25 +338,31 @@ const MessagesView = ({
       ...attachmentData,
       content: msgContent.current?.innerHTML || "",
     };
-    const isNonImageFile = !isImageOrGifFile(msgData.attachment?.name);
+    const newMsgFile = msgData?.attachment as File;
+    const isNonImageFile = !isImageOrGifFile(newMsgFile?.name);
 
-    const newMsg = {
-      _id: Date.now(),
+    const dummyNewMsg: MessageType = {
+      _id: `${Date.now()}` as string,
+      chat: selectedChat?._id as string,
       sender: {
-        _id: loggedInUser?._id,
+        _id: loggedInUser?._id as string,
         profilePic: "",
         name: "",
         email: "",
+        cloudinary_id: "",
+        expiryTime: Date.now(),
+        notifications: [],
+        token: "",
       },
       fileUrl: msgData?.attachmentPreviewUrl,
       file_id: "",
       file_name:
-        msgData?.attachment?.name +
+        newMsgFile?.name +
         `${
           msgData?.mediaDuration
             ? `===${msgData.mediaDuration}`
             : isNonImageFile
-            ? `===${msgData.attachment?.size || ""}`
+            ? `===${newMsgFile?.size || ""}`
             : ""
         }`,
       content: msgData?.content,
@@ -313,7 +370,7 @@ const MessagesView = ({
       sent: false,
     };
     setDontScrollToBottom(false);
-    setMessages([newMsg, ...messages]);
+    setMessages([dummyNewMsg, ...messages]);
     resetMsgInput();
     setSending(true);
     const config = getAxiosConfig({ loggedInUser, formData: true });
@@ -325,17 +382,21 @@ const MessagesView = ({
         : `/api/message/`;
 
       const formData = new FormData();
-      formData.append("attachment", msgData.attachment);
-      formData.append("mediaDuration", msgData?.mediaDuration);
+      formData.append("attachment", newMsgFile);
+      formData.append("mediaDuration", msgData?.mediaDuration as string);
       formData.append("content", msgData.content);
-      formData.append("chatId", selectedChat?._id);
-      const { data } = await axios.post(apiUrl, formData, config);
+      formData.append("chatId", selectedChat?._id as string);
+      const { data } = await axios.post(
+        apiUrl,
+        formData,
+        config as AxiosRequestConfig
+      );
 
-      if (isSocketConnected) clientSocket?.emit("new msg sent", data);
+      if (isSocketConnected) clientSocket?.emit("new_msg_sent", data);
       fetchMessages();
       dispatch(toggleRefresh());
     } catch (error) {
-      displayError(error, "Couldn't Send Message");
+      displayError(error as ErrorType, "Couldn't Send Message");
       setSending(false);
     }
   };
@@ -349,10 +410,10 @@ const MessagesView = ({
       await axios.put(
         `/api/message/delete`,
         { messageIds: JSON.stringify([clickedMsgId]) },
-        config
+        config as AxiosRequestConfig
       );
       if (isSocketConnected) {
-        clientSocket?.emit("msg deleted", {
+        clientSocket?.emit("msg_deleted", {
           deletedMsgId: clickedMsgId,
           senderId: loggedInUser?._id,
           chat: selectedChat,
@@ -365,17 +426,20 @@ const MessagesView = ({
       setSending(false);
       return "msgActionDone";
     } catch (error) {
-      displayError(error, "Couldn't Delete Message");
+      displayError(error as ErrorType, "Couldn't Delete Message");
       dispatch(setLoading(false));
       setSending(false);
     }
   };
 
-  const updateMessage = async (updatedMsgContent, msgDate) => {
+  const updateMessage = async (
+    updatedMsgContent: string,
+    msgDateString: string
+  ) => {
     if (
       !(
         attachmentData.attachment ||
-        (msgFileAlreadyExists && !msgFileRemoved)
+        (msgFileAlreadyExists && isMsgFileRemoved === "false")
       ) &&
       !parseInnerHTML(updatedMsgContent)
     ) {
@@ -385,43 +449,51 @@ const MessagesView = ({
           type: "warning",
           duration: 5000,
           position: "top-center",
-        })
+        } as ToastData)
       );
     }
     setMsgEditMode(false);
     setDontScrollToBottom(true);
 
-    const msgData = {
+    const msgData: AttachmentData = {
       ...attachmentData,
       content: updatedMsgContent || "",
     };
-    const isNonImageFile = !isImageOrGifFile(msgData.attachment?.name);
+    const updatedMsgFile = msgData?.attachment as File;
+    const isNonImageFile = !isImageOrGifFile(updatedMsgFile?.name);
 
-    const updatedMsg = {
-      _id: Date.now(),
+    const updatedMsg: MessageType = {
+      _id: `${Date.now()}`,
+      chat: selectedChat?._id as string,
       sender: {
-        _id: loggedInUser?._id,
+        _id: loggedInUser?._id as string,
         profilePic: "",
         name: "",
         email: "",
+        cloudinary_id: "",
+        expiryTime: Date.now(),
+        notifications: [],
+        token: "",
       },
       fileUrl: msgData?.attachmentPreviewUrl,
       file_id: "",
       file_name:
-        msgData?.attachment?.name +
+        updatedMsgFile?.name +
         `${
           msgData?.mediaDuration
             ? `===${msgData.mediaDuration}`
             : isNonImageFile
-            ? `===${msgData.attachment?.size || ""}`
+            ? `===${updatedMsgFile?.size || ""}`
             : ""
         }`,
-      content: msgData?.content,
-      createdAt: msgDate,
+      content: msgData?.content as string,
+      createdAt: msgDateString,
       sent: false,
     };
     setMessages(
-      messages.map((msg) => (msg._id === clickedMsgId ? updatedMsg : msg))
+      messages.map((msg: MessageType) =>
+        msg?._id === clickedMsgId ? updatedMsg : msg
+      )
     );
     discardAttachment();
     setSending(true);
@@ -434,32 +506,36 @@ const MessagesView = ({
         : `/api/message/update`;
 
       const formData = new FormData();
-      formData.append("attachment", msgData.attachment);
-      formData.append("msgFileRemoved", msgFileRemoved);
-      formData.append("mediaDuration", msgData?.mediaDuration);
-      formData.append("updatedContent", msgData.content);
+      formData.append("attachment", updatedMsgFile);
+      formData.append("msgFileRemoved", isMsgFileRemoved as string);
+      formData.append("mediaDuration", msgData?.mediaDuration as string);
+      formData.append("updatedContent", msgData?.content as string);
       formData.append("messageId", clickedMsgId);
-      const { data } = await axios.put(apiUrl, formData, config);
+      const { data } = await axios.put(
+        apiUrl,
+        formData,
+        config as AxiosRequestConfig
+      );
 
-      if (isSocketConnected) clientSocket?.emit("msg updated", data);
+      if (isSocketConnected) clientSocket?.emit("msg_updated", data);
       fetchMessages({ updatingMsg: true });
       dispatch(toggleRefresh());
-      setMsgFileRemoved(false);
+      setIsMsgFileRemoved("false");
     } catch (error) {
-      displayError(error, "Couldn't Update Message");
+      displayError(error as ErrorType, "Couldn't Update Message");
       setSending(false);
-      setMsgFileRemoved(false);
+      setIsMsgFileRemoved("false");
     }
   };
 
   const editMsgHandler = () => setMsgEditMode(true);
 
-  const setMediaDuration = (mediaUrl, msgFile) => {
+  const setMediaDuration = (mediaUrl: string, msgFile: File) => {
     const media = new Audio(mediaUrl);
     media.onloadedmetadata = () => {
-      const { duration } = media;
-      const minutes = parseInt(duration / 60);
-      const seconds = parseInt(duration % 60);
+      const duration = media?.duration as number;
+      const minutes = Math.trunc(duration / 60);
+      const seconds = Math.trunc(duration % 60);
       setAttachmentData({
         attachment: msgFile,
         attachmentPreviewUrl: mediaUrl,
@@ -471,11 +547,13 @@ const MessagesView = ({
     };
   };
 
-  const handleMsgFileInputChange = (e) => {
+  const handleMsgFileInputChange: ChangeEventHandler = (e) => {
+    if (!e.target?.files) return;
     const msgFile = e.target.files[0];
     if (!msgFile) return;
 
     if (msgFile.size >= FIVE_MB) {
+      if (!msgFileInput?.current) return;
       msgFileInput.current.value = "";
       return dispatch(
         displayToast({
@@ -483,7 +561,7 @@ const MessagesView = ({
           type: "warning",
           duration: 4000,
           position: "top-center",
-        })
+        } as ToastData)
       );
     }
     const fileUrl = URL.createObjectURL(msgFile);
@@ -505,7 +583,7 @@ const MessagesView = ({
   // Initializing Client Socket
   useEffect(() => {
     dispatch(
-      setClientSocket(io(SOCKET_ENDPOINT, { transports: ["websocket"] }))
+      setClientSocket(io(SOCKET_ENDPOINT, { transports: ["websocket"] }) as any)
     );
   }, []);
 
@@ -513,64 +591,87 @@ const MessagesView = ({
   const newMsgSocketEventHandler = () => {
     // off() prevents on() from executing multiple times
     clientSocket
-      .off("new msg received")
-      .on("new msg received", (newMsg, notifications) => {
-        const { chat } = newMsg;
-        dispatch(toggleRefresh());
-        if (selectedChat && chat && selectedChat._id === chat._id) {
-          newMsg["sent"] = true;
-          setMessages([newMsg, ...messages]);
-          deletePersistedNotifs([newMsg._id]);
-        } else {
-          const updatedUser = {
-            ...loggedInUser,
-            notifications: notifications?.reverse(),
-          };
-          persistUpdatedUser(updatedUser);
+      .off("new_msg_received")
+      .on(
+        "new_msg_received",
+        (newMsg: MessageType, notifications: MessageType[]) => {
+          const chat = newMsg?.chat as ChatType;
+          dispatch(toggleRefresh());
+          if (
+            selectedChat &&
+            chat &&
+            selectedChat?._id === chat?._id &&
+            newMsg
+          ) {
+            newMsg["sent"] = true;
+            setMessages([newMsg, ...messages]);
+            deletePersistedNotifs([newMsg?._id]);
+          } else {
+            const updatedUser = {
+              ...loggedInUser,
+              notifications: notifications?.reverse(),
+            };
+            persistUpdatedUser(updatedUser as UserType);
+          }
         }
-      });
+      );
   };
 
   const deletedMsgSocketEventHandler = () => {
     clientSocket
-      .off("remove deleted msg")
-      .on("remove deleted msg", (deletedMsgData) => {
-        const { deletedMsgId, chat } = deletedMsgData;
-        dispatch(toggleRefresh());
-        if (selectedChat && chat && selectedChat._id === chat._id) {
-          setMessages(messages.filter((m) => m?._id !== deletedMsgId));
-        } else {
-          // Remove notification of 'deleted msg' from global state
-          // and localStorage
-          const notifs = loggedInUser.notifications;
-          const updatedUser = {
-            ...loggedInUser,
-            notifications: notifs.filter((n) => n._id !== deletedMsgId),
-          };
-          persistUpdatedUser(updatedUser);
+      .off("remove_deleted_msg")
+      .on(
+        "remove_deleted_msg",
+        (deletedMsgData: {
+          deletedMsgId: string;
+          senderId: string;
+          chat: ChatType;
+        }) => {
+          const { deletedMsgId, chat } = deletedMsgData;
+          dispatch(toggleRefresh());
+          if (selectedChat && chat && selectedChat._id === chat._id) {
+            setMessages(messages.filter((m) => m?._id !== deletedMsgId));
+          } else {
+            // Remove notification of 'deleted msg' from global state
+            // and localStorage
+            const notifs = loggedInUser?.notifications;
+            const updatedUser = {
+              ...loggedInUser,
+              notifications: notifs?.filter(
+                (n: MessageType) => n?._id !== deletedMsgId
+              ),
+            };
+            persistUpdatedUser(updatedUser as UserType);
+          }
         }
-      });
+      );
   };
 
   const updatedMsgSocketEventHandler = () => {
     clientSocket
-      .off("update modified msg")
-      .on("update modified msg", (updatedMsg) => {
+      .off("update_modified_msg")
+      .on("update_modified_msg", (updatedMsg: MessageType) => {
         if (!updatedMsg) return;
-        const { chat } = updatedMsg;
+        const chat = updatedMsg?.chat as ChatType;
         dispatch(toggleRefresh());
-        if (selectedChat && chat && selectedChat._id === chat._id) {
+        if (
+          selectedChat &&
+          chat &&
+          selectedChat?._id === chat?._id &&
+          updatedMsg
+        ) {
           updatedMsg["sent"] = true;
-          updatedMsg["chat"] = updatedMsg.chat?._id;
+          updatedMsg["chat"] = (updatedMsg.chat as ChatType)?._id as string;
           setTimeout(() => {
             // Only updating msg content using 'document' method
             // as updating 'messages' state will re-render all
             // msgs and scroll to bottom, which may prevent the
             // receiver to edit or view his/her msg, causing bad UX
-            if (parseInnerHTML(updatedMsg.content)) {
-              document.getElementById(`${updatedMsg._id}---content`).innerHTML =
-                updatedMsg.content;
-            }
+            (
+              document.getElementById(
+                `${updatedMsg._id}---content`
+              ) as HTMLElement
+            ).innerHTML = updatedMsg.content;
           }, 10);
           // Updating 'state' is the only way to update attachment
         }
@@ -582,8 +683,8 @@ const MessagesView = ({
     if (!clientSocket) return;
 
     if (!isSocketConnected && clientSocket) {
-      clientSocket.emit("init user", loggedInUser?._id);
-      clientSocket.on("user connected", () => {
+      clientSocket.emit("init_user", loggedInUser?._id);
+      clientSocket.on("user_connected", () => {
         // console.log("socket connected");
         dispatch(setSocketConnected(true));
       });
@@ -608,7 +709,7 @@ const MessagesView = ({
         document.getElementById(clickedMsgId)?.scrollIntoView();
       }, 10);
     }, 0);
-    setMsgFileRemoved(false);
+    setIsMsgFileRemoved("false");
     return "msgActionDone";
   };
 
@@ -637,7 +738,7 @@ const MessagesView = ({
 
   const emitStopTyping = () => {
     if (isSocketConnected && currentlyTyping) {
-      clientSocket?.emit("stop typing", selectedChat, loggedInUser);
+      clientSocket?.emit("stop_typing", selectedChat, loggedInUser);
       currentlyTyping = false;
     }
   };
@@ -652,14 +753,16 @@ const MessagesView = ({
     }, 1000);
   };
 
-  const msgInputHandler = debounce((e) => {
-    const isNonEmptyInput = Boolean(parseInnerHTML(e.target.innerHTML));
+  const msgInputHandler: ChangeEventHandler = debounce((e: KeyboardEvent) => {
+    const isNonEmptyInput = Boolean(
+      parseInnerHTML((e.target as HTMLElement).innerHTML)
+    );
     setEnableMsgSend(isNonEmptyInput);
     if (!isNonEmptyInput) emitStopTyping();
     if (isNonEmptyInput) emitTyping();
   }, 500);
 
-  const msgKeydownHandler = (e) => {
+  const msgKeydownHandler: KeyboardEventHandler = (e) => {
     hideEmojiPicker();
     if (
       e.key === "Enter" &&
@@ -669,9 +772,13 @@ const MessagesView = ({
       e.preventDefault();
       if (msgEditMode) {
         const msgDate =
-          e.target.dataset.msgCreatedAt ||
-          e.target.parentNode.dataset.msgCreatedAt;
-        updateMessage(editableMsgContent?.current?.innerHTML, msgDate);
+          (e.target as HTMLElement).dataset.msgCreatedAt ||
+          ((e.target as HTMLElement).parentNode as HTMLElement).dataset
+            .msgCreatedAt;
+        updateMessage(
+          (editableMsgContent?.current as HTMLElement)?.innerHTML,
+          msgDate as string
+        );
       } else {
         sendMessage();
       }
@@ -679,9 +786,10 @@ const MessagesView = ({
   };
 
   // Msgs click handler ('Event Delegation' applied here)
-  const msgsClickHandler = (e) => {
-    const { dataset } = e.target;
-    const parentDataset = e.target.parentNode.dataset;
+  const msgsClickHandler: ClickEventHandler = (e) => {
+    const { dataset } = e.target as HTMLElement;
+    const parentDataset = ((e.target as HTMLElement).parentNode as HTMLElement)
+      .dataset;
     const senderData = (dataset.sender || parentDataset.sender)?.split("===");
     const msgId = dataset.msg || parentDataset.msg;
     const videoId = dataset.video || parentDataset.video;
@@ -701,14 +809,14 @@ const MessagesView = ({
       downloadFile(fileId);
     } else if (videoId) {
       // Load video
-      loadMedia(videoId, {
-        fileName: dataset.videoName || parentDataset.videoName,
+      loadMedia(e, videoId, {
+        fileName: dataset.videoName || parentDataset.videoName || null,
         isAudio: false,
       });
     } else if (audioId) {
       // Load audio
-      loadMedia(audioId, {
-        fileName: dataset.audioName || parentDataset.audioName,
+      loadMedia(e, audioId, {
+        fileName: dataset.audioName || parentDataset.audioName || null,
         isAudio: true,
       });
     } else if (dataset.imageId) {
@@ -720,7 +828,7 @@ const MessagesView = ({
         memberName: senderData[1],
         memberEmail: senderData[2],
       };
-      openViewProfileDialog(props);
+      openViewProfileDialogWithProps(props);
     } else if (msgId && !msgEditMode) {
       msgFileAlreadyExists = Boolean(
         dataset.fileExists || parentDataset.fileExists
@@ -730,13 +838,16 @@ const MessagesView = ({
     } else if (attachMsgFileClicked || editMsgFileClicked) {
       selectAttachment();
     } else if (removeMsgFileClicked) {
-      setMsgFileRemoved(true);
+      setIsMsgFileRemoved("true");
       discardAttachment();
     } else if (discardDraftClicked) {
       openDiscardDraftConfirmDialog();
     } else if (updateEditedMsg) {
       const msgDate = dataset.msgCreatedAt || parentDataset.msgCreatedAt;
-      updateMessage(editableMsgContent?.current?.innerHTML, msgDate);
+      updateMessage(
+        (editableMsgContent?.current as HTMLElement)?.innerHTML,
+        msgDate as string
+      );
     }
   };
 
@@ -747,17 +858,23 @@ const MessagesView = ({
   useEffect(() => {
     if (fetchMsgs) {
       fetchMessages();
-      if (isSocketConnected) clientSocket?.emit("join chat", selectedChat?._id);
+      if (isSocketConnected) clientSocket?.emit("join_chat", selectedChat?._id);
     }
   }, [fetchMsgs]);
 
-  const openViewProfileDialog = (props) => {
+  const openViewProfileDialog: ClickEventHandler = (e) => {
     dispatch(setShowDialogActions(false));
-    setDialogBody(props ? <ViewProfileBody {...props} /> : <ViewProfileBody />);
+    setDialogBody(<ViewProfileBody />);
     dispatch(displayDialog({ title: "View Profile" }));
   };
 
-  const openGroupInfoDialog = () => {
+  const openViewProfileDialogWithProps = (props: ProfileData) => {
+    dispatch(setShowDialogActions(false));
+    setDialogBody(<ViewProfileBody {...props} />);
+    dispatch(displayDialog({ title: "View Profile" }));
+  };
+
+  const openGroupInfoDialog: ClickEventHandler = (e) => {
     // Open group info dialog
     dispatch(setGroupInfo(selectedChat));
     dispatch(setShowDialogActions(false));
@@ -784,9 +901,17 @@ const MessagesView = ({
     if (msgContent?.current) msgContent.current.innerHTML = "";
   }, [selectedChat]);
 
-  const openMsgOptionsMenu = (e) => {
+  const openMsgOptionsMenu: ClickEventHandler = (e) => {
     if (sending) return;
-    setMsgOptionsMenuAnchor(e.target);
+    setMsgOptionsMenuAnchor(e.target as SetStateAction<HTMLElement | null>);
+  };
+
+  const onDiscardFileClick: ClickEventHandler = (e) => {
+    const { dataset } = e.target as HTMLElement;
+    const parentDataset = ((e.target as HTMLElement).parentNode as HTMLElement)
+      .dataset;
+    const discardFileClicked = dataset.discardFile || parentDataset.discardFile;
+    if (discardFileClicked) discardAttachment();
   };
 
   return (
@@ -808,13 +933,7 @@ const MessagesView = ({
             className={`messagesBody position-relative ${
               downloadingFileId || loadingMediaId ? "pe-none" : "pe-auto"
             } d-flex flex-column m-1 p-2`}
-            onClick={(e) => {
-              const { dataset } = e.target;
-              const parentDataset = e.target.parentNode.dataset;
-              const discardFileClicked =
-                dataset.discardFile || parentDataset.discardFile;
-              if (discardFileClicked) discardAttachment();
-            }}
+            onClick={onDiscardFileClick}
           >
             {/* Messages list */}
             <div className="messages rounded-3 d-flex flex-column">
@@ -830,30 +949,31 @@ const MessagesView = ({
                 {loadingMsgs && !sending ? (
                   <LoadingMsgs count={8} />
                 ) : (
-                  messages.map((m, i, msgs) => (
-                    <Message
-                      downloadingFileId={downloadingFileId}
-                      loadingMediaId={loadingMediaId}
-                      msgEditMode={msgEditMode}
-                      clickedMsgId={clickedMsgId}
-                      msgFileRemoved={msgFileRemoved}
-                      attachmentData={attachmentData}
-                      ref={editableMsgContent}
-                      CustomTooltip={CustomTooltip}
-                      key={m._id}
-                      msgSent={m.sent}
-                      currMsg={m}
-                      prevMsg={i < msgs.length - 1 ? msgs[i + 1] : null}
-                    />
-                  ))
+                  messages.map(
+                    (m: MessageType, i: number, msgs: MessageType[]) => (
+                      <Message
+                        downloadingFileId={downloadingFileId}
+                        loadingMediaId={loadingMediaId}
+                        msgEditMode={msgEditMode}
+                        clickedMsgId={clickedMsgId}
+                        msgFileRemoved={isMsgFileRemoved === "true"}
+                        attachmentData={attachmentData}
+                        ref={editableMsgContent as React.Ref<HTMLSpanElement>}
+                        CustomTooltip={CustomTooltip}
+                        key={m?._id}
+                        msgSent={m?.sent as boolean}
+                        currMsg={m}
+                        prevMsg={i < msgs.length - 1 ? msgs[i + 1] : null}
+                      />
+                    )
+                  )
                 )}
               </div>
             </div>
             {/* Edit/Delete Message menu */}
             <MsgOptionsMenu
-              anchor={msgOptionsMenuAnchor}
+              anchor={msgOptionsMenuAnchor as HTMLElement}
               setAnchor={setMsgOptionsMenuAnchor}
-              clickedMsg={clickedMsgId}
               editMsgHandler={editMsgHandler}
               openDeleteMsgConfirmDialog={openDeleteMsgConfirmDialog}
             />
@@ -861,7 +981,6 @@ const MessagesView = ({
               <AttachmentPreview
                 isEditMode={false}
                 attachmentData={attachmentData}
-                discardAttachment={discardAttachment}
                 CustomTooltip={CustomTooltip}
               />
             )}
@@ -904,7 +1023,7 @@ const MessagesView = ({
                       onEmojiClick={onEmojiClick}
                       disableAutoFocus={true}
                       native={true}
-                      searchPlaceholder={"Search an emoji..."}
+                      // searchPlaceholder={"Search an emoji..."}
                     />
                   </span>
                 )}

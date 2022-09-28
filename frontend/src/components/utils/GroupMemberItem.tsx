@@ -56,7 +56,6 @@ const GroupMemberItem = ({ user, truncateValues }: Props) => {
         data-user={_id}
         title={`${isLoggedInUser ? "" : `${name} (${email})`}`}
         placement="top-start"
-        className=""
         arrow
       >
         <Avatar

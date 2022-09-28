@@ -20,12 +20,7 @@ import {
 import { getAxiosConfig, truncateString } from "../utils/appUtils";
 import axios from "../utils/axios";
 import { useAppDispatch, useAppSelector } from "../store/storeHooks";
-import {
-  ChatType,
-  MessageType,
-  ToastData,
-  UserType,
-} from "../utils/AppTypes";
+import { ChatType, MessageType, ToastData, UserType } from "../utils/AppTypes";
 import { AxiosRequestConfig } from "axios";
 
 const ChatsPage = () => {
@@ -92,9 +87,9 @@ const ChatsPage = () => {
 
   const groupSocketEventHandlers = () => {
     clientSocket
-      .off("display updated grp")
+      .off("display_updated_grp")
       .on(
-        "display updated grp",
+        "display_updated_grp",
         (updatedGroupData: {
           updatedGroup: ChatType;
           createdAdmin: UserType;
@@ -137,8 +132,8 @@ const ChatsPage = () => {
       );
 
     clientSocket
-      .off("remove deleted grp")
-      .on("remove deleted grp", (deletedGroup: ChatType) => {
+      .off("remove_deleted_grp")
+      .on("remove_deleted_grp", (deletedGroup: ChatType) => {
         dispatch(toggleRefresh());
         if (!deletedGroup) return;
         if (selectedChat?._id === deletedGroup?._id) {
@@ -149,15 +144,15 @@ const ChatsPage = () => {
         displayInfo(`'${deletedGroup.chatName}' Group Deleted by Admin`);
       });
 
-    clientSocket.off("display new grp").on("display new grp", () => {
+    clientSocket.off("display_new_grp").on("display_new_grp", () => {
       dispatch(toggleRefresh());
     });
   };
 
   const typingSocketEventHandler = () => {
     clientSocket
-      .off("display typing")
-      .on("display typing", (chat: ChatType, typingUser: UserType) => {
+      .off("display_typing")
+      .on("display_typing", (chat: ChatType, typingUser: UserType) => {
         if (!chat || !typingUser) return;
         setTypingChatUsers([
           ...typingChatUsers,
@@ -168,8 +163,8 @@ const ChatsPage = () => {
       });
 
     clientSocket
-      .off("hide typing")
-      .on("hide typing", (chat: ChatType, typingUser: UserType) => {
+      .off("hide_typing")
+      .on("hide_typing", (chat: ChatType, typingUser: UserType) => {
         if (!chat || !typingUser) return;
         setTypingChatUsers(
           typingChatUsers.filter(
@@ -255,9 +250,11 @@ const ChatsPage = () => {
               setDialogBody={setDialogBody}
               deletePersistedNotifs={deletePersistedNotifs}
               isNewUser={chats?.length === 0}
-              typingChatUser={typingChatUsers.find(
-                (u) => getTypingChatId(u) === selectedChat?._id
-              )}
+              typingChatUser={
+                typingChatUsers.find(
+                  (u) => getTypingChatId(u) === selectedChat?._id
+                ) as string
+              }
             />
           </section>
 

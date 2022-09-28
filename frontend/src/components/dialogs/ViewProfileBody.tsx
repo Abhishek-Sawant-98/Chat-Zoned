@@ -1,11 +1,12 @@
 import { getOneToOneChatReceiver, truncateString } from "../../utils/appUtils";
 import getCustomTooltip from "../utils/CustomTooltip";
-import { useSelector } from "react-redux";
 import { selectAppState } from "../../store/slices/AppSlice";
 import { selectChildDialogState } from "../../store/slices/ChildDialogSlice";
 import FullSizeImage from "../utils/FullSizeImage";
 import { useState } from "react";
 import ChildDialog from "../utils/ChildDialog";
+import { useAppSelector } from "../../store/storeHooks";
+import { ClickEventHandler, ProfileData } from "../../utils/AppTypes";
 
 const arrowStyles = { color: "#111" };
 const tooltipStyles = {
@@ -19,10 +20,14 @@ const tooltipStyles = {
 };
 const CustomTooltip = getCustomTooltip(arrowStyles, tooltipStyles);
 
-const ViewProfileBody = ({ memberProfilePic, memberName, memberEmail }) => {
-  const { loggedInUser, selectedChat } = useSelector(selectAppState);
+const ViewProfileBody = ({
+  memberProfilePic,
+  memberName,
+  memberEmail,
+}: ProfileData) => {
+  const { loggedInUser, selectedChat } = useAppSelector(selectAppState);
   let name, email, profilePic;
-  const { childDialogMethods } = useSelector(selectChildDialogState);
+  const { childDialogMethods } = useAppSelector(selectChildDialogState);
   const { setChildDialogBody, displayChildDialog } = childDialogMethods;
 
   const [showDialogActions, setShowDialogActions] = useState(true);
@@ -39,13 +44,15 @@ const ViewProfileBody = ({ memberProfilePic, memberName, memberEmail }) => {
     profilePic = receiver?.profilePic;
   }
 
-  const displayFullSizeImage = (e) => {
+  const displayFullSizeImage: ClickEventHandler = (e) => {
     setShowDialogActions(false);
     setShowDialogClose(true);
+    if (!setChildDialogBody || !displayChildDialog) return;
+
     setChildDialogBody(<FullSizeImage event={e} />);
     displayChildDialog({
       isFullScreen: true,
-      title: e.target?.alt || "Profile Pic",
+      title: (e.target as HTMLImageElement)?.alt || "Profile Pic",
     });
   };
 

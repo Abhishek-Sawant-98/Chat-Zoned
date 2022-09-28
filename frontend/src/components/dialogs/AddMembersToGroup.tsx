@@ -59,7 +59,7 @@ const AddMembersToGroup = ({ getAddedMembers, forCreateGroup }: Props) => {
     setShowDialogClose(false);
     dispatch(setGroupInfo(groupData));
     if (!setChildDialogBody || !displayChildDialog) return;
-    setChildDialogBody(<NewGroupBody closeChildDialog={closeChildDialog} />);
+    setChildDialogBody(<NewGroupBody closeChildDialog={closeChildDialog as () => void} />);
     displayChildDialog({
       title: "Create New Group",
     });

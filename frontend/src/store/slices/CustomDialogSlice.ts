@@ -2,14 +2,6 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { CustomDialogState, DialogData } from "../../utils/AppTypes";
 import type { RootState } from "../store";
 
-// isFullScreen,
-// isOpen,
-// title,
-// nolabel,
-// yeslabel,
-// loadingYeslabel,
-// action,
-
 const initialState: CustomDialogState = {
   dialogData: {
     isOpen: false,
