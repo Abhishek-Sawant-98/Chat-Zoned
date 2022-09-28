@@ -26,7 +26,7 @@
 ## Deployed Links 👇
 
 ### Heroku  👉 <https://chat-zoned.herokuapp.com> 🚀
-### Vercel  👉 <https://chat-zoned.vercel.app> 🚀
+### Railway  👉 <https://chat-zoned.up.railway.app/> 🚀
 
 </div>
 
@@ -145,7 +145,7 @@ npm start
 npm run build
 ```
 
-- Finally, deploy it using [Heroku](https://dashboard.heroku.com/) or [Vercel](https://vercel.com/). Don't forget to add all the above mentioned environment variables while deploying.
+- Finally, deploy it using [Heroku](https://dashboard.heroku.com/) or [Railway](https://railway.app/). Don't forget to add all the above mentioned environment variables while deploying.
 
 ## License
 
