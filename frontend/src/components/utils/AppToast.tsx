@@ -6,12 +6,12 @@ import {
   SnackbarCloseReason,
 } from "@mui/material";
 import { SyntheticEvent } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { hideToast, selectToastState } from "../../store/slices/ToastSlice";
+import { useAppDispatch, useAppSelector } from "../../store/storeHooks";
 
 const AppToast = () => {
-  const { toastData } = useSelector(selectToastState);
-  const dispatch = useDispatch();
+  const { toastData } = useAppSelector(selectToastState);
+  const dispatch = useAppDispatch();
 
   const handleToastClose = (
     event: Event | SyntheticEvent<any | Event>,
