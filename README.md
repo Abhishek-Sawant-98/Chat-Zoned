@@ -23,9 +23,7 @@
 
 <div align="center">
 
-## Deployed Links 👇
-
-### Railway  👉 <https://chat-zoned.up.railway.app> 🚀
+### Deployed to Railway  👉 <https://chat-zoned.up.railway.app> 🚀
 
 </div>
 
