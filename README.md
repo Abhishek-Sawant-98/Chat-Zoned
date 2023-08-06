@@ -142,7 +142,7 @@ npm start
 npm run build
 ```
 
-- Finally, deploy it [Render.com](https://render.com/). Don't forget to add all the above mentioned environment variables (both backend and frontend) while deploying.
+- Finally, deploy it using [Render.com](https://render.com/). Don't forget to add all the above mentioned environment variables (both backend and frontend) while deploying.
 
 ## License
 
