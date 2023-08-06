@@ -23,7 +23,7 @@
 
 <div align="center">
 
-### Deployed to Railway  👉 <https://chat-zoned.up.railway.app> 🚀
+### Deploying to Render 👉 <(Please stay tuned...)> 🚀
 
 </div>
 
